@@ -1,0 +1,249 @@
+@import url("https://fonts.cdnfonts.com/css/common-pixel");
+@import url('https://fonts.cdnfonts.com/css/technicality');
+@import url('https://fonts.cdnfonts.com/css/serious-rounded');
+@import url('https://fonts.cdnfonts.com/css/goma-octagon');
+
+html,
+body {
+  align-items: center;
+  margin: 0;
+  height: 100%;
+}
+
+.app {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgb(29, 29, 29);
+  display: flex;
+  justify-content: center;
+}
+
+/* Waiting room */
+
+.waiting-room-container {
+  background-color: whitesmoke;
+  display: grid;
+  grid-template-areas:
+    "countdown countdown"
+    "info players";
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 1fr; /* Equal widths for info and players */
+  width: 90%;
+  height: 90%;
+  gap: 10px; /* Optional gap between grid items */
+  z-index: 500;
+}
+
+.countdown-container {
+  grid-area: countdown;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+  color: black;
+  font-size: xx-large;
+  border: 3px rgb(187, 0, 255) solid;
+}
+
+.join-container {
+  grid-area: players;
+  color: black;
+  font-size: x-large;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  border: 3px rgb(255, 145, 0) solid;
+  position: relative;
+}
+
+.game-info-container {
+  grid-area: info;
+  border: 3px #2196F3 solid;
+  display: grid;
+  grid-template-areas:
+    "title title"
+    "controls extras";
+  grid-template-rows: 100px 1fr 10px;
+  grid-template-columns: 49% 49%;
+  grid-gap: 5px;
+  justify-content: center;
+}
+
+
+/* Main game container */
+.main-container {
+  display: flex;
+  flex-direction: row; /* Arrange children horizontally */
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  width: 90%; /* Adjustable to control size */
+  height: 90%; /* Adjustable to control size */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the container */
+  background-color: #777777; /* Optional: Add a background color */
+  overflow: hidden; /* Prevent scrollbars inside main container */
+}
+
+/* Game updates container on the left side of game */
+.game-updates-container {
+  font-family: "Arial", sans-serif;
+  color: lightgray;
+  font-size: larger;
+  width: 30%; /* Adjustable width */
+  height: 100%; /* Match main-container's height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  border: 3px green solid;
+}
+
+/* Game container, contains game-wrapper */
+.game-container {
+  width: 70%; /* Adjustable width */
+  height: 100%; /* Match main-container's height */
+  border: 3px red solid;
+  display: flex; /* Flexbox to center game-wrapper */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Game wrapper */
+.game-wrapper {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr); /* Adjust grid columns */
+  grid-template-rows: repeat(13, auto); /* Adjust grid rows */
+  width: auto; /* Size based on content */
+  height: auto; /* Size based on content */
+  margin: 0;
+  object-fit: contain;
+  position: relative;
+}
+
+.bomb {
+  z-index: 3;
+}
+.explosion {
+  z-index: 3;
+}
+
+.hard-wall,
+.dirt-patch,
+.loading-1,
+.loading-2,
+.loading-3,
+.loading-4 {
+  z-index: 2;
+  width: 50px;
+  height: 50px;
+}
+
+
+.player-1,
+.player-2,
+.player-3,
+.player-4 {
+  position: absolute;
+  z-index: 999;
+}
+
+.player-1>p,
+.player-2>p,
+.player-3>p,
+.player-4>p {
+  position: absolute;
+  top: -15px;
+  width: 100%;
+  text-align: center;
+  background-color: #00000042;
+  border-radius: 50px;
+  font-size: small;
+  font-weight: bold;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.player-1>p {
+  color: #ffffff;
+}
+
+.player-2>p {
+  color: #ffab00;
+}
+
+.player-3>p {
+  color: #99ff00;
+}
+
+.player-4>p {
+  color: #79c3ff;
+}
+
+/* Chats */
+
+.main-app {
+  width: 100%;
+  height: 100%;
+  background: #ffffff3a;
+  z-index: 10;
+}
+
+.join-container>.screen {
+  display: none;
+  position: absolute;
+  z-index: 999;
+  background-color: whitesmoke;
+}
+
+.join-container>.screen.active {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.players-waiting-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-areas:
+    "title"
+    "player-1-card"
+    "player-2-card"
+    "player-3-card"
+    "player-4-card";
+  grid-template-rows: 30px 1fr 1fr 1fr 1fr 5px;
+  grid-gap: 10px;
+  justify-content: center;
+  grid-template-columns: 95%;
+  grid-gap: 10px;
+  justify-content: center;
+  overflow: hidden;
+}
+
+
+.congratulations-container {
+  z-index: 999;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.congratulations-container.hidden {
+  display: none;
+}
