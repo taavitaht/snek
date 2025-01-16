@@ -1,7 +1,7 @@
 @import url("https://fonts.cdnfonts.com/css/common-pixel");
-@import url('https://fonts.cdnfonts.com/css/technicality');
-@import url('https://fonts.cdnfonts.com/css/serious-rounded');
-@import url('https://fonts.cdnfonts.com/css/goma-octagon');
+@import url("https://fonts.cdnfonts.com/css/technicality");
+@import url("https://fonts.cdnfonts.com/css/serious-rounded");
+@import url("https://fonts.cdnfonts.com/css/goma-octagon");
 
 html,
 body {
@@ -66,7 +66,7 @@ body {
 
 .game-info-container {
   grid-area: info;
-  border: 3px #2196F3 solid;
+  border: 3px #2196f3 solid;
   display: grid;
   grid-template-areas:
     "title title"
@@ -76,7 +76,6 @@ body {
   grid-gap: 5px;
   justify-content: center;
 }
-
 
 /* Main game container */
 .main-container {
@@ -131,15 +130,12 @@ body {
   position: relative;
 }
 
-.bomb {
-  z-index: 3;
-}
-.explosion {
+.food {
   z-index: 3;
 }
 
 .hard-wall,
-.dirt-patch,
+.grass-patch,
 .loading-1,
 .loading-2,
 .loading-3,
@@ -149,7 +145,6 @@ body {
   height: 50px;
 }
 
-
 .player-1,
 .player-2,
 .player-3,
@@ -158,10 +153,10 @@ body {
   z-index: 999;
 }
 
-.player-1>p,
-.player-2>p,
-.player-3>p,
-.player-4>p {
+.player-1 > p,
+.player-2 > p,
+.player-3 > p,
+.player-4 > p {
   position: absolute;
   top: -15px;
   width: 100%;
@@ -174,19 +169,16 @@ body {
   padding-bottom: 2px;
 }
 
-.player-1>p {
+.player-1 > p {
   color: #ffffff;
 }
-
-.player-2>p {
+.player-2 > p {
   color: #ffab00;
 }
-
-.player-3>p {
+.player-3 > p {
   color: #99ff00;
 }
-
-.player-4>p {
+.player-4 > p {
   color: #79c3ff;
 }
 
@@ -199,20 +191,18 @@ body {
   z-index: 10;
 }
 
-.join-container>.screen {
+.join-container > .screen {
   display: none;
   position: absolute;
   z-index: 999;
   background-color: whitesmoke;
 }
 
-.join-container>.screen.active {
+.join-container > .screen.active {
   display: block;
   width: 100%;
   height: 100%;
 }
-
-
 
 .players-waiting-container {
   position: absolute;
@@ -233,7 +223,6 @@ body {
   justify-content: center;
   overflow: hidden;
 }
-
 
 .congratulations-container {
   z-index: 999;

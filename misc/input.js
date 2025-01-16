@@ -20,7 +20,7 @@ function arrowKeyHandler(e) {
       arrow = "Down";
     }
   } else if (e.key == "F" || e.key == "f") {
-    placeBomb();
+    placeFood();
   }
 }
 
@@ -31,16 +31,16 @@ function arrowKeyHandler(e) {
 import RJNA from "../rjna/engine.js";
 import { globalSettings } from "../misc/gameSetting.js";
 
-function placeBomb() {
-console.log("placeBomb");
-    let bomb = RJNA.tag.div(
+function placeFood() {
+console.log("place food");
+    let food = RJNA.tag.div(
       {
-        class: `bomb`,
+        class: `food`,
         style: {
-          top: 5 * globalSettings.wallHeight + "px",
-          left: 5 * globalSettings.wallWidth + "px",
-          width: `${globalSettings["bomb"]["width"]}px`,
-          height: `${globalSettings["bomb"]["height"]}px`,
+          top: (Math.floor(Math.random() * (globalSettings.numOfRows - 2)) + 1) * globalSettings.gameSquareSize + "px",
+          left: (Math.floor(Math.random() * (globalSettings.numOfColumns - 2)) + 1) * globalSettings.gameSquareSize + "px",
+          width: `${globalSettings["food"]["width"]}px`,
+          height: `${globalSettings["food"]["height"]}px`,
           position: "absolute",
         },
       },
@@ -55,12 +55,12 @@ console.log("placeBomb");
           },
         },
         {},
-        { src: globalSettings["bomb"]["src"] }
+        { src: globalSettings["food"]["src"] }
       )
     );
 
-    let bombElement = RJNA.createNode(bomb);
+    let foodElement = RJNA.createNode(food);
 
     let gameWrapper = document.querySelector(".game-wrapper");
-    gameWrapper.appendChild(bombElement);
+    gameWrapper.appendChild(foodElement);
 }

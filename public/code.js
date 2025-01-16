@@ -66,8 +66,6 @@ startGameButton.setProp("onclick", function () {
       // Create map
       socket.emit("generate-map");
       updatePlayerOrbital(userObj);
-      document.querySelector(".players-waiting-counter").innerHTML =
-        Object.keys(orbital.players).length;
     });
 
     socket.on("remove-waiting-player", function (count) {
@@ -295,7 +293,6 @@ function updatePlayerOrbital(userObj) {
     name: userObj.username,
     _lives: 3, // Add the underlying property _lives to store the actual value
     "power-ups": [],
-    speed: globalSettings.speed.normal,
     numOfBombs: 1,
     immune: false,
   };

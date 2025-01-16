@@ -5,9 +5,9 @@ import { arrow } from "../misc/input.js";
 
 export function placePlayer(number, character, username) {
   let topPosition =
-    orbital["players"][`${number}`]["row"] * globalSettings.wallHeight;
+    orbital["players"][`${number}`]["row"] * globalSettings.gameSquareSize;
   let leftPosition =
-    orbital["players"][`${number}`]["col"] * globalSettings.wallWidth;
+    orbital["players"][`${number}`]["col"] * globalSettings.gameSquareSize;
   return RJNA.tag.div(
     {
       class: `player-${number}`,
@@ -39,27 +39,28 @@ export function PlayerMovement(socket) {
     row: orbital["players"][`${socket.playerCount}`]["row"],
     col: orbital["players"][`${socket.playerCount}`]["col"],
   };
+  console.log("moving = ", JSON.stringify(moving));
 
   // Move according to button
   if (
     arrow == "Left"
   ) {
-    moving.col = parseFloat((moving.col - orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
+    moving.col = moving.col - 1;
     socket.emit("player-movement", moving);
   } else if (
     arrow == "Right"
   ) {
-    moving.col = parseFloat((moving.col + orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
+    moving.col = moving.col + 1;
     socket.emit("player-movement", moving);
   } else if (
     arrow == "Up"
   ) {
-    moving.row = parseFloat((moving.row - orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
+    moving.row = moving.row - 1;
     socket.emit("player-movement", moving);
   } else if (
     arrow == "Down"
   ) {
-    moving.row = parseFloat((moving.row + orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
+    moving.row = moving.row + 1;
     socket.emit("player-movement", moving);
   }
 }
@@ -69,9 +70,9 @@ export function PlayerMovement(socket) {
 export function movePlayers() {
   for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
     document.querySelector(`.player-${playerNum}`).style.top =
-    playerObj.row * globalSettings.wallHeight + "px";
+    playerObj.row * globalSettings.gameSquareSize + "px";
     document.querySelector(`.player-${playerNum}`).style.left =
-      playerObj.col * globalSettings.wallWidth + "px";
+      playerObj.col * globalSettings.gameSquareSize + "px";
       console.log("Player row and col:", playerObj.row, playerObj.col);
   }
 }

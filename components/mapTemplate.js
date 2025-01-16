@@ -2,7 +2,7 @@ import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
 
 // @ = hard wall, 1;2;3;4 = spawn locations, empty = grass
-// Keep in mind globalSettings.numOfRows & globalSettings.numOfCols
+// Keep in mind globalSettings.numOfRows & globalSettings.numOfColumns
 const mapTemplate = [
   ['@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@', '@'],
   ['@', '1', , , , , , , , , , , , , , , , , '3', '@'],
@@ -36,38 +36,38 @@ export function createMap() {
   )
   // Add each cell as child to game wrapper
   for (let row = 0; row < globalSettings.numOfRows; row++) {
-    for (let col = 0; col < globalSettings.numOfCols; col++) {
+    for (let col = 0; col < globalSettings.numOfColumns; col++) {
       switch (mapTemplate[row][col]) {
           case '@':
           gameWrapper.setChild(RJNA.tag.img({
             class: "hard-wall", 
-          }, {}, { src: globalSettings.wallSrc.hard }));
+          }, {}, { src: globalSettings.gameSquareSrc.rock }));
           break
         case '1':
           gameWrapper.setChild(RJNA.tag.img({
             class: "loading-1", 
-          }, {}, { src: globalSettings.wallSrc.empty }));
+          }, {}, { src: globalSettings.gameSquareSrc.grass }));
           break
         case '2':
           gameWrapper.setChild(RJNA.tag.img({
             class: "loading-2", 
-          }, {}, { src: globalSettings.wallSrc.empty }));
+          }, {}, { src: globalSettings.gameSquareSrc.grass }));
           break
         case '3':
           gameWrapper.setChild(RJNA.tag.img({
             class: "loading-3", 
-          }, {}, { src: globalSettings.wallSrc.empty }));
+          }, {}, { src: globalSettings.gameSquareSrc.grass }));
           break
         case '4':
           gameWrapper.setChild(RJNA.tag.img({
             class: "loading-4", 
-          }, {}, { src: globalSettings.wallSrc.empty }));
+          }, {}, { src: globalSettings.gameSquareSrc.grass }));
           break
  
         default:
           gameWrapper.setChild(RJNA.tag.img({
-            class: "dirt-patch", 
-          }, {}, { src: globalSettings.wallSrc.empty }));
+            class: "grass-patch", 
+          }, {}, { src: globalSettings.gameSquareSrc.grass }));
           break
       }
     }

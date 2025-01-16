@@ -1,4 +1,46 @@
+
+import RJNA from "../rjna/engine.js";
 import { globalSettings } from "../misc/gameSetting.js";
+
+
+
+
+
+
+
+function placeFood() {
+console.log("place food");
+    let food = RJNA.tag.div(
+      {
+        class: `food`,
+        style: {
+          top: 5 * globalSettings.gameSquareSize + "px",
+          left: 5 * globalSettings.gameSquareSize + "px",
+          width: `${globalSettings["food"]["width"]}px`,
+          height: `${globalSettings["food"]["height"]}px`,
+          position: "absolute",
+        },
+      },
+      {},
+      {},
+      RJNA.tag.img(
+        {
+          style: {
+            width: "100%",
+            height: "100%",
+            zIndex: 999,
+          },
+        },
+        {},
+        { src: globalSettings["food"]["src"] }
+      )
+    );
+
+    let foodElement = RJNA.createNode(food);
+
+    let gameWrapper = document.querySelector(".game-wrapper");
+    gameWrapper.appendChild(foodElement);
+}
 
 
 
