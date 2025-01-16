@@ -4,6 +4,7 @@ import { movePlayers, placePlayer } from "../components/players.js";
 import { startAnimating } from "../misc/script.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
+import { placeFood } from "../components/food.js";
 
 export let socket;
 let uname;
@@ -17,6 +18,7 @@ export function startSockets() {
   joinUserButton.setProp("onclick", function () {
     let username = app.querySelector(".join-screen #username").value;
     if (username.length == 0) {
+      // TODO: also check that name is unique
       return;
     }
     socket = io();
@@ -112,7 +114,7 @@ startGameButton.setProp("onclick", function () {
         orbital.obj,
         "game-container"
       );
-      console.log(orbital.cells);
+      //console.log(orbital.cells);
       gameContainer.setChild(map);
       const gameWrapper = gameContainer.children[0];
       for (const player of obj.allPlayers) {
@@ -138,6 +140,11 @@ startGameButton.setProp("onclick", function () {
       );
       waitingRoomContainer.removeAttr("style", "", { display: "none" });
       startAnimating(globalSettings.fps);
+
+      // Place food on the gamefield
+      for (let i = 0; i < globalSettings.food.count; i++) {
+      placeFood();
+      }
     });
 
     socket.on("player-moving", function (obj) {
@@ -147,6 +154,7 @@ startGameButton.setProp("onclick", function () {
         }
       }
       // movePlayers();
+      //checkFood();
     });
 
     socket.on("remove-player", function (userObj) {

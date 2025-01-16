@@ -1,7 +1,7 @@
 import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
 import { arrow } from "../misc/input.js";
-
+import { checkForFood } from "../components/food.js";
 
 export function placePlayer(number, character, username) {
   let topPosition =
@@ -39,40 +39,39 @@ export function PlayerMovement(socket) {
     row: orbital["players"][`${socket.playerCount}`]["row"],
     col: orbital["players"][`${socket.playerCount}`]["col"],
   };
-  console.log("moving = ", JSON.stringify(moving));
+  //console.log("moving = ", JSON.stringify(moving));
 
   // Move according to button
-  if (
-    arrow == "Left"
-  ) {
+  if (arrow == "Left") {
+    // If crashing into wall do not move further
+    if (moving.col == 1) { return; } 
     moving.col = moving.col - 1;
     socket.emit("player-movement", moving);
-  } else if (
-    arrow == "Right"
-  ) {
+  } else if (arrow == "Right") {
+    if (moving.col == globalSettings.numOfColumns - 2) { return; }
     moving.col = moving.col + 1;
     socket.emit("player-movement", moving);
-  } else if (
-    arrow == "Up"
-  ) {
+  } else if (arrow == "Up") {
+    if (moving.row == 1) { return; }
     moving.row = moving.row - 1;
     socket.emit("player-movement", moving);
-  } else if (
-    arrow == "Down"
-  ) {
+  } else if (arrow == "Down") {
+    if (moving.row == globalSettings.numOfRows - 2) { return; }
     moving.row = moving.row + 1;
     socket.emit("player-movement", moving);
   }
+  // If player moved check for food
+
+checkForFood(moving);
+
 }
-
-
 
 export function movePlayers() {
   for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
     document.querySelector(`.player-${playerNum}`).style.top =
-    playerObj.row * globalSettings.gameSquareSize + "px";
+      playerObj.row * globalSettings.gameSquareSize + "px";
     document.querySelector(`.player-${playerNum}`).style.left =
       playerObj.col * globalSettings.gameSquareSize + "px";
-      console.log("Player row and col:", playerObj.row, playerObj.col);
+    //console.log("Player row and col:", playerObj.row, playerObj.col);
   }
 }

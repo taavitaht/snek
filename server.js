@@ -35,7 +35,8 @@ io.on("connection", function (socket) {
 
 				// Start with 2 or more players
 				if (io.sockets.sockets.size >= 2 && !startGameTimer) {
-					startGameCountdown();
+					// Autostart disabled
+					//startGameCountdown();
 				}
 
 				connectedSockets.forEach(connected => {
@@ -120,7 +121,7 @@ server.listen(port, () => {
 
 // Game start timer
 function startGameCountdown() {
-	let countdown = 1;
+	let countdown = 0;
 	let allPlayers = []
 	io.sockets.sockets.forEach(connected => {
 		allPlayers.push({ "username": connected.username, "count": connected.playerCount })

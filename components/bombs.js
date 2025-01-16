@@ -6,7 +6,7 @@ import { globalSettings } from "../misc/gameSetting.js";
 
 
 
-// Function to remove dom elements
+// Function to remove dom elements?
 function removeFromCellsAndDom(row, col, querySelectorStatement) {
 
   if (orbital.cells[row][col] == globalSettings.wallTypes.softWall) {

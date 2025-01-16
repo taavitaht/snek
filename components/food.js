@@ -2,20 +2,47 @@
 import RJNA from "../rjna/engine.js";
 import { globalSettings } from "../misc/gameSetting.js";
 
+export let foodArray = [];
+export class Food {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+// Place food in random position
+export function placeFood() {
+    // Get random coordinates
+    let { x: xCoord, y: yCoord } = randomCoordinates();
+  
+    // If food is already placed in this position get new position
+    while (
+      foodArray.some((foodItem) => foodItem.x == xCoord && foodItem.y == yCoord)
+    ) {
+      ({ x: xCoord, y: yCoord } = randomCoordinates());
+    }
+  
+    // Create new food item
+    const foodItem = new Food(xCoord, yCoord);
+  
+    // Store in array
+    foodArray.push(foodItem);
+
+    // TODO: socket emit
+  
 
 
 
 
-
-
-function placeFood() {
-console.log("place food");
+    // Add to page
     let food = RJNA.tag.div(
       {
         class: `food`,
+        "x-coordinate": xCoord,
+        "y-coordinate": yCoord,
         style: {
-          top: 5 * globalSettings.gameSquareSize + "px",
-          left: 5 * globalSettings.gameSquareSize + "px",
+          top: yCoord * globalSettings.gameSquareSize + "px",
+          left: xCoord * globalSettings.gameSquareSize + "px",
           width: `${globalSettings["food"]["width"]}px`,
           height: `${globalSettings["food"]["height"]}px`,
           position: "absolute",
@@ -35,54 +62,53 @@ console.log("place food");
         { src: globalSettings["food"]["src"] }
       )
     );
-
+  
+    // Create new node from food element and append to game wrapper
     let foodElement = RJNA.createNode(food);
-
     let gameWrapper = document.querySelector(".game-wrapper");
     gameWrapper.appendChild(foodElement);
-}
-
-
-
-
-
-
-
-// Function to remove dom elements
-function removeFromCellsAndDom(row, col, querySelectorStatement) {
-
-  if (orbital.cells[row][col] == globalSettings.wallTypes.softWall) {
-    orbital.cells[row][col] = null
-  } else if (orbital.cells[row][col] == `1${globalSettings["power-ups"]["types"]["speed"]}`) {
-    orbital.cells[row][col] = globalSettings["power-ups"]["types"]["speeds"]
-  } else if (orbital.cells[row][col] == `1${globalSettings["power-ups"]["types"]["flames"]}`) {
-    orbital.cells[row][col] = globalSettings["power-ups"]["types"]["flames"]
-  } else if (orbital.cells[row][col] == `1${globalSettings["power-ups"]["types"]["bombs"]}`) {
-    orbital.cells[row][col] = globalSettings["power-ups"]["types"]["bombs"]
   }
-  const removeDomEle = Array.from(
-    //.soft-wall
-    document.querySelectorAll(`.${querySelectorStatement}`)
-  ).filter((ele) => {
-    //if the co-ord has a decimal places then make it to 2dp.
-    let eleTopDp = Math.pow(10, 0);
-    if (ele.style.top.includes(".")) {
-      eleTopDp = Math.pow(10, ele.style.top.split(".")[1].length - 2);
-    }
-    let eleLeftDp = Math.pow(10, 0);
-    if (ele.style.left.includes(".")) {
-      eleLeftDp = Math.pow(10, ele.style.left.split(".")[1].length - 2);
-    }
-    let top =
-      Math.round(row * globalSettings["gameSquareSize"] * eleTopDp) / eleTopDp;
-    let left =
-      Math.round(col * globalSettings["gameSquareSize"] * eleLeftDp) / eleLeftDp;
-    return (
-      Math.round(parseFloat(ele.style.top) * eleTopDp) / eleTopDp === top &&
-      Math.round(parseFloat(ele.style.left) * eleLeftDp) / eleLeftDp === left
+/*
+  let moving = {
+    myPlayerNum: socket.playerCount,
+    row: orbital["players"][`${socket.playerCount}`]["row"],
+    col: orbital["players"][`${socket.playerCount}`]["col"],
+  };
+*/
+export function checkForFood(moving){
+    //console.log("Checking for food", moving);
+  if (
+    foodArray.some(
+      (foodItem) =>
+        parseInt(foodItem.x) === parseInt(moving.col) &&
+        parseInt(foodItem.y) === parseInt(moving.row)
+    )
+  ) {
+    //console.log("EGG!")
+    // Remove food from array
+    foodArray = foodArray.filter(
+      (foodItem) => foodItem.x != moving.col || foodItem.y != moving.row
     );
-  });
-  while (removeDomEle.length > 0) {
-    removeDomEle.shift().remove();
+    // Remove food from the page
+    // Find the correct element by coordinte values
+    let foodToRemove = document.querySelector(
+      `.food[x-coordinate="${moving.col}"][y-coordinate="${moving.row}"]`
+    );
+    // Remove from parent element
+    let gameWrapper = document.querySelector(".game-wrapper");
+    gameWrapper.removeChild(foodToRemove);
+
+    // TODO: socket emit
+
+    // Replace eaten food
+    placeFood();
   }
 }
+
+// Function to generate random coordinates within the play area
+function randomCoordinates() {
+    let xCoord = Math.floor(Math.random() * (globalSettings.numOfColumns - 2)) + 1;
+    let yCoord = Math.floor(Math.random() * (globalSettings.numOfRows - 2)) + 1;
+    return { x: xCoord, y: yCoord };
+  }
+  

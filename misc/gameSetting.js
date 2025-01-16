@@ -26,6 +26,7 @@ export const globalSettings = {
     "food": {
         width: 50,
         height: 50,
-        src: "./img/fried-egg.png"
+        src: "./img/fried-egg.png",
+        count: 5
     },
 }
