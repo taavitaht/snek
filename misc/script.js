@@ -1,91 +1,48 @@
-import { PlayerMovement, movePlayers,} from "../components/players.js";
+import { PlayerMovement, movePlayers } from "../components/players.js";
 import { socket } from "../public/code.js";
 
 export let currentLevel;
 
-
 //https://stackoverflow.com/questions/19764018/controlling-fps-with-requestanimationframe
 
-let stop = false;
-let fps = 60,
-  fpsInterval,
-  startTime,
-  now,
-  then,
+let stop = false;  
+let duration = 0;
+let previousFrameTimestamp = 0;
+let fpsInterval,  
   elapsed;
-  let duration = 0;
 
+// Calculate frame time and start animating
 export function startAnimating(fps) {
-  fpsInterval = 1000 / fps;
-  then = window.performance.now();
-  startTime = then;
-  animate(fpsInterval);
+  fpsInterval = 1000 / fps; // fpsInterval is duration of frame in milliseconds (1000/60=16.67ms)
+  animate(fpsInterval); // Start animating
 }
 
-// let duration = 0;
-function animate(newtime) {
-  // stop
+function animate(totalAnimatedTimestamp) {
+  // Stop
   if (stop) {
     return;
   }
 
-  // request another frame
+  // requestAnimationFrame() tells the browser to perform an animation
+  // Recursive call will continue the animation loop frame by frame, by calling requestAnimationFrame(animate) inside the animate function itself
+  requestAnimationFrame(animate);
 
-  let frame=requestAnimationFrame(animate);
+  // Elapsed time since last frame
+  elapsed = totalAnimatedTimestamp - previousFrameTimestamp;
 
-  // calc elapsed time since last loop
+  // If fpsInterval time has passed draw next frame
+  if (elapsed >= fpsInterval) {
+    // Save timestamp of this frame and also compensate for frame drift
+    previousFrameTimestamp = totalAnimatedTimestamp - (elapsed % fpsInterval);
 
-  now = newtime;
-  elapsed = now - then;
-
-  // if enough time has elapsed, draw the next frame
-
-  if (elapsed > fpsInterval) {
-    // Get ready for next frame by setting then=now, but...
-    // Also, adjust for fpsInterval not being multiple of 16.67
-    then = now - (elapsed % fpsInterval);
-
-    // draw stuff here
-
-    // draw player movement
-    if (socket != null){
-      if (duration%10==0){
+    // Draw player movement
+    if (socket != null) {
+      if (duration % 10 == 0) {
         PlayerMovement(socket);
       }
-      movePlayers()
-      duration++
-      //throttle(gameOver(socket),50)
+      movePlayers();
+      duration++;
+      //console.log("Duration: " + duration);
     }
-  }
-}
-
-
-export const debounce = (func, wait) => {
-	let debounceTimer
-	return function (eve) {
-	  const context = this
-	  const args = arguments
-	  clearTimeout(debounceTimer)
-	  debounceTimer = setTimeout(() => func.apply(context, args), wait)
-	  return debounceTimer
-	}
-  }
-
-function throttle(fn, threshold) {
-  threshold = threshold || 16.67 *3;
-  var last, deferTimer;
-
-  return function() {
-      var now = +new Date, args = arguments;
-      if(last && now < last + threshold) {
-          clearTimeout(deferTimer);
-          deferTimer = setTimeout(function() {
-              last = now;
-              fn.apply(this, args);
-          }, threshold);
-      } else {
-          last = now;
-          fn.apply(this, args);
-      }
   }
 }

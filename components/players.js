@@ -15,11 +15,9 @@ import {
 
 export function placePlayer(number, character, username) {
   let topPosition =
-    orbital["players"][`${number}`]["row"] * globalSettings.wallHeight +
-    globalSettings.wallHeight * 0.1;
+    orbital["players"][`${number}`]["row"] * globalSettings.wallHeight;
   let leftPosition =
-    orbital["players"][`${number}`]["col"] * globalSettings.wallWidth +
-    globalSettings.wallWidth * 0.1;
+    orbital["players"][`${number}`]["col"] * globalSettings.wallWidth;
   return RJNA.tag.div(
     {
       class: `player-${number}`,
@@ -112,13 +110,10 @@ export function PlayerMovement(socket) {
 export function movePlayers() {
   for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
     document.querySelector(`.player-${playerNum}`).style.top =
-      playerObj.row * globalSettings.wallHeight +
-      globalSettings.wallHeight * 0.1 +
-      "px";
+    playerObj.row * globalSettings.wallHeight + "px";
     document.querySelector(`.player-${playerNum}`).style.left =
-      playerObj.col * globalSettings.wallWidth +
-      globalSettings.wallWidth * 0.1 +
-      "px";
+      playerObj.col * globalSettings.wallWidth + "px";
+      console.log("Player row and col:", playerObj.row, playerObj.col);
   }
 }
 

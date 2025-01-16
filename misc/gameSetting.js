@@ -11,6 +11,7 @@ export function browserHeight() {
 
 export const globalSettings = {
 
+    fps: 60,
     numOfRows: 13,
     numOfCols: 15,
     //wallWidth: (((window.screen.width - 10 - 10) * 0.6) / 15),
@@ -38,7 +39,7 @@ export const globalSettings = {
         wario: "https://66.media.tumblr.com/a5dc6a16fe07f56389d959e9da5f599f/tumblr_mugvnijgKx1rfjowdo1_500.gif"
     },
     speed: {
-        normal: 0.7,
+        normal: 1,
         fast: 1,
     },
     flames: {

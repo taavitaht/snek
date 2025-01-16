@@ -140,7 +140,7 @@ startGameButton.setProp("onclick", function () {
         "waiting-room-container"
       );
       waitingRoomContainer.removeAttr("style", "", { display: "none" });
-      startAnimating(60);
+      startAnimating(globalSettings.fps);
     });
 
     socket.on("player-moving", function (obj) {
@@ -377,7 +377,7 @@ function updatePlayerOrbital(userObj) {
   }
 }
 
-function appendLiveUpdateMessage(updateMessage) {
+export function appendLiveUpdateMessage(updateMessage) {
   let gameUpdatesContainer = document.querySelector(".live-updates");
   if (gameUpdatesContainer.childNodes.length != 0) {
     gameUpdatesContainer.insertBefore(

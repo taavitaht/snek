@@ -120,7 +120,7 @@ server.listen(port, () => {
 
 // Game start timer
 function startGameCountdown() {
-	let countdown = 5;
+	let countdown = 1;
 	let allPlayers = []
 	io.sockets.sockets.forEach(connected => {
 		allPlayers.push({ "username": connected.username, "count": connected.playerCount })
