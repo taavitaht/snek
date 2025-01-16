@@ -1,17 +1,7 @@
 import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
-import {
-  leftPressed,
-  rightPressed,
-  upPressed,
-  downPressed,
-  falseKeyBool,
-  bombDropped,
-} from "../misc/input.js";
-import {
-  checkWallCollision,
-  touchExplosion
-} from "../misc/collision.js";
+import { arrow } from "../misc/input.js";
+
 
 export function placePlayer(number, character, username) {
   let topPosition =
@@ -43,64 +33,33 @@ export function placePlayer(number, character, username) {
     )
   );
 }
-let isTouchingExplosion = false
 export function PlayerMovement(socket) {
   let moving = {
     myPlayerNum: socket.playerCount,
     row: orbital["players"][`${socket.playerCount}`]["row"],
     col: orbital["players"][`${socket.playerCount}`]["col"],
-    flames: orbital["players"][`${socket.playerCount}`]["flames"] || globalSettings.flames.normal,
-    bombs: orbital["players"][`${socket.playerCount}`]["bombs"] || globalSettings.bombs.normal,
   };
-  //drop player's bomb when they press 'w'
-  if (bombDropped) {
-    falseKeyBool("bombs-dropped");
-    //send to everyone bomb has been dropped
-    socket.emit("drop-bomb", moving);
-    moving.flames = globalSettings.flames.normal
-  }
-  // move when the button is pressed and the next block is empty
+
+  // Move according to button
   if (
-    leftPressed &&
-    !checkWallCollision("left", socket.playerCount, orbital["players"][`${socket.playerCount}`]["speed"])
+    arrow == "Left"
   ) {
     moving.col = parseFloat((moving.col - orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
     socket.emit("player-movement", moving);
   } else if (
-    rightPressed &&
-    !checkWallCollision("right", socket.playerCount, orbital["players"][`${socket.playerCount}`]["speed"])
+    arrow == "Right"
   ) {
     moving.col = parseFloat((moving.col + orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
     socket.emit("player-movement", moving);
   } else if (
-    upPressed &&
-    !checkWallCollision("up", socket.playerCount, orbital["players"][`${socket.playerCount}`]["speed"])
+    arrow == "Up"
   ) {
     moving.row = parseFloat((moving.row - orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
     socket.emit("player-movement", moving);
   } else if (
-    downPressed &&
-    !checkWallCollision("down", socket.playerCount, orbital["players"][`${socket.playerCount}`]["speed"])
+    arrow == "Down"
   ) {
     moving.row = parseFloat((moving.row + orbital["players"][`${socket.playerCount}`]["speed"]).toFixed(2));
-    socket.emit("player-movement", moving);
-  }
-
-
-  const touchingExplosion = touchExplosion(moving);
-  // Check if touchExplosion is true and the event hasn't been emitted yet
-  if (touchingExplosion && !isTouchingExplosion && !orbital["players"][`${touchingExplosion.playerKilled}`].immune) {
-    // Set the flag to true to prevent further requests
-    isTouchingExplosion = true;
-
-    // Emit the "player-killed" event
-    socket.emit("player-killed", touchingExplosion);
-
-    setTimeout(() => {
-      isTouchingExplosion = false;
-    }, 67);
-
-    moving = resetMovingCoords(moving.myPlayerNum);
     socket.emit("player-movement", moving);
   }
 }
@@ -115,33 +74,4 @@ export function movePlayers() {
       playerObj.col * globalSettings.wallWidth + "px";
       console.log("Player row and col:", playerObj.row, playerObj.col);
   }
-}
-
-function resetMovingCoords(count) {
-  let moving = {
-    myPlayerNum: count,
-    speed: globalSettings.speed.normal,
-    flames: globalSettings.flames.normal,
-    bombs: globalSettings.bombs.normal,
-    immune: true
-  }
-  switch (count) {
-    case 1:
-      moving.row = 1;
-      moving.col = 1;
-      break;
-    case 2:
-      moving.row = 1;
-      moving.col = 13;
-      break;
-    case 3:
-      moving.row = 11;
-      moving.col = 13;
-      break;
-    case 4:
-      moving.row = 11;
-      moving.col = 1;
-      break;
-  }
-  return moving
 }

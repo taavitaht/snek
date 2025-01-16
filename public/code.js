@@ -4,7 +4,6 @@ import { movePlayers, placePlayer } from "../components/players.js";
 import { startAnimating } from "../misc/script.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
-import { placeBombAndExplode } from "../components/bombs.js";
 
 export let socket;
 let uname;
@@ -162,30 +161,6 @@ startGameButton.setProp("onclick", function () {
     });
 
 
-    socket.on("bomb-dropped", async function (moving) {
-      //check if a player collided with an explosion
-      placeBombAndExplode(moving)
-        .then((res) => {
-          setTimeout(() => {
-            Array.from(
-              document.querySelectorAll(
-                `.player-${moving["myPlayerNum"]}-explosion`
-              )
-            ).forEach((el) => el.remove());
-            if (
-              orbital["players"][moving["myPlayerNum"]]["numOfBombs"] === 0 &&
-              document.querySelector(
-                `.player-${moving["myPlayerNum"]}-bomb`
-              ) === null
-            ) {
-              orbital["players"][moving["myPlayerNum"]]["numOfBombs"] = 1;
-            }
-          }, 1000);
-        })
-        .catch((err) => {
-          socket.emit("cannot-drop-bomb", moving["myPlayerNum"]);
-        });
-    });
 
     socket.on("game-update", function (message) {
       let updateMessage;

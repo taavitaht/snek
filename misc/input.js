@@ -1,100 +1,66 @@
-// For player movement movement
-export let rightPressed = false,
-    leftPressed = false,
-    upPressed = false,
-    downPressed = false,
-    pickUp = false,
-    speedPressed = false,
-    flamesPressed = false,
-    bombsPressed = false,
-    bombDropped = false;
+export let arrow;
 
-document.addEventListener('keydown', keyDownHandler, false);
-document.addEventListener('keyup', keyUpHandler, false);
+document.addEventListener("keydown", arrowKeyHandler, false);
 
-export function keyDownHandler(e) {
-    if (e.key == 'Right' || e.key == 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key == 'Left' || e.key == 'ArrowLeft') {
-        leftPressed = true;
-    } else if (e.key == 'Up' || e.key == 'ArrowUp') {
-        upPressed = true;
-    } else if (e.key == 'Down' || e.key == 'ArrowDown') {
-        downPressed = true;
+function arrowKeyHandler(e) {
+  if (e.key == "Right" || e.key == "ArrowRight") {
+    if (arrow != "Left") {
+      arrow = "Right";
     }
+  } else if (e.key == "Left" || e.key == "ArrowLeft") {
+    if (arrow != "Right") {
+      arrow = "Left";
+    }
+  } else if (e.key == "Up" || e.key == "ArrowUp") {
+    if (arrow != "Down") {
+      arrow = "Up";
+    }
+  } else if (e.key == "Down" || e.key == "ArrowDown") {
+    if (arrow != "Up") {
+      arrow = "Down";
+    }
+  } else if (e.key == "F" || e.key == "f") {
+    placeBomb();
+  }
 }
 
-export function keyUpHandler(e) {
-    if (e.key == 'Right' || e.key == 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key == 'Left' || e.key == 'ArrowLeft') {
-        leftPressed = false;
-    } else if (e.key == 'Up' || e.key == 'ArrowUp') {
-        upPressed = false;
-    } else if (e.key == 'Down' || e.key == 'ArrowDown') {
-        downPressed = false;
-    } else if (e.key == "q") {
-        pickUp = true
-    } else if (e.key == "s") {
-        //active speed power up
-        speedPressed = true;
-    } else if (e.key == "a") {
-        // active flames power
-        flamesPressed = true;
-    } else if (e.key == "d") {
-        //active bombs power up
-        bombsPressed = true;
-    } else if (e.key == "w") {
-        bombDropped = true;
-    }
-}
-export function falseKeyBool(string) {
-    switch (string) {
-        case "left":
-            leftPressed = false
-            break
-        case "right":
-            rightPressed = false
-            break
-        case "up":
-            upPressed = false
-            break
-        case "down":
-            downPressed = false
-            break
-        case "pick-up":
-            pickUp = false
-            break
-        case "speed-pressed":
-            speedPressed = false
-            break
-        case "flames-pressed":
-            flamesPressed = false
-            break
-        case "bombs-pressed":
-            bombsPressed = false
-            break
-        case "bombs-dropped":
-            bombDropped = false
-            break
-    }
-}
 
-//https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
-//prevent arrows and space bar from moving the screen
-window.addEventListener(
-    'keydown',
-    function stopCrolling(e) {
-        if (
-            [
-                'ArrowUp',
-                'ArrowDown',
-                'ArrowLeft',
-                'ArrowRight'
-            ].indexOf(e.code) > -1
-        ) {
-            e.preventDefault();
-        }
-    },
-    false
-);
+
+
+
+import RJNA from "../rjna/engine.js";
+import { globalSettings } from "../misc/gameSetting.js";
+
+function placeBomb() {
+console.log("placeBomb");
+    let bomb = RJNA.tag.div(
+      {
+        class: `bomb`,
+        style: {
+          top: 5 * globalSettings.wallHeight + "px",
+          left: 5 * globalSettings.wallWidth + "px",
+          width: `${globalSettings["bomb"]["width"]}px`,
+          height: `${globalSettings["bomb"]["height"]}px`,
+          position: "absolute",
+        },
+      },
+      {},
+      {},
+      RJNA.tag.img(
+        {
+          style: {
+            width: "100%",
+            height: "100%",
+            zIndex: 999,
+          },
+        },
+        {},
+        { src: globalSettings["bomb"]["src"] }
+      )
+    );
+
+    let bombElement = RJNA.createNode(bomb);
+
+    let gameWrapper = document.querySelector(".game-wrapper");
+    gameWrapper.appendChild(bombElement);
+}

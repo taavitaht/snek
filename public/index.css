@@ -122,8 +122,8 @@ body {
 /* Game wrapper */
 .game-wrapper {
   display: grid;
-  grid-template-columns: repeat(15, 1fr); /* Adjust grid columns */
-  grid-template-rows: repeat(13, auto); /* Adjust grid rows */
+  grid-template-columns: repeat(20, 1fr); /* Adjust grid columns */
+  grid-template-rows: repeat(20, auto); /* Adjust grid rows */
   width: auto; /* Size based on content */
   height: auto; /* Size based on content */
   margin: 0;
