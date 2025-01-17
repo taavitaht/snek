@@ -5,9 +5,11 @@ import { startAnimating } from "../misc/script.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
 import { placeFood } from "../components/food.js";
+import { escapePressed, resetEscapePressed } from "../misc/input.js";
 
 export let socket;
 let uname;
+
 export function startSockets() {
   const app = document.querySelector(".app");
   // when the user presses join in the waiting room
@@ -27,14 +29,14 @@ export function startSockets() {
     runSocket();
   });
 
-// Start game button
-const startGameButton = RJNA.getObjByAttrsAndPropsVal(
-  orbital.obj,
-  "start-game-button"
-);
-startGameButton.setProp("onclick", function () {
-  socket.emit("start-game-button");
-});
+  // Start game button
+  const startGameButton = RJNA.getObjByAttrsAndPropsVal(
+    orbital.obj,
+    "start-game-button"
+  );
+  startGameButton.setProp("onclick", function () {
+    socket.emit("start-game-button");
+  });
 
   function runSocket() {
     // adds recently joined player-card to the waiting room
@@ -77,13 +79,11 @@ startGameButton.setProp("onclick", function () {
         Object.keys(orbital.players).length;
     });
 
-
-
     // display 10s countdown before game starts
     socket.on("start-game-countdown", function (countdown) {
       const startGameCountdown = app.querySelector(".countdown-container");
       startGameCountdown.classList.remove("waiting");
-        startGameCountdown.innerHTML = `Game will start in ${countdown} !`;
+      startGameCountdown.innerHTML = `Game will start in ${countdown} !`;
     });
 
     // displays full lobby message on form
@@ -143,7 +143,7 @@ startGameButton.setProp("onclick", function () {
 
       // Place food on the gamefield
       for (let i = 0; i < globalSettings.food.count; i++) {
-      placeFood();
+        placeFood();
       }
     });
 
@@ -165,8 +165,6 @@ startGameButton.setProp("onclick", function () {
     socket.on("receive-cells", function () {
       socket.emit("update-cells", orbital.cells);
     });
-
-
 
     socket.on("game-update", function (message) {
       let updateMessage;
@@ -293,6 +291,29 @@ startGameButton.setProp("onclick", function () {
     });
 
     */
+
+    socket.on("game-status-update", function (data) {
+      console.log("[CLIENT] Received 'game-status-update':", data);
+      const container = document.querySelector(".congratulations-container");
+      if (!container) return;
+      switch (data.status) {
+        case "paused":
+          container.classList.remove("hidden");
+          container.querySelector("h1").textContent = "Paused";
+          // emit/stop the game/time etc
+          break;
+        case "resumed":
+          container.classList.add("hidden");
+          break;
+        case "quit":
+          container.classList.remove("hidden");
+          //redirect to main page, remove the player from the que?
+          break;
+      }
+    });
+    pauseMenu(socket);
+
+    requestAnimationFrame(checkForEscape);
   }
 }
 
@@ -367,4 +388,33 @@ export function appendLiveUpdateMessage(updateMessage) {
   } else {
     gameUpdatesContainer.appendChild(updateMessage);
   }
+}
+
+// checks needed if the game is running or not
+function pauseMenu(socket) {
+  const resumeButton = document.querySelector(".resume-button");
+  const quitButton = document.querySelector(".quit-button");
+
+  if (resumeButton) {
+    resumeButton.addEventListener("click", () => {
+      console.log("[CLIENT] Resume button clicked -> Emitting 'game-resumed'");
+      socket.emit("game-resumed");
+    });
+  }
+
+  if (quitButton) {
+    quitButton.addEventListener("click", () => {
+      console.log("[CLIENT] Quit button clicked -> Emitting 'game-quit'");
+      socket.emit("game-quit");
+    });
+  }
+}
+
+function checkForEscape() {
+  if (escapePressed) {
+    console.log("[CLIENT] 'escapePressed' is true -> Emitting 'game-paused'");
+    socket.emit("game-paused");
+    resetEscapePressed();
+  }
+  requestAnimationFrame(checkForEscape);
 }
