@@ -19,6 +19,7 @@ export const congratulationsContainer = RJNA.tag.div(
   {},
   {},
   RJNA.tag.h1({}, {}, {}, "Paused"),
+  RJNA.tag.p({ class: "pause-timer" }, {}, {}, "60 seconds"),
   RJNA.tag.button({ class: "resume-button" }, {}, {}, "Resume"),
   RJNA.tag.button({ class: "quit-button" }, {}, {}, "Quit")
 );

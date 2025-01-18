@@ -18,6 +18,7 @@ app.get("/", (req, res) => {
 let waitingTimer, startGameTimer, cells;
 let gameStarted = false;
 let gameMap = [];
+const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 
 io.on("connection", function (socket) {
   socket.on("newuser", function (username) {
@@ -130,16 +131,11 @@ io.on("connection", function (socket) {
     startGameCountdown();
   });
 
-  socket.on("game-paused", function () {
-    io.sockets.emit("game-status-update", { status: "paused" });
-  });
-
-  socket.on("game-resumed", function () {
-    io.sockets.emit("game-status-update", { status: "resumed" });
-  });
-
-  socket.on("game-quit", function () {
-    io.sockets.emit("game-status-update", { status: "quit" });
+  gameStatusUpdates.forEach((event) => {
+    socket.on(event, function () {
+      const status = event.split("-")[1];
+      io.sockets.emit("game-status-update", { status });
+    });
   });
 });
 
@@ -149,7 +145,7 @@ server.listen(port, () => {
 
 // Game start timer
 function startGameCountdown() {
-  let countdown = 0;
+  let countdown = 5;
   let allPlayers = [];
   io.sockets.sockets.forEach((connected) => {
     allPlayers.push({
@@ -159,6 +155,10 @@ function startGameCountdown() {
   });
   function emitGameCountdown() {
     io.sockets.emit("start-game-countdown", countdown);
+
+    if (countdown === 3) {
+      io.sockets.emit("play-sound", { sound: "start-game-sound" });
+    }
 
     if (countdown > 0) {
       countdown--;

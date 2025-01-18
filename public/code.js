@@ -313,6 +313,13 @@ export function startSockets() {
     });
     pauseMenu(socket);
 
+    socket.on("play-sound", (data) => {
+      if (data.sound === "start-game-sound") {
+        const audio = new Audio("/sounds/start.mp3");
+        audio.play();
+      }
+    });
+
     requestAnimationFrame(checkForEscape);
   }
 }

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +17,8 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.7",
     "utf-8-validate": "^6.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
