@@ -1,9 +1,10 @@
-
 import { placeFood } from "../components/food.js";
 
 export let arrow;
+export let escapePressed = false;
 
 document.addEventListener("keydown", arrowKeyHandler, false);
+document.addEventListener("keydown", escapeKeyHandler);
 
 function arrowKeyHandler(e) {
   if (e.key == "Right" || e.key == "ArrowRight") {
@@ -25,4 +26,14 @@ function arrowKeyHandler(e) {
   } else if (e.key == "F" || e.key == "f") {
     placeFood();
   }
+}
+
+function escapeKeyHandler(e) {
+  if (e.key === "Escape") {
+    escapePressed = true;
+  }
+}
+
+export function resetEscapePressed() {
+  escapePressed = false;
 }
