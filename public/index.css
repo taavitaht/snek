@@ -153,6 +153,18 @@ body {
   z-index: 999;
 }
 
+.snake {
+  background-color: green;
+  z-index: 999;
+  position: absolute;
+  transition: transform 0.2s ease; /* Smooth transition for translate */
+}
+
+.snake-body{
+  background-color: lightgreen;
+}
+
+
 .player-1 > p,
 .player-2 > p,
 .player-3 > p,

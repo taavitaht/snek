@@ -47,14 +47,12 @@ export const waitingRoomGrid = RJNA.tag.div(
   ),
   RJNA.tag.div({ class: "game-info-container" }, {}, {},
     RJNA.tag.div({ class: "synopsis-info" }, {}, {},
-      RJNA.tag.h3({ class: "game-info-title" }, {}, {}, "Welcome to Bomberman"),
+      RJNA.tag.h3({ class: "game-info-title" }, {}, {}, "Title goes here"),
       RJNA.tag.p(
         { class: "synopsis-text" },
         {},
         {},
-        `Bomberman is an arcade-style game where players control a 
-           character who strategically places bombs to eliminate obstacles,
-           enemies, and opponents in a maze-like arena.
+        `And text goes here...
           `),
 
     ),

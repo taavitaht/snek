@@ -41,8 +41,29 @@ function animate(totalAnimatedTimestamp) {
         PlayerMovement(socket);
       }
       movePlayers();
+      //updateSnakePosition();
       duration++;
       //console.log("Duration: " + duration);
     }
   }
+}
+
+
+// Function to update snake position gradually
+function updateSnakePosition() {
+  // Loop through the snake segments
+  snake.segments.forEach((segment, index) => {
+    // Get the current element representing the snake segment
+    const segmentElement = document.querySelector(`.snake-${segment.id}`);
+    
+    // Calculate the new position of the snake segment using `transform`
+    const newX = segment.x * globalSettings.gameSquareSize + 0.5;
+    const newY = segment.y * globalSettings.gameSquareSize + 0.5;
+
+    // Update the transform property for smooth animation
+    segmentElement.style.transform = `translate(-50%, -50%) translate(${newX}px, ${newY}px)`;
+
+    // Optionally add a transition (if desired)
+    segmentElement.style.transition = "transform 0.1s";  // Adjust timing as needed
+  });
 }

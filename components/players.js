@@ -3,11 +3,76 @@ import RJNA from "../rjna/engine.js";
 import { arrow } from "../misc/input.js";
 import { checkForFood } from "../components/food.js";
 
+// TODO: Retrieve player number and starting coordinates from settings based on player number
+const initialSnakePosition = [
+  { x: 5, y: 5 }, // Head
+  { x: 5, y: 4 },
+  { x: 5, y: 3 }, // Tail
+];
+
+export class Snake {
+  constructor(playerNum, initialSnakePosition) {
+    this.playerNum = playerNum;
+    this.segments = initialSnakePosition;
+    // TODO: Direction from settings?
+    this.direction = "Right";
+  }
+  // Method to get coordinates of snake head
+  get position() {
+    return this.segments[0];
+  }
+  // Method to update the snake's direction
+  setDirection(newDirection) {
+    this.direction = newDirection;
+  }
+
+  // Method to move the snake
+  move() {
+    const newHead = { ...this.position }; // Copy the current head position
+
+    // Calculate the new head position based on direction
+    if (this.direction === "Left") newHead.x -= 1;
+    else if (this.direction === "Right") newHead.x += 1;
+    else if (this.direction === "Up") newHead.y -= 1;
+    else if (this.direction === "Down") newHead.y += 1;
+
+    // Check for crash
+    if (wallCollisionCheck(newHead)) {
+      return;
+    }
+    // Check for food
+    const foundFood = checkForFood(newHead);
+
+    // Update the snake's position
+    this.segments.unshift(newHead); // Add new head
+    if (!foundFood) {
+      this.segments.pop(); // Remove the tail if no food was found
+    }
+  }
+}
+
+export const snake = new Snake(1, initialSnakePosition);
+
+// Wall collision check
+function wallCollisionCheck(newHead) {
+  if (
+    newHead.x <= 0 || // Left wall
+    newHead.x >= globalSettings.numOfColumns - 1 || // Right wall
+    newHead.y <= 0 || // Top wall
+    newHead.y >= globalSettings.numOfRows - 1 // Bottom wall
+  ) {
+    console.error("Snake hit the wall! Game over.");
+    return true;
+  }
+  return false;
+}
+
+// Place player on game field
 export function placePlayer(number, character, username) {
-  let topPosition =
-    orbital["players"][`${number}`]["row"] * globalSettings.gameSquareSize;
-  let leftPosition =
-    orbital["players"][`${number}`]["col"] * globalSettings.gameSquareSize;
+  const snakeHead = snake.position; // Get initial snake head position
+  let topPosition = snakeHead.y * globalSettings.gameSquareSize;
+  let leftPosition = snakeHead.x * globalSettings.gameSquareSize;
+
   return RJNA.tag.div(
     {
       class: `player-${number}`,
@@ -33,45 +98,89 @@ export function placePlayer(number, character, username) {
     )
   );
 }
+
+// Manage player movement
 export function PlayerMovement(socket) {
-  let moving = {
+  // Prevent movement if there's no valid direction (e.g., no arrow key pressed)
+  if (!arrow) return;
+
+  // Set the direction in the Snake instance
+  snake.setDirection(arrow);
+
+  // Get the current head position
+  const currentHead = snake.position;
+
+  // Calculate the new head position directly inside the `Snake` class's `move` method
+  snake.move();
+
+  // Check for food using the new head position
+  const foundFood = checkForFood(snake.position);
+
+  // If food was found, the `snake.move()` method already handles growth,
+  // so no additional action is needed here.
+
+  // Emit updated position to server
+  const moving = {
     myPlayerNum: socket.playerCount,
-    row: orbital["players"][`${socket.playerCount}`]["row"],
-    col: orbital["players"][`${socket.playerCount}`]["col"],
+    row: snake.position.y,
+    col: snake.position.x,
   };
-  //console.log("moving = ", JSON.stringify(moving));
+  socket.emit("player-movement", moving);
 
-  // Move according to button
-  if (arrow == "Left") {
-    // If crashing into wall do not move further
-    if (moving.col == 1) { return; } 
-    moving.col = moving.col - 1;
-    socket.emit("player-movement", moving);
-  } else if (arrow == "Right") {
-    if (moving.col == globalSettings.numOfColumns - 2) { return; }
-    moving.col = moving.col + 1;
-    socket.emit("player-movement", moving);
-  } else if (arrow == "Up") {
-    if (moving.row == 1) { return; }
-    moving.row = moving.row - 1;
-    socket.emit("player-movement", moving);
-  } else if (arrow == "Down") {
-    if (moving.row == globalSettings.numOfRows - 2) { return; }
-    moving.row = moving.row + 1;
-    socket.emit("player-movement", moving);
-  }
-  // If player moved check for food
-
-checkForFood(moving);
-
+  // Update the snake's visual representation on the screen
+  updateSnakeVisual();
 }
 
+// Draw snake
+function updateSnakeVisual() {
+  // Add each segment of the snake to the DOM
+  const gameWrapper = document.querySelector(".game-wrapper");
+
+  // Loop through each segment of the snake
+  snake.segments.forEach((segment, index) => {
+    const segmentElement = document.querySelector(`.snake[data-index="${index}"]`);
+
+    // If the segment does not exist in the DOM, create it
+    if (!segmentElement) {
+      const newSegmentElement = RJNA.tag.div(
+        {
+          class: `snake ${index === 0 ? "snake-head" : "snake-body"}`,
+          "data-index": index, // Store the index for later reference
+          style: {
+            transform: `translate(-50%, -50%) translate(${(segment.x + 0.5) * globalSettings.gameSquareSize}px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`,
+            width: index === 0 ? `${globalSettings.players.width * 0.9}px` : `${globalSettings.players.width * 0.7}px`,
+            height: index === 0 ? `${globalSettings.players.height * 0.9}px` : `${globalSettings.players.height * 0.7}px`,
+            position: "absolute",
+          },
+        },
+        {},
+        {}
+      );
+      
+      const segmentNode = RJNA.createNode(newSegmentElement);
+      gameWrapper.appendChild(segmentNode);
+    } else {
+      // Update the existing segment's position with the new transform
+      segmentElement.style.transform = `translate(-50%, -50%) translate(${(segment.x + 0.5) * globalSettings.gameSquareSize}px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`;
+    }
+  });
+}
+
+
+// Update player position on the game field
 export function movePlayers() {
+  // Update the positions of all players, including the snake
   for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
-    document.querySelector(`.player-${playerNum}`).style.top =
-      playerObj.row * globalSettings.gameSquareSize + "px";
-    document.querySelector(`.player-${playerNum}`).style.left =
-      playerObj.col * globalSettings.gameSquareSize + "px";
-    //console.log("Player row and col:", playerObj.row, playerObj.col);
+    if (playerNum == snake.playerNum) {
+      updateSnakeVisual(); // Special handling for the snake player
+    } else {
+      const playerElement = document.querySelector(`.player-${playerNum}`);
+      if (playerElement) {
+        playerElement.style.top =
+          playerObj.row * globalSettings.gameSquareSize + "px";
+        playerElement.style.left =
+          playerObj.col * globalSettings.gameSquareSize + "px";
+      }
+    }
   }
 }
