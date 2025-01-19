@@ -2,20 +2,19 @@ import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
 import { arrow } from "../misc/input.js";
 import { checkForFood } from "../components/food.js";
+import { mapTemplate } from "./mapTemplate.js";
 
-// TODO: Retrieve player number and starting coordinates from settings based on player number
-const initialSnakePosition = [
-  { x: 5, y: 5 }, // Head
-  { x: 5, y: 4 },
-  { x: 5, y: 3 }, // Tail
-];
 
+// TODO: Edit?
+//const playerNumber = socket.playerCount;
+const playerNumber = 1
+
+// Snake class
 export class Snake {
-  constructor(playerNum, initialSnakePosition) {
-    this.playerNum = playerNum;
+  constructor(playerNumber, initialSnakePosition) {
+    this.playerNumber = playerNumber;
     this.segments = initialSnakePosition;
-    // TODO: Direction from settings?
-    this.direction = "Right";
+    this.direction = determineDirection(initialSnakePosition);
   }
   // Method to get coordinates of snake head
   get position() {
@@ -51,7 +50,89 @@ export class Snake {
   }
 }
 
-export const snake = new Snake(1, initialSnakePosition);
+// Function to parse the map and sort segments
+function getInitialSnakePosition(mapTemplate, playerNumber) {
+  const segments = []; // Complete snake
+  let headPosition = null; // Head position
+  const bodyPositions = []; // Body positions
+
+  // Parse the map
+  for (let y = 0; y < mapTemplate.length; y++) {
+    for (let x = 0; x < mapTemplate[y].length; x++) {
+      const cell = mapTemplate[y][x];
+      if (cell === `${playerNumber}h`) {
+        // Cell "1h" is head of snake1
+        headPosition = { x, y }; // Store head position
+      } else if (cell === `${playerNumber}b`) {
+        bodyPositions.push({ x, y }); // Store body position
+      }
+    }
+  }
+
+  if (!headPosition || !bodyPositions) {
+    throw new Error(`Snake (${playerNumber}) not found in the map!`);
+  }
+
+  // Sort the body positions based on proximity to the head
+  const sortedBody = [];
+  let currentHead = headPosition;
+
+  while (bodyPositions.length > 0) {
+    // Find the closest body segment to the current head
+    const closestIndex = bodyPositions.reduce(
+      (closestIdx, segment, idx, array) => {
+        const dist = calculateDistance(currentHead, segment);
+        const closestDist = calculateDistance(currentHead, array[closestIdx]);
+        return dist < closestDist ? idx : closestIdx;
+      },
+      0
+    );
+
+    // Add the closest body segment to the sorted array
+    sortedBody.push(bodyPositions[closestIndex]);
+
+    // Update currentHead to the newly added body segment
+    currentHead = bodyPositions[closestIndex];
+
+    // Remove added closest segment and continue looping
+    bodyPositions.splice(closestIndex, 1);
+  }
+
+  // Combine the head and sorted body
+  segments.push(headPosition, ...sortedBody);
+
+  return segments;
+}
+
+// Calculate Manhattan/Taxicab distance
+function calculateDistance(pointA, pointB) {
+  return Math.abs(pointA.x - pointB.x) + Math.abs(pointA.y - pointB.y);
+}
+
+// Determine initial heading based on closest body element position relative to head
+function determineDirection(initialSnakePosition) {
+  // Extract head and the first body segment
+  const head = initialSnakePosition[0];
+  const closestBody = initialSnakePosition[1];
+
+  // Determine the direction based on relative positions
+  if (closestBody.x < head.x) {
+    return "Right";
+  } else if (closestBody.x > head.x) {
+    return "Left";
+  } else if (closestBody.y < head.y) {
+    return "Down";
+  } else if (closestBody.y > head.y) {
+    return "Up";
+  }
+}
+
+// Example snake for testing TODO: Edit?
+export const snake = new Snake(
+  playerNumber,
+  getInitialSnakePosition(mapTemplate, playerNumber)
+);
+//console.log("snake:", snake);
 
 // Wall collision check
 function wallCollisionCheck(newHead) {
@@ -67,57 +148,24 @@ function wallCollisionCheck(newHead) {
   return false;
 }
 
-// Place player on game field
-export function placePlayer(number, character, username) {
-  const snakeHead = snake.position; // Get initial snake head position
-  let topPosition = snakeHead.y * globalSettings.gameSquareSize;
-  let leftPosition = snakeHead.x * globalSettings.gameSquareSize;
-
-  return RJNA.tag.div(
-    {
-      class: `player-${number}`,
-      style: {
-        top: topPosition + "px",
-        left: leftPosition + "px",
-        width: `${globalSettings.players.width}px`,
-        height: `${globalSettings.players.height}px`,
-      },
-    },
-    {},
-    {},
-    RJNA.tag.p({}, {}, {}, username),
-    RJNA.tag.img(
-      {
-        style: {
-          width: "100%",
-          height: "100%",
-        },
-      },
-      {},
-      { src: globalSettings.players[character] }
-    )
-  );
-}
-
 // Manage player movement
 export function PlayerMovement(socket) {
-  // Prevent movement if there's no valid direction (e.g., no arrow key pressed)
-  if (!arrow) return;
+  // In beginning of game start moving right away
+  if (!arrow) {
+    // return
+    snake.setDirection(snake.direction);
+    // Afterwards use arrowkey input
+  } else {
+    snake.setDirection(arrow);
+  }
 
-  // Set the direction in the Snake instance
-  snake.setDirection(arrow);
-
-  // Get the current head position
-  const currentHead = snake.position;
-
-  // Calculate the new head position directly inside the `Snake` class's `move` method
+  // Calculate new head position using Snake class move method
   snake.move();
 
   // Check for food using the new head position
-  const foundFood = checkForFood(snake.position);
+  checkForFood(snake.position);
 
-  // If food was found, the `snake.move()` method already handles growth,
-  // so no additional action is needed here.
+  // If food was found, snake.move() handled growth and checkForFood() replaced eaten food
 
   // Emit updated position to server
   const moving = {
@@ -127,18 +175,20 @@ export function PlayerMovement(socket) {
   };
   socket.emit("player-movement", moving);
 
-  // Update the snake's visual representation on the screen
+  // Draw snake
   updateSnakeVisual();
 }
 
 // Draw snake
-function updateSnakeVisual() {
+export function updateSnakeVisual() {
   // Add each segment of the snake to the DOM
   const gameWrapper = document.querySelector(".game-wrapper");
 
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {
-    const segmentElement = document.querySelector(`.snake[data-index="${index}"]`);
+    const segmentElement = document.querySelector(
+      `.snake[data-index="${index}"]`
+    );
 
     // If the segment does not exist in the DOM, create it
     if (!segmentElement) {
@@ -147,29 +197,38 @@ function updateSnakeVisual() {
           class: `snake ${index === 0 ? "snake-head" : "snake-body"}`,
           "data-index": index, // Store the index for later reference
           style: {
-            transform: `translate(-50%, -50%) translate(${(segment.x + 0.5) * globalSettings.gameSquareSize}px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`,
-            width: index === 0 ? `${globalSettings.players.width * 0.9}px` : `${globalSettings.players.width * 0.7}px`,
-            height: index === 0 ? `${globalSettings.players.height * 0.9}px` : `${globalSettings.players.height * 0.7}px`,
+            transform: `translate(-50%, -50%) translate(${
+              (segment.x + 0.5) * globalSettings.gameSquareSize
+            }px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`,
+            width:
+              index === 0
+                ? `${globalSettings.players.width * 0.9}px`
+                : `${globalSettings.players.width * 0.7}px`,
+            height:
+              index === 0
+                ? `${globalSettings.players.height * 0.9}px`
+                : `${globalSettings.players.height * 0.7}px`,
             position: "absolute",
           },
         },
         {},
         {}
       );
-      
+
       const segmentNode = RJNA.createNode(newSegmentElement);
       gameWrapper.appendChild(segmentNode);
     } else {
       // Update the existing segment's position with the new transform
-      segmentElement.style.transform = `translate(-50%, -50%) translate(${(segment.x + 0.5) * globalSettings.gameSquareSize}px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`;
+      segmentElement.style.transform = `translate(-50%, -50%) translate(${
+        (segment.x + 0.5) * globalSettings.gameSquareSize
+      }px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`;
     }
   });
 }
 
-
 // Update player position on the game field
 export function movePlayers() {
-  // Update the positions of all players, including the snake
+  // Update the positions of all snakes
   for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
     if (playerNum == snake.playerNum) {
       updateSnakeVisual(); // Special handling for the snake player
