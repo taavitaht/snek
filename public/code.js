@@ -1,6 +1,6 @@
 import RJNA from "../rjna/engine.js";
 import { playerCard } from "../components/waitingRoom.js";
-import { movePlayers, placePlayer } from "../components/players.js";
+import { movePlayers, updateSnakeVisual } from "../components/players.js";
 import { startAnimating } from "../misc/script.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
@@ -117,7 +117,8 @@ export function startSockets() {
       //console.log(orbital.cells);
       gameContainer.setChild(map);
       const gameWrapper = gameContainer.children[0];
-      for (const player of obj.allPlayers) {
+      updateSnakeVisual();
+      /*for (const player of obj.allPlayers) {
         switch (player.count) {
           case 1:
             gameWrapper.setChild(placePlayer(1, "one", player.username));
@@ -132,7 +133,7 @@ export function startSockets() {
             gameWrapper.setChild(placePlayer(4, "wario", player.username));
             break;
         }
-      }
+      }*/
 
       const waitingRoomContainer = RJNA.getObjByAttrsAndPropsVal(
         orbital.obj,
