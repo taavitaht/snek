@@ -320,6 +320,7 @@ export function startSockets() {
         case "quit":
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message} `;
+          //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY
           break;
         case "restart":
           // TODO: Implement restart logic
@@ -356,6 +357,13 @@ export function startSockets() {
 
       container.classList.remove("hidden");
       reasonElement.classList.remove("hidden");
+    });
+
+    socket.on("username-taken", function (msg) {
+      const errorElement = document.getElementById("username-taken");
+      if (errorElement) {
+        errorElement.textContent = msg;
+      }
     });
 
     requestAnimationFrame(checkForEscape);

@@ -25,6 +25,18 @@ const pauseTimers = new Map();
 
 io.on("connection", function (socket) {
   socket.on("newuser", function (username) {
+    const isUsernameUnique = Array.from(io.sockets.sockets.values()).some(
+      (connectedSocket) => connectedSocket.username === username
+    );
+
+    if (isUsernameUnique) {
+      socket.emit(
+        "username-taken",
+        "Username is already taken. Choose another name."
+      );
+      return;
+    }
+
     if (io.sockets.sockets.size <= 4) {
       if (startGameTimer || gameStarted) {
         socket.emit("connection-limit-reached", "Game Currently In Session");
