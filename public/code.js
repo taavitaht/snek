@@ -293,30 +293,56 @@ export function startSockets() {
     */
 
     socket.on("game-status-update", function (data) {
-      console.log("[CLIENT] Received 'game-status-update':", data);
+      console.log(
+        `[CLIENT] Game status updated: ${data.status} by ${data.username}`
+      );
       const container = document.querySelector(".congratulations-container");
+      const timerElement = container.querySelector(".pause-timer");
       if (!container) return;
       switch (data.status) {
         case "paused":
           container.classList.remove("hidden");
-          container.querySelector("h1").textContent = "Paused";
-          // emit/stop the game/time etc
+          container.querySelector("h1").textContent = `${data.message}`;
+          if (timerElement) {
+            timerElement.textContent = "60 seconds remaining";
+            timerElement.style.display = "block";
+          }
           break;
+
         case "resumed":
           container.classList.add("hidden");
+          if (timerElement) {
+            timerElement.style.display = "none";
+          }
           break;
+
         case "quit":
           container.classList.remove("hidden");
-          //redirect to main page, remove the player from the que?
+          container.querySelector("h1").textContent = `${data.message} `;
+          break;
+        case "restart":
+          // TODO: Implement restart logic
           break;
       }
     });
-    pauseMenu(socket);
 
+    pauseMenu(socket);
+    // for sound effects
     socket.on("play-sound", (data) => {
       if (data.sound === "start-game-sound") {
         const audio = new Audio("/sounds/start.mp3");
         audio.play();
+      }
+    });
+    // start countdown
+    socket.on("countdown-update", function (data) {
+      const { username, remainingTime } = data;
+      console.log(`${username} pause countdown: ${remainingTime} seconds`);
+
+      const container = document.querySelector(".congratulations-container");
+      const timerElement = container.querySelector(".pause-timer");
+      if (timerElement) {
+        timerElement.textContent = `${remainingTime} seconds remaining`;
       }
     });
 

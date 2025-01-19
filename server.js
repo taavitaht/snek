@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const http = require("http");
+const { clearInterval } = require("timers");
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +20,8 @@ let waitingTimer, startGameTimer, cells;
 let gameStarted = false;
 let gameMap = [];
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
+const activePauses = new Map();
+const pauseTimers = new Map();
 
 io.on("connection", function (socket) {
   socket.on("newuser", function (username) {
@@ -134,7 +137,101 @@ io.on("connection", function (socket) {
   gameStatusUpdates.forEach((event) => {
     socket.on(event, function () {
       const status = event.split("-")[1];
-      io.sockets.emit("game-status-update", { status });
+      const username = socket.username;
+      let remainingTime = 60;
+
+      switch (status) {
+        case "paused": {
+          const playerPauseInfo = activePauses.get(username) || {
+            paused: false,
+            pauseUsed: false,
+          };
+
+          if (playerPauseInfo.paused) {
+            socket.emit("pause-rejected", {
+              reason: "You can only pause once per game.",
+            });
+            return;
+          }
+
+          activePauses.set(username, { paused: true });
+
+          io.sockets.emit("game-status-update", {
+            status,
+            username,
+            remainingTime,
+            message: `${username} paused the game.`,
+          });
+
+          const interval = setInterval(() => {
+            remainingTime--;
+            io.sockets.emit("countdown-update", { username, remainingTime });
+
+            if (remainingTime <= 0) {
+              clearInterval(interval);
+              pauseTimers.delete(username);
+              activePauses.set(username, { paused: false });
+
+              io.sockets.emit("game-status-update", {
+                status: "resumed",
+                username,
+                message: `${username}'s pause has ended.`,
+              });
+            }
+          }, 1000);
+
+          pauseTimers.set(username, interval);
+          break;
+        }
+
+        case "resumed": {
+          const interval = pauseTimers.get(username);
+          if (interval) {
+            clearInterval(interval);
+            pauseTimers.delete(username);
+          }
+
+          activePauses.set(username, { paused: false });
+
+          io.sockets.emit("game-status-update", {
+            status,
+            username,
+            message: `${username} resumed the game.`,
+          });
+          break;
+        }
+
+        case "quit": {
+          const interval = pauseTimers.get(username);
+          if (interval) {
+            clearInterval(interval);
+            pauseTimers.delete(username);
+          }
+          activePauses.set(username, { paused: false });
+          io.sockets.emit("game-status-update", {
+            status,
+            username,
+            message: `${username} has quit the game.`,
+          });
+          break;
+        }
+
+        case "restart": {
+          //  restart logic here.
+          //  reset game state, clear timers, etc.
+
+          io.sockets.emit("game-status-update", {
+            status,
+            username,
+            message: `${username} restarted the game.`,
+          });
+          break;
+        }
+
+        default:
+          // dno
+          break;
+      }
     });
   });
 });
@@ -145,7 +242,7 @@ server.listen(port, () => {
 
 // Game start timer
 function startGameCountdown() {
-  let countdown = 5;
+  let countdown = 0;
   let allPlayers = [];
   io.sockets.sockets.forEach((connected) => {
     allPlayers.push({
