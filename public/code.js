@@ -347,6 +347,17 @@ export function startSockets() {
       }
     });
 
+    socket.on("pause-rejected", (data) => {
+      const container = document.querySelector(".congratulations-container");
+      const reasonElement = container.querySelector(".pause-reason");
+      if (!reasonElement) return;
+
+      reasonElement.textContent = data.reason;
+
+      container.classList.remove("hidden");
+      reasonElement.classList.remove("hidden");
+    });
+
     requestAnimationFrame(checkForEscape);
   }
 }

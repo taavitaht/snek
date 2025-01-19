@@ -147,6 +147,13 @@ io.on("connection", function (socket) {
             pauseUsed: false,
           };
 
+          if (playerPauseInfo.pauseUsed) {
+            socket.emit("pause-rejected", {
+              reason: "You've already used your pause in this game.",
+            });
+            return;
+          }
+
           if (playerPauseInfo.paused) {
             socket.emit("pause-rejected", {
               reason: "You can only pause once per game.",
@@ -154,7 +161,7 @@ io.on("connection", function (socket) {
             return;
           }
 
-          activePauses.set(username, { paused: true });
+          activePauses.set(username, { paused: true, pauseUsed: true });
 
           io.sockets.emit("game-status-update", {
             status,
@@ -170,7 +177,7 @@ io.on("connection", function (socket) {
             if (remainingTime <= 0) {
               clearInterval(interval);
               pauseTimers.delete(username);
-              activePauses.set(username, { paused: false });
+              activePauses.set(username, { paused: false, pauseUsed: true });
 
               io.sockets.emit("game-status-update", {
                 status: "resumed",
@@ -191,7 +198,15 @@ io.on("connection", function (socket) {
             pauseTimers.delete(username);
           }
 
-          activePauses.set(username, { paused: false });
+          const playerPauseInfo = activePauses.get(username) || {
+            paused: false,
+            pauseUsed: false,
+          };
+
+          activePauses.set(username, {
+            paused: false,
+            pauseUsed: playerPauseInfo.pauseUsed,
+          });
 
           io.sockets.emit("game-status-update", {
             status,
