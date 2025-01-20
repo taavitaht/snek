@@ -51,7 +51,9 @@ export const waitingRoomGrid = RJNA.tag.div(
             { pattern: "^(?=\\s*\\S).{1,6}$", required: true },
             "Join Chatroom"
           ),
-          RJNA.tag.p({}, {}, {}, "Enter up to 6 Characters")
+          RJNA.tag.p({}, {}, {}, "Enter up to 6 Characters"),
+
+          RJNA.tag.p({ id: "username-taken" }, {}, {}, "")
         ),
         RJNA.tag.div(
           { class: "form-input" },
