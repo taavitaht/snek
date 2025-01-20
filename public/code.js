@@ -305,7 +305,7 @@ export function startSockets() {
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message}`;
           if (timerElement) {
-            timerElement.textContent = "60 seconds remaining";
+            timerElement.textContent = "4 seconds remaining";
             timerElement.style.display = "block";
           }
           break;
@@ -320,7 +320,7 @@ export function startSockets() {
         case "quit":
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message} `;
-          //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY
+          //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY or disconnect?
           break;
         case "restart":
           // TODO: Implement restart logic
@@ -336,6 +336,14 @@ export function startSockets() {
         audio.play();
       }
     });
+
+    socket.on("play-sound", (data) => {
+      if (data.sound === "countdown-sound") {
+        const audio = new Audio("/sounds/pause-end.mp3");
+        audio.play();
+      }
+    });
+
     // start countdown
     socket.on("countdown-update", function (data) {
       const { username, remainingTime } = data;
