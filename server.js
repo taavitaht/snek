@@ -7,7 +7,7 @@ const { countReset } = require("console");
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-const port = 5001;
+const port = 5000;
 
 // Serve static files
 app.use(express.static(__dirname));
