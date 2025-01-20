@@ -2,11 +2,12 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const { clearInterval } = require("timers");
+const { countReset } = require("console");
 
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-const port = 5000;
+const port = 5001;
 
 // Serve static files
 app.use(express.static(__dirname));
@@ -179,7 +180,7 @@ io.on("connection", function (socket) {
             status,
             username,
             remainingTime,
-            message: `${username} paused the game.`,
+            message: `${username} paused the game`,
           });
 
           const interval = setInterval(() => {
@@ -206,14 +207,8 @@ io.on("connection", function (socket) {
           pauseTimers.set(username, interval);
           break;
         }
-
+        //TODO: resume the animation for all players
         case "resumed": {
-          const interval = pauseTimers.get(username);
-          if (interval) {
-            clearInterval(interval);
-            pauseTimers.delete(username);
-          }
-
           const playerPauseInfo = activePauses.get(username) || {
             paused: false,
             pauseUsed: false,
@@ -224,14 +219,48 @@ io.on("connection", function (socket) {
             pauseUsed: playerPauseInfo.pauseUsed,
           });
 
-          io.sockets.emit("game-status-update", {
-            status,
-            username,
-            message: `${username} resumed the game.`,
-          });
+          //TODO: if player has already used their pause, they can't resume but it should not affect others? broadcast to specific player othwerwise everyone will see the message
+          if (!playerPauseInfo.paused) {
+            socket.emit("pause-rejected", {
+              reason: "You have used your pause already.",
+            });
+            return;
+          }
+
+          const interval = pauseTimers.get(username);
+          if (interval) {
+            clearInterval(interval);
+            pauseTimers.delete(username);
+          }
+
+          let remainingTime = 10;
+
+          const countdownInterval = setInterval(() => {
+            io.sockets.emit("resume-countdown", {
+              username,
+              remainingTime,
+              message: `Game will resume in ${remainingTime} seconds`,
+            });
+
+            remainingTime--;
+
+            if (remainingTime === 3) {
+              io.sockets.emit("play-sound", { sound: "countdown-sound" });
+            }
+
+            if (remainingTime < 0) {
+              clearInterval(countdownInterval);
+
+              io.sockets.emit("game-status-update", {
+                status,
+                username,
+                message: `${username} resumed the game.`,
+              });
+            }
+          }, 1000);
           break;
         }
-
+        // TODO: remove specific player from the game, notify all players?
         case "quit": {
           const interval = pauseTimers.get(username);
           if (interval) {

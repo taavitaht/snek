@@ -305,7 +305,7 @@ export function startSockets() {
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message}`;
           if (timerElement) {
-            timerElement.textContent = "4 seconds remaining";
+            timerElement.textContent = "60 seconds remaining";
             timerElement.style.display = "block";
           }
           break;
@@ -365,12 +365,31 @@ export function startSockets() {
 
       container.classList.remove("hidden");
       reasonElement.classList.remove("hidden");
+      // for testing, later popup msg, but the user still should have the options to quit or restart? mby move buttons somewhere else
+      setTimeout(() => {
+        container.classList.add("hidden");
+        reasonElement.classList.add("hidden");
+      }, 3000);
     });
 
     socket.on("username-taken", function (msg) {
       const errorElement = document.getElementById("username-taken");
       if (errorElement) {
         errorElement.textContent = msg;
+      }
+    });
+
+    socket.on("resume-countdown", function (data) {
+      const container = document.querySelector(".congratulations-container");
+      const reasonElement = container.querySelector(".pause-reason");
+
+      if (reasonElement) {
+        reasonElement.textContent = data.message;
+      }
+
+      const timerElement = container.querySelector(".pause-timer");
+      if (timerElement) {
+        timerElement.textContent = "";
       }
     });
 
