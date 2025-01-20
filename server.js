@@ -151,7 +151,7 @@ io.on("connection", function (socket) {
     socket.on(event, function () {
       const status = event.split("-")[1];
       const username = socket.username;
-      let remainingTime = 4;
+      let remainingTime = 10;
       //TODO: pause the animation for all players
       switch (status) {
         case "paused": {
@@ -187,7 +187,7 @@ io.on("connection", function (socket) {
             remainingTime--;
             io.sockets.emit("countdown-update", { username, remainingTime });
 
-            if (remainingTime === 3) {
+            if (remainingTime === 4) {
               io.sockets.emit("play-sound", { sound: "countdown-sound" });
             }
 
@@ -244,7 +244,7 @@ io.on("connection", function (socket) {
 
             remainingTime--;
 
-            if (remainingTime === 3) {
+            if (remainingTime === 4) {
               io.sockets.emit("play-sound", { sound: "countdown-sound" });
             }
 
