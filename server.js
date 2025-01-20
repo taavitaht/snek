@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const { clearInterval } = require("timers");
+//const { globalSettings } = require("./misc/gameSetting");
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 let waitingTimer, startGameTimer, cells;
 let gameStarted = false;
 let gameMap = [];
+let gameTimer;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
@@ -133,6 +135,23 @@ io.on("connection", function (socket) {
   socket.on("start-game-button", function () {
     startGameCountdown();
   });
+
+  // socket.on("start-game", function () {
+  //   if (gameTimer) clearInterval(gameTimer);
+  //   gameTime = 60 //should be set in globalSettings
+  //   console.log("game timer started ");
+
+  //   gameTimer = setInterval(() => {
+  //     if (gameTime > 0) {
+  //       gameTime--;
+  //       io.emit("game-timer-update", { remainingTime: gameTime });
+  //     } else {
+  //       clearInterval(gameTimer);
+  //       io.emit("game-over", { reason: "time-up" });
+  //     }
+  //   }, 1000);
+
+  // });
 
   gameStatusUpdates.forEach((event) => {
     socket.on(event, function () {
@@ -263,10 +282,27 @@ function startGameCountdown() {
     } else {
       startGameTimer = null;
       io.sockets.emit("start-game", { gameMap, allPlayers });
+      startTimer();
       gameStarted = true;
     }
   }
   emitGameCountdown();
+}
+
+function startTimer() {
+  if (gameTimer) clearInterval(gameTimer);
+  gameTime = 60 //should be set in globalSettings
+  console.log("game timer started ");
+
+  gameTimer = setInterval(() => {
+    if (gameTime > 0) {
+      gameTime--;
+      io.emit("game-timer-update", { remainingTime: gameTime });
+    } else {
+      clearInterval(gameTimer);
+      io.emit("game-over", { reason: "time-up" });
+    }
+  }, 1000);
 }
 
 function findPlayerCount() {

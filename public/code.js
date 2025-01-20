@@ -173,29 +173,21 @@ export function startSockets() {
         case "player-killed":
           let playerNumber = parseInt(message.playerKilled);
           let deathMessageArr = [
-            `${orbital["players"][`${playerNumber}`].name} was caught in  ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} was caught in  ${orbital["players"][`${message.bomber}`].name
             }'s explosion`,
-            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${orbital["players"][`${message.bomber}`].name
             }`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } has met Allah!! Thanks  ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name
+            } has met Allah!! Thanks  ${orbital["players"][`${message.bomber}`].name
             }`,
-            `${orbital["players"][`${message.bomber}`].name} says "RIP ${
-              orbital["players"][`${playerNumber}`].name
+            `${orbital["players"][`${message.bomber}`].name} says "RIP ${orbital["players"][`${playerNumber}`].name
             }"`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } sadly passed away- Thanks ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name
+            } sadly passed away- Thanks ${orbital["players"][`${message.bomber}`].name
             }`,
           ];
-          let finalDeathMessage = `${
-            orbital["players"][`${message.bomber}`].name
-          } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
+          let finalDeathMessage = `${orbital["players"][`${message.bomber}`].name
+            } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
           if (orbital["players"][`${playerNumber}`].lives != 0) {
             updateMessage = RJNA.createNode(
               RJNA.tag.p(
@@ -203,7 +195,7 @@ export function startSockets() {
                 {},
                 {},
                 deathMessageArr[
-                  Math.floor(Math.random() * deathMessageArr.length)
+                Math.floor(Math.random() * deathMessageArr.length)
                 ]
               )
             );
@@ -232,6 +224,15 @@ export function startSockets() {
       appendLiveUpdateMessage(updateMessage);
     });
 
+    socket.on("game-timer-update", function (data) {
+      const gameTimerElement = document.querySelector(".game-updates-container .timer");
+      console.log(`timer update: ${data.remainingTime}`);
+      if (gameTimerElement) {
+        const minutes = Math.floor(data.remainingTime / 60);
+        const seconds = Math.floor(data.remainingTime % 60);
+        gameTimerElement.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+    })
     // Disable game end
     /*
     socket.on("end-game", function (winner) {
