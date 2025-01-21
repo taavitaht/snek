@@ -173,6 +173,8 @@ io.on("connection", function (socket) {
       //TODO: pause the animation for all players
       switch (status) {
         case "paused": {
+          pauseGameTimer();
+
           const playerPauseInfo = activePauses.get(username) || {
             paused: false,
             pauseUsed: false,
@@ -227,6 +229,7 @@ io.on("connection", function (socket) {
         }
         //TODO: resume the animation for all players
         case "resumed": {
+          resumeGameTimer();
           const playerPauseInfo = activePauses.get(username) || {
             paused: false,
             pauseUsed: false,
@@ -294,9 +297,8 @@ io.on("connection", function (socket) {
           break;
         }
 
+        // I don't think we need this case
         case "restart": {
-          //  restart logic here.
-          //  reset game state, clear timers, etc.
 
           io.sockets.emit("game-status-update", {
             status,
@@ -351,7 +353,6 @@ function startGameCountdown() {
 function startTimer() {
   if (gameTimer) clearInterval(gameTimer);
   gameTime = 60; //should be set in globalSettings
-  console.log("game timer started ");
 
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
@@ -362,6 +363,22 @@ function startTimer() {
       io.emit("game-over", { reason: "time-up" });
     }
   }, 1000);
+}
+
+function pauseGameTimer() {
+  clearInterval(gameTimer);
+}
+
+function resumeGameTimer() {
+  gameTimer = setInterval(() => {
+    if (gameTime > 0) {
+      gameTime--;
+      io.emit("game-timer-update", { remainingTime: gameTime });
+    } else {
+      clearInterval(gameTimer);
+      io.emit("game-over", { reason: "time-up" });
+    }
+  });
 }
 
 function findPlayerCount() {
