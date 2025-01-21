@@ -169,29 +169,21 @@ export function startSockets() {
         case "player-killed":
           let playerNumber = parseInt(message.playerKilled);
           let deathMessageArr = [
-            `${orbital["players"][`${playerNumber}`].name} was caught in  ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} was caught in  ${orbital["players"][`${message.bomber}`].name
             }'s explosion`,
-            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${orbital["players"][`${message.bomber}`].name
             }`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } has met Allah!! Thanks  ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name
+            } has met Allah!! Thanks  ${orbital["players"][`${message.bomber}`].name
             }`,
-            `${orbital["players"][`${message.bomber}`].name} says "RIP ${
-              orbital["players"][`${playerNumber}`].name
+            `${orbital["players"][`${message.bomber}`].name} says "RIP ${orbital["players"][`${playerNumber}`].name
             }"`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } sadly passed away- Thanks ${
-              orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name
+            } sadly passed away- Thanks ${orbital["players"][`${message.bomber}`].name
             }`,
           ];
-          let finalDeathMessage = `${
-            orbital["players"][`${message.bomber}`].name
-          } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
+          let finalDeathMessage = `${orbital["players"][`${message.bomber}`].name
+            } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
           if (orbital["players"][`${playerNumber}`].lives != 0) {
             updateMessage = RJNA.createNode(
               RJNA.tag.p(
@@ -199,7 +191,7 @@ export function startSockets() {
                 {},
                 {},
                 deathMessageArr[
-                  Math.floor(Math.random() * deathMessageArr.length)
+                Math.floor(Math.random() * deathMessageArr.length)
                 ]
               )
             );
@@ -218,6 +210,15 @@ export function startSockets() {
       appendLiveUpdateMessage(updateMessage);
     });
 
+    socket.on("game-timer-update", function (data) {
+      const gameTimerElement = document.querySelector(".game-updates-container .timer");
+      console.log(`timer update: ${data.remainingTime}`);
+      if (gameTimerElement) {
+        const minutes = Math.floor(data.remainingTime / 60);
+        const seconds = Math.floor(data.remainingTime % 60);
+        gameTimerElement.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+    })
     // Disable game end
     /*
     socket.on("end-game", function (winner) {
@@ -306,6 +307,7 @@ export function startSockets() {
         case "quit":
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message} `;
+          //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY or disconnect?
           break;
         case "restart":
           // TODO: Implement restart logic
@@ -321,6 +323,14 @@ export function startSockets() {
         audio.play();
       }
     });
+
+    socket.on("play-sound", (data) => {
+      if (data.sound === "countdown-sound") {
+        const audio = new Audio("/sounds/pause-end.mp3");
+        audio.play();
+      }
+    });
+
     // start countdown
     socket.on("countdown-update", function (data) {
       const { username, remainingTime } = data;
@@ -330,6 +340,43 @@ export function startSockets() {
       const timerElement = container.querySelector(".pause-timer");
       if (timerElement) {
         timerElement.textContent = `${remainingTime} seconds remaining`;
+      }
+    });
+
+    socket.on("pause-rejected", (data) => {
+      const container = document.querySelector(".congratulations-container");
+      const reasonElement = container.querySelector(".pause-reason");
+      if (!reasonElement) return;
+
+      reasonElement.textContent = data.reason;
+
+      container.classList.remove("hidden");
+      reasonElement.classList.remove("hidden");
+      // for testing, later popup msg, but the user still should have the options to quit or restart? mby move buttons somewhere else
+      setTimeout(() => {
+        container.classList.add("hidden");
+        reasonElement.classList.add("hidden");
+      }, 3000);
+    });
+
+    socket.on("username-taken", function (msg) {
+      const errorElement = document.getElementById("username-taken");
+      if (errorElement) {
+        errorElement.textContent = msg;
+      }
+    });
+
+    socket.on("resume-countdown", function (data) {
+      const container = document.querySelector(".congratulations-container");
+      const reasonElement = container.querySelector(".pause-reason");
+
+      if (reasonElement) {
+        reasonElement.textContent = data.message;
+      }
+
+      const timerElement = container.querySelector(".pause-timer");
+      if (timerElement) {
+        timerElement.textContent = "";
       }
     });
 

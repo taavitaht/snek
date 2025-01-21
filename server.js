@@ -164,7 +164,7 @@ function startGameTicker() {
       // Move the snake
       snake.move();
     });
-console.log("foodArray:", foodArray)
+//console.log("foodArray:", foodArray)
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray); // Send the state of all snakes and food items to all clients
   }, 500);

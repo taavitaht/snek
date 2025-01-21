@@ -9,6 +9,7 @@ export const gameUpdatesContainer = RJNA.tag.div(
   { class: "game-updates-container" },
   {},
   {},
+  RJNA.tag.div({ class: "timer" }, {}, {}, "TIMER"),
   RJNA.tag.h3({ class: "game-updates-title" }, {}, {}, "GAME UPDATES:"),
   RJNA.tag.div({ class: "live-updates" }, {}, {})
 );
@@ -19,7 +20,8 @@ export const congratulationsContainer = RJNA.tag.div(
   {},
   {},
   RJNA.tag.h1({}, {}, {}, "Paused"),
-  RJNA.tag.p({ class: "pause-timer" }, {}, {}),
+  RJNA.tag.p({ class: "pause-timer" }, {}, {}, ""),
+  RJNA.tag.p({ class: "pause-reason hidden" }, {}, {}, ""),
   RJNA.tag.button({ class: "resume-button" }, {}, {}, "Resume"),
   RJNA.tag.button({ class: "quit-button" }, {}, {}, "Quit"),
   RJNA.tag.button({ class: "restart-button" }, {}, {}, "Restart")
