@@ -1,5 +1,5 @@
 import RJNA from "../rjna/engine.js";
-import { globalSettings } from "../misc/gameSetting.js";
+
 
 // Generate player card
 export const playerCard = (incomingPlayer) =>
@@ -19,10 +19,7 @@ export const playerCard = (incomingPlayer) =>
 export const waitingRoomGrid = RJNA.tag.div(
   {
     class: "waiting-room-container",
-    style: {
-      "grid-template-columns": `${globalSettings.gridColumn1}px ${globalSettings.gridColumn2}px ${globalSettings.gridColumn3}px`,
-      "grid-template-rows": `60px 60px ${globalSettings.gridFr}px ${globalSettings.gridFr}px`,
-    },
+
   },
   {},
   {},

@@ -8,24 +8,19 @@ import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
-import {
-  drawSnake,
-} from "../components/players.js";
+import { drawSnake } from "../components/players.js";
 
 export let socket;
 let uname;
-
-let snakes = []
+let map;
+let snakes = [];
 export let mySnake;
 
 export function startSockets() {
   const app = document.querySelector(".app");
   // when the user presses join in the waiting room
-  const joinUserButton = RJNA.getObjByAttrsAndPropsVal(
-    orbital.obj,
-    "join-user-button"
-  );
-  joinUserButton.setProp("onclick", function () {
+  const joinUserButton = document.getElementById("join-user-button");
+  joinUserButton.addEventListener("click", function () {
     let username = app.querySelector(".join-screen #username").value;
     if (username.length == 0) {
       // TODO: also check that name is unique
@@ -38,11 +33,8 @@ export function startSockets() {
   });
 
   // Start game button
-  const startGameButton = RJNA.getObjByAttrsAndPropsVal(
-    orbital.obj,
-    "start-game-button"
-  );
-  startGameButton.setProp("onclick", function () {
+  const startGameButton = document.getElementById("start-game-button");
+  startGameButton.addEventListener("click", function () {
     socket.emit("start-game-button");
   });
 
@@ -54,7 +46,7 @@ export function startSockets() {
         "players-waiting-container"
       ).setChild(playerCard(userObj));
       //updatePlayerOrbital(userObj);
-      document.querySelector(".players-waiting-counter").innerHTML =  // TODO: this line gives error when joining lobby
+      document.querySelector(".players-waiting-counter").innerHTML = // TODO: this line gives error when joining lobby
         Object.keys(orbital.players).length;
     });
 
@@ -117,10 +109,11 @@ export function startSockets() {
     // Game start
     socket.on("start-game", function (obj) {
       // Create the map
-      let map = createMap();
-      const gameContainer = document.getElementById("game-container");
-      gameContainer.appendChild(map);
-
+      if (!map) {
+        map = createMap();
+        const gameContainer = document.getElementById("game-container");
+        gameContainer.appendChild(map);
+      }
       // Hide waiting room
       const waitingRoomContainer = RJNA.getObjByAttrsAndPropsVal(
         orbital.obj,
@@ -161,21 +154,29 @@ export function startSockets() {
         case "player-killed":
           let playerNumber = parseInt(message.playerKilled);
           let deathMessageArr = [
-            `${orbital["players"][`${playerNumber}`].name} was caught in  ${orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} was caught in  ${
+              orbital["players"][`${message.bomber}`].name
             }'s explosion`,
-            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${orbital["players"][`${message.bomber}`].name
+            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${
+              orbital["players"][`${message.bomber}`].name
             }`,
-            `${orbital["players"][`${playerNumber}`].name
-            } has met Allah!! Thanks  ${orbital["players"][`${message.bomber}`].name
+            `${
+              orbital["players"][`${playerNumber}`].name
+            } has met Allah!! Thanks  ${
+              orbital["players"][`${message.bomber}`].name
             }`,
-            `${orbital["players"][`${message.bomber}`].name} says "RIP ${orbital["players"][`${playerNumber}`].name
+            `${orbital["players"][`${message.bomber}`].name} says "RIP ${
+              orbital["players"][`${playerNumber}`].name
             }"`,
-            `${orbital["players"][`${playerNumber}`].name
-            } sadly passed away- Thanks ${orbital["players"][`${message.bomber}`].name
+            `${
+              orbital["players"][`${playerNumber}`].name
+            } sadly passed away- Thanks ${
+              orbital["players"][`${message.bomber}`].name
             }`,
           ];
-          let finalDeathMessage = `${orbital["players"][`${message.bomber}`].name
-            } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
+          let finalDeathMessage = `${
+            orbital["players"][`${message.bomber}`].name
+          } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
           if (orbital["players"][`${playerNumber}`].lives != 0) {
             updateMessage = RJNA.createNode(
               RJNA.tag.p(
@@ -183,7 +184,7 @@ export function startSockets() {
                 {},
                 {},
                 deathMessageArr[
-                Math.floor(Math.random() * deathMessageArr.length)
+                  Math.floor(Math.random() * deathMessageArr.length)
                 ]
               )
             );
@@ -203,14 +204,18 @@ export function startSockets() {
     });
 
     socket.on("game-timer-update", function (data) {
-      const gameTimerElement = document.querySelector(".game-updates-container .timer");
+      const gameTimerElement = document.querySelector(
+        ".game-updates-container .timer"
+      );
       console.log(`timer update: ${data.remainingTime}`);
       if (gameTimerElement) {
         const minutes = Math.floor(data.remainingTime / 60);
         const seconds = Math.floor(data.remainingTime % 60);
-        gameTimerElement.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        gameTimerElement.textContent = `${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
       }
-    })
+    });
     // Disable game end
     /*
     socket.on("end-game", function (winner) {

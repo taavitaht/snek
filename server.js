@@ -3,7 +3,7 @@ import path from "path";
 import http from "http";
 import { Server } from "socket.io";
 import { Snake } from "./components/players.js";
-import { Food, placeFood, foodArray } from "./components/food.js";
+import { placeFood, foodArray } from "./components/food.js";
 
 // Create an express app and HTTP server
 const app = express();
@@ -15,11 +15,8 @@ const port = 5000;
 let serverSnakes = []; // Array holding all snakes
 let playerKeypresses = {};
 let gameInterval;
-//let foodArray = [];
-
-let waitingTimer, startGameTimer, cells;
+let waitingTimer, startGameTimer;
 let gameStarted = false;
-let gameMap = [];
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
@@ -28,11 +25,12 @@ const pauseTimers = new Map();
 app.use(express.static(path.resolve()));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.resolve("index.html")); // Path to your index.html file
+  res.sendFile(path.resolve("index.html"));
 });
 
 io.on("connection", (socket) => {
   socket.on("newuser", (username) => {
+    // io.of("/").sockets.size is number of connected sockets
     if (io.of("/").sockets.size <= 4) {
       if (startGameTimer || gameStarted) {
         socket.emit("connection-limit-reached", "Game Currently In Session");
@@ -45,7 +43,7 @@ io.on("connection", (socket) => {
           username: socket.username,
           count: socket.playerNumber,
         };
-        socket.broadcast.emit("waiting", userObj);
+        socket.broadcast.emit("waiting");
 
         connectedSockets.forEach((connected) => {
           const previouslyJoinedSocket = {
@@ -158,9 +156,8 @@ function startGameTicker() {
       // Move the snake
       snake.move();
     });
-    //console.log("foodArray:", foodArray)
     // Emit the updated state of all snakes to all connected clients
-    io.emit("tick", serverSnakes, foodArray); // Send the state of all snakes and food items to all clients
+    io.emit("tick", serverSnakes, foodArray);
   }, 500);
 }
 
@@ -201,8 +198,9 @@ function startGameCountdown() {
   emitGameCountdown();
 }
 
-// Reset game state
+// Reset game state before new game is started
 function resetGameState() {
+  stopGameTicker();
   playerKeypresses = {};
   serverSnakes.length = 0;
   foodArray.length = 0;

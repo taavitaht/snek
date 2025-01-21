@@ -36,7 +36,9 @@ export function placeFood(count) {
 // Render the food items
 export function drawFood(foodArray) {
   const gameWrapper = document.querySelector(".game-wrapper");
-
+  if (!gameWrapper) {
+    return;
+  }
   // Get all existing food elements in the DOM
   const existingFoodIds = Array.from(gameWrapper.querySelectorAll(".food")).map(
     (foodElement) => foodElement.getAttribute("data-id")

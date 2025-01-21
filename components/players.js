@@ -38,7 +38,7 @@ export class Snake {
       return;
     }
     // Check for food
-    if (checkForFood(newHead)){
+    if (checkForFood(newHead)) {
       foundFood = true;
       this.score++;
     }
@@ -145,7 +145,9 @@ function wallCollisionCheck(newHead) {
 // Render snake
 export function drawSnake(snake) {
   const gameWrapper = document.getElementById("game-wrapper");
-
+  if (!gameWrapper) {
+    return;
+  }
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {
     // Create a unique ID or data attribute to associate the segment with the DOM element
@@ -186,4 +188,3 @@ export function drawSnake(snake) {
     }
   });
 }
-
