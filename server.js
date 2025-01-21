@@ -2,12 +2,8 @@ import express from "express";
 import path from "path";
 import http from "http";
 import { Server } from "socket.io";
-import {
-  Snake,
-  getInitialSnakePosition,
-  drawSnake,
-} from "./components/players.js";
-import { Food, placeFood } from "./components/food.js";
+import { Snake } from "./components/players.js";
+import { Food, placeFood, foodArray } from "./components/food.js";
 
 // Create an express app and HTTP server
 const app = express();
@@ -19,7 +15,7 @@ const port = 5000;
 let serverSnakes = []; // Array holding all snakes
 let playerKeypresses = {};
 let gameInterval;
-let foodArray = [];
+//let foodArray = [];
 
 let waitingTimer, startGameTimer, cells;
 let gameStarted = false;
@@ -76,9 +72,7 @@ io.on("connection", (socket) => {
   socket.on("keypress", (arrow) => {
     if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
       playerKeypresses[socket.playerNumber] = arrow;
-      console.log(socket.playerNumber);
-      console.log(socket.username);
-      console.log(playerKeypresses);
+      //console.log(playerKeypresses);
     }
   });
 
@@ -164,7 +158,7 @@ function startGameTicker() {
       // Move the snake
       snake.move();
     });
-//console.log("foodArray:", foodArray)
+    //console.log("foodArray:", foodArray)
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray); // Send the state of all snakes and food items to all clients
   }, 500);
@@ -212,15 +206,14 @@ function resetGameState() {
   playerKeypresses = {};
   serverSnakes.length = 0;
   foodArray.length = 0;
-
   // Create new snakes
   io.sockets.sockets.forEach((connected) => {
     const snake = new Snake(connected.playerNumber, connected.username);
     serverSnakes.push(snake);
   });
   // Place food items
-  foodArray = placeFood(5);
-  console.log("Foods: ", foodArray);
+  placeFood(5);
+  //console.log("Foods: ", foodArray);
 }
 
 // Handle game status updates (pause, resume, quit, restart)

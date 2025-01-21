@@ -58,7 +58,7 @@ export function startSockets() {
         "players-waiting-container"
       ).setChild(playerCard(userObj));
       updatePlayerOrbital(userObj);
-      document.querySelector(".players-waiting-counter").innerHTML =
+      document.querySelector(".players-waiting-counter").innerHTML =  // TODO: this line gives error when joining lobby
         Object.keys(orbital.players).length;
     });
 
@@ -147,6 +147,7 @@ export function startSockets() {
 
     // Listen for updated snake positions on the client
     socket.on("tick", function (updatedSnakes, foodArray) {
+      console.log("tick", updatedSnakes, foodArray);
       updatedSnakes.forEach((snake) => {
         drawSnake(snake);
       });

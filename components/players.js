@@ -180,7 +180,7 @@ export function PlayerMovement(socket, snake) {
 
 // Draw snake
 export function drawSnake(snake) {
-  console.log("drawSnake:", snake);
+  //console.log("drawSnake:", snake);
   const gameWrapper = document.querySelector(".game-wrapper");
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {

@@ -1,7 +1,7 @@
 import RJNA from "../rjna/engine.js";
 import { globalSettings } from "../misc/gameSetting.js";
 
-let foodArray = [];
+export let foodArray = [];
 
 export class Food {
   constructor(x, y) {
@@ -111,7 +111,7 @@ export function drawFood(foodArray) {
 // Check if the snake eats food
 export function checkForFood(snakeHead) {
   // Get the current head position of the snake
-  console.log("Snake head coords:", snakeHead);
+  //console.log("Snake head coords:", snakeHead);
   //console.log(foodArray)
   // Check if the head matches any food position
   const foundFood = foodArray.some(
@@ -124,7 +124,6 @@ export function checkForFood(snakeHead) {
     foodArray = foodArray.filter(
       (foodItem) => foodItem.x !== snakeHead.x || foodItem.y !== snakeHead.y
     );
-
     // Replace the eaten food with a new one
     placeFood(1);
 
