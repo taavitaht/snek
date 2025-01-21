@@ -34,55 +34,48 @@ export function placeFood(count) {
   return foodArray;
 }
 
-// Draw food
-// Draw food
 export function drawFood(foodArray) {
   const gameWrapper = document.querySelector(".game-wrapper");
 
   // Get all existing food elements in the DOM
-  const existingFoodIds = Array.from(gameWrapper.querySelectorAll('.food'))
-    .map(foodElement => foodElement.getAttribute('data-id'));
+  const existingFoodIds = Array.from(
+    gameWrapper.querySelectorAll(".food")
+  ).map((foodElement) => foodElement.getAttribute("data-id"));
 
   // Loop through each food item in the food array
   foodArray.forEach((foodItem) => {
     const foodId = `food-${foodItem.x}-${foodItem.y}`;
 
     // Check if the food already exists in the DOM
-    let foodElement = document.querySelector(`#${foodId}`);
+    let foodElement = document.getElementById(foodId);
 
     // If the food doesn't exist, create it
     if (!foodElement) {
-      foodElement = RJNA.tag.div(
-        {
-          id: foodId, // Set a unique ID for the food item
-          class: 'food', // Add a class for styling purposes
-          'data-id': foodId, // Store the unique identifier as a data attribute
-          style: {
-            transform: `translate(-50%, -50%) translate(${
-              (foodItem.x + 0.5) * globalSettings.gameSquareSize
-            }px, ${(foodItem.y + 0.5) * globalSettings.gameSquareSize}px)`,
-            width: `${globalSettings.food.width}px`,
-            height: `${globalSettings.food.height}px`,
-            position: 'absolute',
-          },
-        },
-        {},
-        {},
-        RJNA.tag.img(
-          {
-            style: {
-              width: '100%',
-              height: '100%',
-              zIndex: 999,
-            },
-          },
-          {},
-          { src: globalSettings.food.src }
-        )
-      );
+      foodElement = document.createElement("div");
+      foodElement.id = foodId;
+      foodElement.className = "food";
+      foodElement.setAttribute("data-id", foodId);
 
-      const foodNode = RJNA.createNode(foodElement);
-      gameWrapper.appendChild(foodNode); // Append the food to the game wrapper
+      // Set styles for the food element
+      foodElement.style.transform = `translate(-50%, -50%) translate(${
+        (foodItem.x + 0.5) * globalSettings.gameSquareSize
+      }px, ${(foodItem.y + 0.5) * globalSettings.gameSquareSize}px)`;
+      foodElement.style.width = `${globalSettings.food.width}px`;
+      foodElement.style.height = `${globalSettings.food.height}px`;
+      foodElement.style.position = "absolute";
+
+      // Add an image inside the food element
+      const foodImage = document.createElement("img");
+      foodImage.src = globalSettings.food.src;
+      foodImage.style.width = "100%";
+      foodImage.style.height = "100%";
+      foodImage.style.zIndex = "999";
+
+      // Append the image to the food element
+      foodElement.appendChild(foodImage);
+
+      // Append the food element to the game wrapper
+      gameWrapper.appendChild(foodElement);
     } else {
       // If the food exists, update its position
       foodElement.style.transform = `translate(-50%, -50%) translate(${
@@ -93,13 +86,13 @@ export function drawFood(foodArray) {
 
   // Remove old food items that are no longer in the foodArray
   existingFoodIds.forEach((foodId) => {
-    const foodElement = gameWrapper.querySelector(`#${foodId}`);
+    const foodElement = document.getElementById(foodId);
     const isFoodInArray = foodArray.some(
       (foodItem) => `food-${foodItem.x}-${foodItem.y}` === foodId
     );
 
     // If the food is not in the updated foodArray, remove it
-    if (!isFoodInArray) {
+    if (!isFoodInArray && foodElement) {
       foodElement.remove();
     }
   });

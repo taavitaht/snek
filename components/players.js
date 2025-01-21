@@ -178,47 +178,41 @@ export function PlayerMovement(socket, snake) {
   drawSnake(snake);
 }
 
-// Draw snake
 export function drawSnake(snake) {
-  //console.log("drawSnake:", snake);
   const gameWrapper = document.querySelector(".game-wrapper");
+
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {
     // Create a unique ID or data attribute to associate the segment with the DOM element
     const segmentId = `snake-${snake.playerNumber}-segment-${index}`;
 
     // Check if the segment already exists in the DOM
-    let segmentElement = document.querySelector(`#${segmentId}`);
+    let segmentElement = document.getElementById(segmentId);
 
     // If the segment doesn't exist, create it
     if (!segmentElement) {
-      segmentElement = RJNA.tag.div(
-        {
-          id: segmentId, // Set a unique ID for the segment
-          class: `snake-${snake.playerNumber} ${
-            index === 0 ? "snake-head" : "snake-body"
-          }`,
-          style: {
-            transform: `translate(-50%, -50%) translate(${
-              (segment.x + 0.5) * globalSettings.gameSquareSize
-            }px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`,
-            width:
-              index === 0
-                ? `${globalSettings.players.width * 0.9}px`
-                : `${globalSettings.players.width * 0.7}px`,
-            height:
-              index === 0
-                ? `${globalSettings.players.height * 0.9}px`
-                : `${globalSettings.players.height * 0.7}px`,
-            position: "absolute",
-          },
-        },
-        {},
-        {}
-      );
+      segmentElement = document.createElement("div");
+      segmentElement.id = segmentId;
+      segmentElement.className = `snake-${snake.playerNumber} ${
+        index === 0 ? "snake-head" : "snake-body"
+      }`;
 
-      const segmentNode = RJNA.createNode(segmentElement);
-      gameWrapper.appendChild(segmentNode); // This line gives error
+      // Set initial styles
+      segmentElement.style.position = "absolute";
+      segmentElement.style.width =
+        index === 0
+          ? `${globalSettings.players.width * 0.9}px`
+          : `${globalSettings.players.width * 0.7}px`;
+      segmentElement.style.height =
+        index === 0
+          ? `${globalSettings.players.height * 0.9}px`
+          : `${globalSettings.players.height * 0.7}px`;
+      segmentElement.style.transform = `translate(-50%, -50%) translate(${
+        (segment.x + 0.5) * globalSettings.gameSquareSize
+      }px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`;
+
+      // Append the segment to the game wrapper
+      gameWrapper.appendChild(segmentElement);
     } else {
       // If the segment exists, update its position
       segmentElement.style.transform = `translate(-50%, -50%) translate(${
@@ -227,3 +221,4 @@ export function drawSnake(snake) {
     }
   });
 }
+

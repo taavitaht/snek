@@ -168,8 +168,8 @@ body {
 .snake-4 {
   z-index: 999;
   position: absolute;
-  transition: transform 0.2s ease;
-  /* Smooth transition for translate */
+  will-change: transform; /* Inform browser that this element's transform property is likely to change */
+  transition: transform 0.2s ease; /* Smooth transition for translate */
 }
 
 .snake-1 {
