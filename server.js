@@ -210,16 +210,15 @@ function resetGameState() {
   io.sockets.sockets.forEach((connected) => {
     const snake = new Snake(connected.playerNumber, connected.username);
     serverSnakes.push(snake);
+    placeFood(2); //2 food items per snake
   });
-  // Place food items
-  placeFood(5);
-  //console.log("Foods: ", foodArray);
 }
 
 // Handle game status updates (pause, resume, quit, restart)
 function handleGameStatus(event, username, status, remainingTime) {
   switch (status) {
     case "paused": {
+      stopGameTicker();
       const playerPauseInfo = activePauses.get(username) || {
         paused: false,
         pauseUsed: false,
@@ -263,6 +262,7 @@ function handleGameStatus(event, username, status, remainingTime) {
     }
 
     case "resumed": {
+      startGameTicker();
       const interval = pauseTimers.get(username);
       if (interval) {
         clearInterval(interval);

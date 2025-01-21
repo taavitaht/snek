@@ -1,20 +1,12 @@
 import { globalSettings } from "../misc/gameSetting.js";
-import RJNA from "../rjna/engine.js";
-//import { arrow } from "../misc/input.js";
 import { checkForFood } from "../components/food.js";
 import { mapTemplate } from "./mapTemplate.js";
-
-
-// TODO: Edit?
-//const playerNumber = socket.playerNumber;
-const playerNumber = 1;
 
 // Snake class
 export class Snake {
   constructor(playerNumber, username) {
     this.playerNumber = playerNumber;
     this.username = username;
-    //this.segments = initialSnakePosition;
     this.segments = getInitialSnakePosition(mapTemplate, playerNumber); // Read initial snake position from map
     this.direction = determineDirection(this.segments); // Use segments to determine direction
     this.score = 0;
@@ -136,10 +128,6 @@ function determineDirection(initialSnakePosition) {
   }
 }
 
-// Example snake for testing TODO: Edit?
-//export const snake = new Snake(1, "Snake");
-//console.log("snake:", snake);
-
 // Wall collision check
 function wallCollisionCheck(newHead) {
   if (
@@ -154,32 +142,9 @@ function wallCollisionCheck(newHead) {
   return false;
 }
 
-// Manage player movement TODO: Remove
-export function PlayerMovement(socket, snake) {
-  //console.log("PlayerMovement:", socket, snake);
-  // In beginning of game start moving right away
-  if (!arrow) {
-    // return
-    snake.setDirection(snake.direction);
-    // Afterwards use arrowkey input
-  } else {
-    snake.setDirection(arrow);
-  }
-
-  // Calculate new head position using Snake class move method
-  snake.move();
-
-  // If food was found, snake.move() handled growth and checkForFood() within it replaced eaten food
-
-  // Emit updated position to server
-  socket.emit("player-movement", snake);
-
-  // Draw snake
-  drawSnake(snake);
-}
-
+// Render snake
 export function drawSnake(snake) {
-  const gameWrapper = document.querySelector(".game-wrapper");
+  const gameWrapper = document.getElementById("game-wrapper");
 
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {

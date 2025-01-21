@@ -1,5 +1,4 @@
 import { globalSettings } from "../misc/gameSetting.js";
-import RJNA from "../rjna/engine.js";
 
 // @ = hard wall, 1;2;3;4 = spawn locations, h/b = head/body, empty = grass
 // Keep in mind globalSettings.numOfRows & globalSettings.numOfColumns
@@ -29,29 +28,33 @@ export const mapTemplate = [
 
 // Create map based on template
 export function createMap() {
-  // Create game wrapper
-  const gameWrapper = RJNA.tag.div(
-    { class: "game-wrapper" },
-    {},
-    {}
-  )
-  // Add each cell as child to game wrapper
+  // Create the game wrapper
+  const gameWrapper = document.createElement("div");
+  gameWrapper.id = "game-wrapper";
+  gameWrapper.className = "game-wrapper";
+
+  // Add each cell as a child to the game wrapper
   for (let row = 0; row < globalSettings.numOfRows; row++) {
     for (let col = 0; col < globalSettings.numOfColumns; col++) {
-      switch (mapTemplate[row][col]) {
-          case'@':
-          gameWrapper.setChild(RJNA.tag.img({
-            class: "hard-wall", 
-          }, {}, { src: globalSettings.gameSquareSrc.rock }));
-          break
-         
-        default:
-          gameWrapper.setChild(RJNA.tag.img({
-            class: "grass-patch", 
-          }, {}, { src: globalSettings.gameSquareSrc.grass }));
-          break
+      let cellElement;
+
+      // Check the template for the type of cell to create
+      if (mapTemplate[row][col] === "@") {
+        // Hard wall
+        cellElement = document.createElement("img");
+        cellElement.className = "hard-wall";
+        cellElement.src = globalSettings.gameSquareSrc.rock;
+      } else {
+        // Grass patch (default case)
+        cellElement = document.createElement("img");
+        cellElement.className = "grass-patch";
+        cellElement.src = globalSettings.gameSquareSrc.grass;
       }
+
+      // Append the cell to the game wrapper
+      gameWrapper.appendChild(cellElement);
     }
   }
-  return gameWrapper
+
+  return gameWrapper;
 }

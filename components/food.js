@@ -1,4 +1,3 @@
-import RJNA from "../rjna/engine.js";
 import { globalSettings } from "../misc/gameSetting.js";
 
 export let foodArray = [];
@@ -34,13 +33,14 @@ export function placeFood(count) {
   return foodArray;
 }
 
+// Render the food items
 export function drawFood(foodArray) {
   const gameWrapper = document.querySelector(".game-wrapper");
 
   // Get all existing food elements in the DOM
-  const existingFoodIds = Array.from(
-    gameWrapper.querySelectorAll(".food")
-  ).map((foodElement) => foodElement.getAttribute("data-id"));
+  const existingFoodIds = Array.from(gameWrapper.querySelectorAll(".food")).map(
+    (foodElement) => foodElement.getAttribute("data-id")
+  );
 
   // Loop through each food item in the food array
   foodArray.forEach((foodItem) => {
@@ -67,9 +67,7 @@ export function drawFood(foodArray) {
       // Add an image inside the food element
       const foodImage = document.createElement("img");
       foodImage.src = globalSettings.food.src;
-      foodImage.style.width = "100%";
-      foodImage.style.height = "100%";
-      foodImage.style.zIndex = "999";
+      foodImage.className = "food-image";
 
       // Append the image to the food element
       foodElement.appendChild(foodImage);
@@ -98,14 +96,8 @@ export function drawFood(foodArray) {
   });
 }
 
-
-
-
-// Check if the snake eats food
+// Check if snake found food
 export function checkForFood(snakeHead) {
-  // Get the current head position of the snake
-  //console.log("Snake head coords:", snakeHead);
-  //console.log(foodArray)
   // Check if the head matches any food position
   const foundFood = foodArray.some(
     (foodItem) => foodItem.x === snakeHead.x && foodItem.y === snakeHead.y

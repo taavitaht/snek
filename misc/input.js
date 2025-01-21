@@ -1,6 +1,6 @@
 // Handle keyboard input
 
-import { socket } from "../public/code.js";
+import { socket, mySnake } from "../public/code.js";
 
 export let arrow;
 export let escapePressed = false;
@@ -9,25 +9,29 @@ document.addEventListener("keydown", arrowKeyHandler, false);
 document.addEventListener("keydown", escapeKeyHandler);
 
 function arrowKeyHandler(e) {
+  // Wait until game has begun
+  if (!mySnake) {
+    return;
+  }
   if (e.key == "Right" || e.key == "ArrowRight") {
     // Ignore direction changes in opposite direction (snake can't start moving into itself)
-    if (arrow == "Left") {
+    if (mySnake.direction == "Left") {
       return;
     }
     // Record new direction
     arrow = "Right";
   } else if (e.key == "Left" || e.key == "ArrowLeft") {
-    if (arrow == "Right") {
+    if (mySnake.direction == "Right") {
       return;
     }
     arrow = "Left";
   } else if (e.key == "Up" || e.key == "ArrowUp") {
-    if (arrow == "Down") {
+    if (mySnake.direction == "Down") {
       return;
     }
     arrow = "Up";
   } else if (e.key == "Down" || e.key == "ArrowDown") {
-    if (arrow == "Up") {
+    if (mySnake.direction == "Up") {
       return;
     }
     arrow = "Down";

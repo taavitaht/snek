@@ -2,7 +2,7 @@ import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
 
 // Game container
-export const gameContainer = RJNA.tag.div({ class: "game-container" }, {}, {});
+export const gameContainer = RJNA.tag.div({ id: "game-container", class: "game-container" }, {}, {});
 
 // Scoreboard container
 export const gameUpdatesContainer = RJNA.tag.div(

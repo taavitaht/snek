@@ -3,23 +3,19 @@
 
 import RJNA from "../rjna/engine.js";
 import { playerCard } from "../components/waitingRoom.js";
-import { startAnimating } from "../misc/script.js";
+import { startAnimating } from "../misc/animationLoop.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
 import {
-  Snake,
-  getInitialSnakePosition,
   drawSnake,
-  // PlayerMovement
 } from "../components/players.js";
-import { mapTemplate } from "../components/mapTemplate.js";
 
 export let socket;
 let uname;
 
-const snakes = {}; // Key: player ID, Value: Snake object
+let snakes = []
 export let mySnake;
 
 export function startSockets() {
@@ -57,7 +53,7 @@ export function startSockets() {
         orbital.obj,
         "players-waiting-container"
       ).setChild(playerCard(userObj));
-      updatePlayerOrbital(userObj);
+      //updatePlayerOrbital(userObj);
       document.querySelector(".players-waiting-counter").innerHTML =  // TODO: this line gives error when joining lobby
         Object.keys(orbital.players).length;
     });
@@ -81,7 +77,7 @@ export function startSockets() {
       ).setChild(playerCard(userObj));
       // Create map
       socket.emit("generate-map");
-      updatePlayerOrbital(userObj);
+      //updatePlayerOrbital(userObj);
     });
 
     socket.on("remove-waiting-player", function (count) {
@@ -119,15 +115,11 @@ export function startSockets() {
     });
 
     // Game start
-    //io.sockets.emit("start-game", { gameMap, allPlayers });
     socket.on("start-game", function (obj) {
       // Create the map
       let map = createMap();
-      let gameContainer = RJNA.getObjByAttrsAndPropsVal(
-        orbital.obj,
-        "game-container"
-      );
-      gameContainer.setChild(map);
+      const gameContainer = document.getElementById("game-container");
+      gameContainer.appendChild(map);
 
       // Hide waiting room
       const waitingRoomContainer = RJNA.getObjByAttrsAndPropsVal(
@@ -136,11 +128,6 @@ export function startSockets() {
       );
       waitingRoomContainer.removeAttr("style", "", { display: "none" });
 
-      // Place food on the gamefield
-      for (let i = 0; i < globalSettings.food.count; i++) {
-       // placeFood();
-      }
-
       // Begin
       startAnimating(globalSettings.fps);
     });
@@ -148,8 +135,12 @@ export function startSockets() {
     // Listen for updated snake positions on the client
     socket.on("tick", function (updatedSnakes, foodArray) {
       console.log("tick", updatedSnakes, foodArray);
+      snakes = updatedSnakes;
       updatedSnakes.forEach((snake) => {
         drawSnake(snake);
+        if (snake.playerNumber === socket.playerNumber) {
+          mySnake = snake;
+        }
       });
       drawFood(foodArray);
     });
@@ -382,67 +373,6 @@ export function startSockets() {
     });
 
     requestAnimationFrame(checkForEscape);
-  }
-}
-
-function updatePlayerOrbital(userObj) {
-  orbital["players"][`${userObj["count"]}`] = {
-    name: userObj.username,
-    _lives: 3, // Add the underlying property _lives to store the actual value
-    "power-ups": [],
-    numOfBombs: 1,
-    immune: false,
-  };
-  Object.defineProperty(orbital["players"][`${userObj["count"]}`], "lives", {
-    get: function () {
-      return this._lives; // Return the value from the underlying property _lives
-    },
-    set: function (v) {
-      let playerLives = document.querySelector(
-        `#player-${userObj["count"]}-lives`
-      );
-      this._lives = v; // Update the value of the underlying property _lives
-      if (playerLives !== undefined && playerLives !== null) {
-        const lifeElements = playerLives.children[0].children;
-        if (this._lives < lifeElements.length && lifeElements.length > 0) {
-          Array.from(lifeElements).shift().remove();
-        } else if (
-          this._lives > lifeElements.length &&
-          lifeElements.length > 0
-        ) {
-          // Code to add new life elements if needed.
-        } else {
-          // Code to handle other cases or errors.
-        }
-      } else {
-        let lives = Array.from(
-          document.querySelector(".lives-container").children[0].children
-        );
-        if (lives.length > this._lives) {
-          lives.shift().remove();
-        }
-      }
-    },
-  });
-
-  // coordinates are [row][col]
-  switch (userObj.count) {
-    case 1:
-      orbital["players"][`${userObj["count"]}`]["row"] = 1;
-      orbital["players"][`${userObj["count"]}`]["col"] = 1;
-      break;
-    case 2:
-      orbital["players"][`${userObj["count"]}`]["row"] = 1;
-      orbital["players"][`${userObj["count"]}`]["col"] = 13;
-      break;
-    case 3:
-      orbital["players"][`${userObj["count"]}`]["row"] = 11;
-      orbital["players"][`${userObj["count"]}`]["col"] = 13;
-      break;
-    case 4:
-      orbital["players"][`${userObj["count"]}`]["row"] = 11;
-      orbital["players"][`${userObj["count"]}`]["col"] = 1;
-      break;
   }
 }
 
