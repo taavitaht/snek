@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
       const username = socket.username;
       let remainingTime = 60;
 
-      handleGameStatus(event, username, status, remainingTime);
+      handleGameStatus(socket, event, username, status, remainingTime);
     });
   });
 });
@@ -213,14 +213,19 @@ function resetGameState() {
 }
 
 // Handle game status updates (pause, resume, quit, restart)
-function handleGameStatus(event, username, status, remainingTime) {
+function handleGameStatus(socket, event, username, status, remainingTime) {
   switch (status) {
     case "paused": {
+      const playerPauseInfo = activePauses.get(username);
+
+      if (playerPauseInfo.pauseUsed) {
+        socket.emit("pause-rejected", {
+          reason: "You've already used your pause in this game.",
+        });
+        return;
+      }
+
       stopGameTicker();
-      const playerPauseInfo = activePauses.get(username) || {
-        paused: false,
-        pauseUsed: false,
-      };
 
       if (playerPauseInfo.paused) {
         socket.emit("pause-rejected", {
@@ -229,23 +234,28 @@ function handleGameStatus(event, username, status, remainingTime) {
         return;
       }
 
-      activePauses.set(username, { paused: true });
+      activePauses.set(username, { paused: true, pauseUsed: true });
 
       io.emit("game-status-update", {
         status,
         username,
         remainingTime,
-        message: `${username} paused the game.`,
+        message: `${username} paused the game`,
       });
 
       const interval = setInterval(() => {
         remainingTime--;
         io.emit("countdown-update", { username, remainingTime });
 
+        if (remainingTime === 4) {
+          io.emit("play-sound", { sound: "countdown-sound" });
+        }
+
         if (remainingTime <= 0) {
           clearInterval(interval);
           pauseTimers.delete(username);
-          activePauses.set(username, { paused: false });
+
+          activePauses.set(username, { paused: false, pauseUsed: true });
 
           io.emit("game-status-update", {
             status: "resumed",
@@ -256,24 +266,58 @@ function handleGameStatus(event, username, status, remainingTime) {
       }, 1000);
 
       pauseTimers.set(username, interval);
+
       break;
     }
 
     case "resumed": {
-      startGameTicker();
+      const playerPauseInfo = activePauses.get(username);
+
+      if (!playerPauseInfo.paused) {
+        socket.emit("pause-rejected", {
+          reason: "You have used your pause already.",
+        });
+        return;
+      }
+
       const interval = pauseTimers.get(username);
       if (interval) {
         clearInterval(interval);
         pauseTimers.delete(username);
       }
 
-      activePauses.set(username, { paused: false });
-
-      io.emit("game-status-update", {
-        status,
-        username,
-        message: `${username} resumed the game.`,
+      activePauses.set(username, {
+        paused: false,
+        pauseUsed: playerPauseInfo.pauseUsed,
       });
+
+      let resumeCountdown = 10;
+      const countdownInterval = setInterval(() => {
+        io.emit("resume-countdown", {
+          username,
+          remainingTime: resumeCountdown,
+          message: `Game will resume in ${resumeCountdown} seconds`,
+        });
+
+        if (resumeCountdown === 4) {
+          io.emit("play-sound", { sound: "countdown-sound" });
+        }
+
+        resumeCountdown--;
+
+        if (resumeCountdown < 0) {
+          clearInterval(countdownInterval);
+
+          startGameTicker();
+
+          io.emit("game-status-update", {
+            status,
+            username,
+            message: `${username} resumed the game.`,
+          });
+        }
+      }, 1000);
+
       break;
     }
 
@@ -284,6 +328,7 @@ function handleGameStatus(event, username, status, remainingTime) {
         pauseTimers.delete(username);
       }
       activePauses.set(username, { paused: false });
+
       io.emit("game-status-update", {
         status,
         username,
@@ -302,10 +347,10 @@ function handleGameStatus(event, username, status, remainingTime) {
     }
 
     default:
+      // Do nothing
       break;
   }
 }
-
 // Returns number of connected players
 function findPlayerCount() {
   let smallestMissingValue = null;

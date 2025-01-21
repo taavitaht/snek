@@ -328,7 +328,7 @@ export function startSockets() {
       }
     });
 
-    // start countdown
+    // start countdown on main screen
     socket.on("countdown-update", function (data) {
       const { username, remainingTime } = data;
       console.log(`${username} pause countdown: ${remainingTime} seconds`);
@@ -340,6 +340,7 @@ export function startSockets() {
       }
     });
 
+    // TODO: popup message for pause-rejected w/o buttons?
     socket.on("pause-rejected", (data) => {
       const container = document.querySelector(".congratulations-container");
       const reasonElement = container.querySelector(".pause-reason");
