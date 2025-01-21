@@ -1,20 +1,24 @@
 import { globalSettings } from "../misc/gameSetting.js";
 import RJNA from "../rjna/engine.js";
-import { arrow } from "../misc/input.js";
+//import { arrow } from "../misc/input.js";
 import { checkForFood } from "../components/food.js";
 import { mapTemplate } from "./mapTemplate.js";
 
 
 // TODO: Edit?
-//const playerNumber = socket.playerCount;
-const playerNumber = 1
+//const playerNumber = socket.playerNumber;
+const playerNumber = 1;
 
 // Snake class
 export class Snake {
-  constructor(playerNumber, initialSnakePosition) {
+  constructor(playerNumber, username) {
     this.playerNumber = playerNumber;
-    this.segments = initialSnakePosition;
-    this.direction = determineDirection(initialSnakePosition);
+    this.username = username;
+    //this.segments = initialSnakePosition;
+    this.segments = getInitialSnakePosition(mapTemplate, playerNumber); // Read initial snake position from map
+    this.direction = determineDirection(this.segments); // Use segments to determine direction
+    this.score = 0;
+    this.crashed;
   }
   // Method to get coordinates of snake head
   get position() {
@@ -28,6 +32,7 @@ export class Snake {
   // Method to move the snake
   move() {
     const newHead = { ...this.position }; // Copy the current head position
+    let foundFood = false;
 
     // Calculate the new head position based on direction
     if (this.direction === "Left") newHead.x -= 1;
@@ -37,10 +42,14 @@ export class Snake {
 
     // Check for crash
     if (wallCollisionCheck(newHead)) {
+      this.crashed = "wall";
       return;
     }
     // Check for food
-    const foundFood = checkForFood(newHead);
+    if (checkForFood(newHead)){
+      foundFood = true;
+      this.score++;
+    }
 
     // Update the snake's position
     this.segments.unshift(newHead); // Add new head
@@ -51,7 +60,7 @@ export class Snake {
 }
 
 // Function to parse the map and sort segments
-function getInitialSnakePosition(mapTemplate, playerNumber) {
+export function getInitialSnakePosition(mapTemplate, playerNumber) {
   const segments = []; // Complete snake
   let headPosition = null; // Head position
   const bodyPositions = []; // Body positions
@@ -128,10 +137,7 @@ function determineDirection(initialSnakePosition) {
 }
 
 // Example snake for testing TODO: Edit?
-export const snake = new Snake(
-  playerNumber,
-  getInitialSnakePosition(mapTemplate, playerNumber)
-);
+//export const snake = new Snake(1, "Snake");
 //console.log("snake:", snake);
 
 // Wall collision check
@@ -142,14 +148,15 @@ function wallCollisionCheck(newHead) {
     newHead.y <= 0 || // Top wall
     newHead.y >= globalSettings.numOfRows - 1 // Bottom wall
   ) {
-    console.error("Snake hit the wall! Game over.");
+    //console.error("Snake hit the wall! Game over.");
     return true;
   }
   return false;
 }
 
-// Manage player movement
-export function PlayerMovement(socket) {
+// Manage player movement TODO: Remove
+export function PlayerMovement(socket, snake) {
+  //console.log("PlayerMovement:", socket, snake);
   // In beginning of game start moving right away
   if (!arrow) {
     // return
@@ -162,40 +169,35 @@ export function PlayerMovement(socket) {
   // Calculate new head position using Snake class move method
   snake.move();
 
-  // Check for food using the new head position
-  checkForFood(snake.position);
-
-  // If food was found, snake.move() handled growth and checkForFood() replaced eaten food
+  // If food was found, snake.move() handled growth and checkForFood() within it replaced eaten food
 
   // Emit updated position to server
-  const moving = {
-    myPlayerNum: socket.playerCount,
-    row: snake.position.y,
-    col: snake.position.x,
-  };
-  socket.emit("player-movement", moving);
+  socket.emit("player-movement", snake);
 
   // Draw snake
-  updateSnakeVisual();
+  drawSnake(snake);
 }
 
 // Draw snake
-export function updateSnakeVisual() {
-  // Add each segment of the snake to the DOM
+export function drawSnake(snake) {
+  console.log("drawSnake:", snake);
   const gameWrapper = document.querySelector(".game-wrapper");
-
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {
-    const segmentElement = document.querySelector(
-      `.snake[data-index="${index}"]`
-    );
+    // Create a unique ID or data attribute to associate the segment with the DOM element
+    const segmentId = `snake-${snake.playerNumber}-segment-${index}`;
 
-    // If the segment does not exist in the DOM, create it
+    // Check if the segment already exists in the DOM
+    let segmentElement = document.querySelector(`#${segmentId}`);
+
+    // If the segment doesn't exist, create it
     if (!segmentElement) {
-      const newSegmentElement = RJNA.tag.div(
+      segmentElement = RJNA.tag.div(
         {
-          class: `snake ${index === 0 ? "snake-head" : "snake-body"}`,
-          "data-index": index, // Store the index for later reference
+          id: segmentId, // Set a unique ID for the segment
+          class: `snake-${snake.playerNumber} ${
+            index === 0 ? "snake-head" : "snake-body"
+          }`,
           style: {
             transform: `translate(-50%, -50%) translate(${
               (segment.x + 0.5) * globalSettings.gameSquareSize
@@ -215,31 +217,13 @@ export function updateSnakeVisual() {
         {}
       );
 
-      const segmentNode = RJNA.createNode(newSegmentElement);
-      gameWrapper.appendChild(segmentNode);
+      const segmentNode = RJNA.createNode(segmentElement);
+      gameWrapper.appendChild(segmentNode); // This line gives error
     } else {
-      // Update the existing segment's position with the new transform
+      // If the segment exists, update its position
       segmentElement.style.transform = `translate(-50%, -50%) translate(${
         (segment.x + 0.5) * globalSettings.gameSquareSize
       }px, ${(segment.y + 0.5) * globalSettings.gameSquareSize}px)`;
     }
   });
-}
-
-// Update player position on the game field
-export function movePlayers() {
-  // Update the positions of all snakes
-  for (let [playerNum, playerObj] of Object.entries(orbital.players)) {
-    if (playerNum == snake.playerNum) {
-      updateSnakeVisual(); // Special handling for the snake player
-    } else {
-      const playerElement = document.querySelector(`.player-${playerNum}`);
-      if (playerElement) {
-        playerElement.style.top =
-          playerObj.row * globalSettings.gameSquareSize + "px";
-        playerElement.style.left =
-          playerObj.col * globalSettings.gameSquareSize + "px";
-      }
-    }
-  }
 }

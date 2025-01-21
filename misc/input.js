@@ -1,4 +1,6 @@
-import { placeFood } from "../components/food.js";
+// Handle keyboard input
+
+import { socket } from "../public/code.js";
 
 export let arrow;
 export let escapePressed = false;
@@ -8,23 +10,31 @@ document.addEventListener("keydown", escapeKeyHandler);
 
 function arrowKeyHandler(e) {
   if (e.key == "Right" || e.key == "ArrowRight") {
-    if (arrow != "Left") {
-      arrow = "Right";
+    // Ignore direction changes in opposite direction (snake can't start moving into itself)
+    if (arrow == "Left") {
+      return;
     }
+    // Record new direction
+    arrow = "Right";
   } else if (e.key == "Left" || e.key == "ArrowLeft") {
-    if (arrow != "Right") {
-      arrow = "Left";
+    if (arrow == "Right") {
+      return;
     }
+    arrow = "Left";
   } else if (e.key == "Up" || e.key == "ArrowUp") {
-    if (arrow != "Down") {
-      arrow = "Up";
+    if (arrow == "Down") {
+      return;
     }
+    arrow = "Up";
   } else if (e.key == "Down" || e.key == "ArrowDown") {
-    if (arrow != "Up") {
-      arrow = "Down";
+    if (arrow == "Up") {
+      return;
     }
-  } else if (e.key == "F" || e.key == "f") {
-    placeFood();
+    arrow = "Down";
+  }
+  // If socket is connected emit the keydown event
+  if (socket) {
+    socket.emit("keypress", arrow);
   }
 }
 

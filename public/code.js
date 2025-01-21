@@ -1,14 +1,26 @@
+// Game state management (updating positions, rendering visuals, etc)
+// Communication with server for game updates
+
 import RJNA from "../rjna/engine.js";
 import { playerCard } from "../components/waitingRoom.js";
-import { movePlayers, updateSnakeVisual } from "../components/players.js";
 import { startAnimating } from "../misc/script.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSetting.js";
-import { placeFood } from "../components/food.js";
+import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
+import {
+  Snake,
+  getInitialSnakePosition,
+  drawSnake,
+  // PlayerMovement
+} from "../components/players.js";
+import { mapTemplate } from "../components/mapTemplate.js";
 
 export let socket;
 let uname;
+
+const snakes = {}; // Key: player ID, Value: Snake object
+export let mySnake;
 
 export function startSockets() {
   const app = document.querySelector(".app");
@@ -55,7 +67,7 @@ export function startSockets() {
       if (Object.keys(userObj).length != 0)
         if (userObj.username == uname) {
           socket.username = uname;
-          socket.playerCount = userObj.count;
+          socket.playerNumber = userObj.count;
         }
       RJNA.getObjByAttrsAndPropsVal(orbital.obj, "join-screen").removeAttr(
         "class",
@@ -106,56 +118,39 @@ export function startSockets() {
       socket.close();
     });
 
-    // draw map with all connected players and start game
+    // Game start
+    //io.sockets.emit("start-game", { gameMap, allPlayers });
     socket.on("start-game", function (obj) {
-      orbital.cells = obj.cells;
-      let map = createMap(obj.cells);
+      // Create the map
+      let map = createMap();
       let gameContainer = RJNA.getObjByAttrsAndPropsVal(
         orbital.obj,
         "game-container"
       );
-      //console.log(orbital.cells);
       gameContainer.setChild(map);
-      const gameWrapper = gameContainer.children[0];
-      updateSnakeVisual();
-      /*for (const player of obj.allPlayers) {
-        switch (player.count) {
-          case 1:
-            gameWrapper.setChild(placePlayer(1, "one", player.username));
-            break;
-          case 2:
-            gameWrapper.setChild(placePlayer(2, "ghost", player.username));
-            break;
-          case 3:
-            gameWrapper.setChild(placePlayer(3, "lad", player.username));
-            break;
-          case 4:
-            gameWrapper.setChild(placePlayer(4, "wario", player.username));
-            break;
-        }
-      }*/
 
+      // Hide waiting room
       const waitingRoomContainer = RJNA.getObjByAttrsAndPropsVal(
         orbital.obj,
         "waiting-room-container"
       );
       waitingRoomContainer.removeAttr("style", "", { display: "none" });
-      startAnimating(globalSettings.fps);
 
       // Place food on the gamefield
       for (let i = 0; i < globalSettings.food.count; i++) {
-        placeFood();
+       // placeFood();
       }
+
+      // Begin
+      startAnimating(globalSettings.fps);
     });
 
-    socket.on("player-moving", function (obj) {
-      for (let [key, value] of Object.entries(obj)) {
-        if (key != "myPlayerNum") {
-          orbital.players[obj.myPlayerNum][key] = value;
-        }
-      }
-      // movePlayers();
-      //checkFood();
+    // Listen for updated snake positions on the client
+    socket.on("tick", function (updatedSnakes, foodArray) {
+      updatedSnakes.forEach((snake) => {
+        drawSnake(snake);
+      });
+      drawFood(foodArray);
     });
 
     socket.on("remove-player", function (userObj) {
@@ -167,6 +162,7 @@ export function startSockets() {
       socket.emit("update-cells", orbital.cells);
     });
 
+    // Messages on game update display on left of game area
     socket.on("game-update", function (message) {
       let updateMessage;
       switch (message.event) {
@@ -218,16 +214,6 @@ export function startSockets() {
             );
           }
           break;
-        case "cannot-drop-bomb":
-          if (socket.playerCount == message.playerCount)
-            updateMessage = RJNA.createNode(
-              RJNA.tag.p(
-                { class: "live-updates-message" },
-                {},
-                {},
-                "Soz!! you cannot drop a bomb rn!!!!"
-              )
-            );
       }
       appendLiveUpdateMessage(updateMessage);
     });

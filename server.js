@@ -1,20 +1,25 @@
-const express = require("express");
-const path = require("path");
-const http = require("http");
-const { clearInterval } = require("timers");
+import express from "express";
+import path from "path";
+import http from "http";
+import { Server } from "socket.io";
+import {
+  Snake,
+  getInitialSnakePosition,
+  drawSnake,
+} from "./components/players.js";
+import { Food, placeFood } from "./components/food.js";
 
+// Create an express app and HTTP server
 const app = express();
 const server = http.createServer(app);
-const io = require("socket.io")(server);
+const io = new Server(server);
 const port = 5000;
 
-// Serve static files
-app.use(express.static(__dirname));
-
-// Serve index.html for all routes
-app.get("/", (req, res) => {
-  res.sendFile(__dirname, "index.html");
-});
+// Game state variables
+let serverSnakes = []; // Array holding all snakes
+let playerKeypresses = {};
+let gameInterval;
+let foodArray = [];
 
 let waitingTimer, startGameTimer, cells;
 let gameStarted = false;
@@ -23,33 +28,37 @@ const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
 
-io.on("connection", function (socket) {
-  socket.on("newuser", function (username) {
-    if (io.sockets.sockets.size <= 4) {
+// Serve static files
+app.use(express.static(path.resolve()));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve("index.html")); // Path to your index.html file
+});
+
+io.on("connection", (socket) => {
+  socket.on("newuser", (username) => {
+    if (io.of("/").sockets.size <= 4) {
       if (startGameTimer || gameStarted) {
         socket.emit("connection-limit-reached", "Game Currently In Session");
         socket.disconnect(true);
       } else {
         const connectedSockets = io.sockets.sockets;
         socket.username = username;
-        socket.playerCount = findPlayerCount();
-        userObj = { username: socket.username, count: socket.playerCount };
+        socket.playerNumber = findPlayerCount();
+        const userObj = {
+          username: socket.username,
+          count: socket.playerNumber,
+        };
         socket.broadcast.emit("waiting", userObj);
-
-        // Start with 2 or more players
-        if (io.sockets.sockets.size >= 2 && !startGameTimer) {
-          // Autostart disabled
-          //startGameCountdown();
-        }
 
         connectedSockets.forEach((connected) => {
           const previouslyJoinedSocket = {
             username: connected.username,
-            count: connected.playerCount,
+            count: connected.playerNumber,
           };
           socket.emit("join-lobby", previouslyJoinedSocket);
         });
-        socket.broadcast.emit("update", username + " joined the lobby");
+        socket.broadcast.emit("update", `${username} joined the lobby`);
       }
     } else {
       socket.emit(
@@ -60,201 +69,129 @@ io.on("connection", function (socket) {
     }
   });
 
-  socket.on("generate-map", function (mapCells) {
-    gameMap.push(mapCells);
+  socket.on("player-movement", (newSnake) => {
+    updateSnakeArray(newSnake);
   });
 
-  socket.on("player-movement", function (movingObj) {
-    io.sockets.emit("player-moving", movingObj);
+  socket.on("keypress", (arrow) => {
+    if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
+      playerKeypresses[socket.playerNumber] = arrow;
+      console.log(socket.playerNumber);
+      console.log(socket.username);
+      console.log(playerKeypresses);
+    }
   });
 
-  socket.on("drop-bomb", async function (movingObj) {
-    io.sockets.emit("bomb-dropped", movingObj);
-  });
-
-  socket.on("update-cells", function (updatedCells) {
-    cells = updatedCells;
-  });
-
-  socket.on("player-killed", function (playerKilledObj) {
-    io.sockets.emit("game-update", {
-      event: "player-killed",
-      playerKilled: playerKilledObj.playerKilled,
-      bomber: playerKilledObj.bomber,
-    });
-    io.sockets.emit("player-death", playerKilledObj);
-  });
-
-  socket.on("cannot-drop-bomb", function (count) {
-    socket.emit("game-update", {
-      event: "cannot-drop-bomb",
-      playerCount: count,
-    });
-  });
-
-  socket.on("game-over", function (aliveCount) {
-    if (aliveCount.length == 1 && gameStarted) {
-      // one player remaining
-      io.sockets.emit("end-game", {
+  socket.on("game-over", (aliveCount) => {
+    if (aliveCount.length === 1 && gameStarted) {
+      io.emit("end-game", {
         event: "winner",
         playerNum: aliveCount[0].playerNum,
         name: aliveCount[0].name,
       });
     }
-    if (aliveCount.length == 0 && gameStarted) {
-      // draw no winner
-      io.sockets.emit("end-game", { event: "draw" });
+    if (aliveCount.length === 0 && gameStarted) {
+      io.emit("end-game", { event: "draw" });
     }
   });
 
-  socket.on("disconnect", function (reason) {
-    if (socket.username != undefined) {
+  socket.on("disconnect", (reason) => {
+    if (socket.username) {
       socket.broadcast.emit(
         "update",
-        socket.username + " has left the conversation"
+        `${socket.username} has left the conversation`
       );
     }
-    // if the length of connections=1, that player wins, send out game over with winner
-    if (io.sockets.sockets.size < 2 && waitingTimer) {
+
+    if (io.of("/").sockets.size < 2 && waitingTimer) {
       stopCountdown();
-    } else if (io.sockets.sockets.size < 2 && startGameTimer) {
+    } else if (io.of("/").sockets.size < 2 && startGameTimer) {
       stopGameCountdown();
     }
-    socket.broadcast.emit("remove-waiting-player", socket.playerCount);
-    if (gameStarted && socket.playerCount != undefined) {
-      socket.broadcast.emit("remove-player", socket.playerCount);
+
+    socket.broadcast.emit("remove-waiting-player", socket.playerNumber);
+    if (gameStarted && socket.playerNumber) {
+      socket.broadcast.emit("remove-player", socket.playerNumber);
     }
 
-    if (io.sockets.sockets.size == 0 && gameStarted) {
+    if (io.of("/").sockets.size === 0 && gameStarted) {
       gameStarted = false;
     }
   });
 
-  socket.on("start-game-button", function () {
+  socket.on("start-game-button", () => {
     startGameCountdown();
+    resetGameState();
+    gameStarted = true;
   });
 
   gameStatusUpdates.forEach((event) => {
-    socket.on(event, function () {
+    socket.on(event, () => {
       const status = event.split("-")[1];
       const username = socket.username;
       let remainingTime = 60;
 
-      switch (status) {
-        case "paused": {
-          const playerPauseInfo = activePauses.get(username) || {
-            paused: false,
-            pauseUsed: false,
-          };
-
-          if (playerPauseInfo.paused) {
-            socket.emit("pause-rejected", {
-              reason: "You can only pause once per game.",
-            });
-            return;
-          }
-
-          activePauses.set(username, { paused: true });
-
-          io.sockets.emit("game-status-update", {
-            status,
-            username,
-            remainingTime,
-            message: `${username} paused the game.`,
-          });
-
-          const interval = setInterval(() => {
-            remainingTime--;
-            io.sockets.emit("countdown-update", { username, remainingTime });
-
-            if (remainingTime <= 0) {
-              clearInterval(interval);
-              pauseTimers.delete(username);
-              activePauses.set(username, { paused: false });
-
-              io.sockets.emit("game-status-update", {
-                status: "resumed",
-                username,
-                message: `${username}'s pause has ended.`,
-              });
-            }
-          }, 1000);
-
-          pauseTimers.set(username, interval);
-          break;
-        }
-
-        case "resumed": {
-          const interval = pauseTimers.get(username);
-          if (interval) {
-            clearInterval(interval);
-            pauseTimers.delete(username);
-          }
-
-          activePauses.set(username, { paused: false });
-
-          io.sockets.emit("game-status-update", {
-            status,
-            username,
-            message: `${username} resumed the game.`,
-          });
-          break;
-        }
-
-        case "quit": {
-          const interval = pauseTimers.get(username);
-          if (interval) {
-            clearInterval(interval);
-            pauseTimers.delete(username);
-          }
-          activePauses.set(username, { paused: false });
-          io.sockets.emit("game-status-update", {
-            status,
-            username,
-            message: `${username} has quit the game.`,
-          });
-          break;
-        }
-
-        case "restart": {
-          //  restart logic here.
-          //  reset game state, clear timers, etc.
-
-          io.sockets.emit("game-status-update", {
-            status,
-            username,
-            message: `${username} restarted the game.`,
-          });
-          break;
-        }
-
-        default:
-          // dno
-          break;
-      }
+      handleGameStatus(event, username, status, remainingTime);
     });
   });
 });
 
-server.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
-});
+// Update snake array with the latest snake positions
+function updateSnakeArray(newSnake) {
+  const index = serverSnakes.findIndex(
+    (snake) => snake.playerNumber === newSnake.playerNumber
+  );
 
-// Game start timer
+  if (index === -1) {
+    serverSnakes.push(newSnake);
+  } else {
+    serverSnakes[index] = newSnake;
+  }
+}
+
+// Start the game ticker
+function startGameTicker() {
+  console.log("Starting game");
+  gameInterval = setInterval(() => {
+    // Update the position of each snake
+    serverSnakes.forEach((snake) => {
+      const direction = playerKeypresses[snake.playerNumber];
+
+      // Update moving direction of snake if there is a keypress
+      if (direction) {
+        snake.setDirection(direction);
+      }
+      // Move the snake
+      snake.move();
+    });
+console.log("foodArray:", foodArray)
+    // Emit the updated state of all snakes to all connected clients
+    io.emit("tick", serverSnakes, foodArray); // Send the state of all snakes and food items to all clients
+  }, 500);
+}
+
+// Stop the game ticker
+function stopGameTicker() {
+  clearInterval(gameInterval);
+}
+
+// Start the countdown before the game begins
 function startGameCountdown() {
-  let countdown = 0;
+  let countdown = 3;
   let allPlayers = [];
+
   io.sockets.sockets.forEach((connected) => {
     allPlayers.push({
       username: connected.username,
-      count: connected.playerCount,
+      count: connected.playerNumber,
     });
   });
+
   function emitGameCountdown() {
-    io.sockets.emit("start-game-countdown", countdown);
+    io.emit("start-game-countdown", countdown);
 
     if (countdown === 3) {
-      io.sockets.emit("play-sound", { sound: "start-game-sound" });
+      io.emit("play-sound", { sound: "start-game-sound" });
     }
 
     if (countdown > 0) {
@@ -262,20 +199,130 @@ function startGameCountdown() {
       startGameTimer = setTimeout(emitGameCountdown, 1000);
     } else {
       startGameTimer = null;
-      io.sockets.emit("start-game", { gameMap, allPlayers });
+      startGameTicker();
+      io.emit("start-game", { allPlayers });
       gameStarted = true;
     }
   }
   emitGameCountdown();
 }
 
+// Reset game state
+function resetGameState() {
+  playerKeypresses = {};
+  serverSnakes.length = 0;
+  foodArray.length = 0;
+
+  // Create new snakes
+  io.sockets.sockets.forEach((connected) => {
+    const snake = new Snake(connected.playerNumber, connected.username);
+    serverSnakes.push(snake);
+  });
+  // Place food items
+  foodArray = placeFood(5);
+  console.log("Foods: ", foodArray);
+}
+
+// Handle game status updates (pause, resume, quit, restart)
+function handleGameStatus(event, username, status, remainingTime) {
+  switch (status) {
+    case "paused": {
+      const playerPauseInfo = activePauses.get(username) || {
+        paused: false,
+        pauseUsed: false,
+      };
+
+      if (playerPauseInfo.paused) {
+        socket.emit("pause-rejected", {
+          reason: "You can only pause once per game.",
+        });
+        return;
+      }
+
+      activePauses.set(username, { paused: true });
+
+      io.emit("game-status-update", {
+        status,
+        username,
+        remainingTime,
+        message: `${username} paused the game.`,
+      });
+
+      const interval = setInterval(() => {
+        remainingTime--;
+        io.emit("countdown-update", { username, remainingTime });
+
+        if (remainingTime <= 0) {
+          clearInterval(interval);
+          pauseTimers.delete(username);
+          activePauses.set(username, { paused: false });
+
+          io.emit("game-status-update", {
+            status: "resumed",
+            username,
+            message: `${username}'s pause has ended.`,
+          });
+        }
+      }, 1000);
+
+      pauseTimers.set(username, interval);
+      break;
+    }
+
+    case "resumed": {
+      const interval = pauseTimers.get(username);
+      if (interval) {
+        clearInterval(interval);
+        pauseTimers.delete(username);
+      }
+
+      activePauses.set(username, { paused: false });
+
+      io.emit("game-status-update", {
+        status,
+        username,
+        message: `${username} resumed the game.`,
+      });
+      break;
+    }
+
+    case "quit": {
+      const interval = pauseTimers.get(username);
+      if (interval) {
+        clearInterval(interval);
+        pauseTimers.delete(username);
+      }
+      activePauses.set(username, { paused: false });
+      io.emit("game-status-update", {
+        status,
+        username,
+        message: `${username} has quit the game.`,
+      });
+      break;
+    }
+
+    case "restart": {
+      io.emit("game-status-update", {
+        status,
+        username,
+        message: `${username} restarted the game.`,
+      });
+      break;
+    }
+
+    default:
+      break;
+  }
+}
+
+// Returns number of connected players
 function findPlayerCount() {
   let smallestMissingValue = null;
   for (let n = 1; n <= 4; n++) {
     let found = false;
 
     for (let [id, socket] of io.sockets.sockets) {
-      if (socket.playerCount === n) {
+      if (socket.playerNumber === n) {
         found = true;
         break;
       }
@@ -289,3 +336,8 @@ function findPlayerCount() {
 
   return smallestMissingValue;
 }
+
+// Start server
+server.listen(port, () => {
+  console.log(`App listening at http://localhost:${port}`);
+});
