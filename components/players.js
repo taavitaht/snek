@@ -37,6 +37,12 @@ export class Snake {
       this.crashed = "wall";
       return;
     }
+    /*
+    if (snakeCollisionCheck(newHead)) {
+      this.crashed = "snake";
+      return;
+    }
+      */
     // Check for food
     if (checkForFood(newHead)) {
       foundFood = true;
@@ -128,7 +134,7 @@ function determineDirection(initialSnakePosition) {
   }
 }
 
-// Wall collision check
+// Collision checks
 function wallCollisionCheck(newHead) {
   if (
     newHead.x <= 0 || // Left wall
@@ -136,11 +142,27 @@ function wallCollisionCheck(newHead) {
     newHead.y <= 0 || // Top wall
     newHead.y >= globalSettings.numOfRows - 1 // Bottom wall
   ) {
-    //console.error("Snake hit the wall! Game over.");
+    console.error("Snake hit the wall! Game over.");
     return true;
   }
   return false;
 }
+/*
+function snakeCollisionCheck(newHead) {
+  // Loop through all snakes in the game
+  for (let snake of snakes) {
+    // Check collision with each segment of the snake
+    for (let segment of snake.segments) {
+      if (newHead.x === segment.x && newHead.y === segment.y) {
+        // Collision detected
+        console.error("Snake collided with a snake! Game over.");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+*/
 
 // Render snake
 export function drawSnake(snake) {

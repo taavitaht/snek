@@ -13,7 +13,7 @@ import { drawSnake } from "../components/players.js";
 export let socket;
 let uname;
 let map;
-let snakes = [];
+export let snakes = [];
 export let mySnake;
 
 export function startSockets() {
