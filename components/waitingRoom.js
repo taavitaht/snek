@@ -1,5 +1,3 @@
-
-
 // Generate player card
 export const playerCard = (incomingPlayer) => {
   console.log(incomingPlayer);
@@ -18,7 +16,6 @@ export const playerCard = (incomingPlayer) => {
   // Return the constructed player card div
   return playerCardDiv;
 };
-
 
 // Container for waiting room
 export const waitingRoomContainer = document.createElement("div");
@@ -65,7 +62,12 @@ usernameMessage.textContent = "Enter up to 6 Characters";
 const usernameTakenMessage = document.createElement("p");
 usernameTakenMessage.id = "username-taken";
 
-formInputUsername.append(usernameLabel, usernameInput, usernameMessage, usernameTakenMessage);
+formInputUsername.append(
+  usernameLabel,
+  usernameInput,
+  usernameMessage,
+  usernameTakenMessage
+);
 
 // Create the submit button
 const formInputButton = document.createElement("div");
@@ -98,6 +100,7 @@ startGameButton.textContent = "Start Game!";
 
 // Add the start game button to the players waiting container
 joinContainer.appendChild(startGameButton);
+joinContainer.appendChild(playersWaitingContainer);
 
 // Create the game info container
 const gameInfoContainer = document.createElement("div");
@@ -125,8 +128,7 @@ gameInfoContainer.appendChild(synopsisInfo);
 
 // Add all elements to the waiting room container
 waitingRoomContainer.append(
-    countdownContainer,
-    joinContainer,
-    playersWaitingContainer,
-    gameInfoContainer
+  countdownContainer,
+  joinContainer,
+  gameInfoContainer
 );

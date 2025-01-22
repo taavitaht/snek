@@ -10,7 +10,7 @@ import { globalSettings } from "./misc/gameSettings.js";
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const port = 5000;
+const port = 5001;
 
 // Game state variables
 let serverSnakes = {}; // Object holding all snakes
