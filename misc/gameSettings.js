@@ -3,7 +3,7 @@
 export const globalSettings = {
 
     // Animation settings
-    fps: 75,
+    fps: 60,
 
     // Game board settings
     numOfRows: 20,

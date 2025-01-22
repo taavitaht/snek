@@ -5,10 +5,11 @@ import RJNA from "../rjna/engine.js";
 import { playerCard } from "../components/waitingRoom.js";
 import { startAnimating } from "../misc/animationLoop.js";
 import { createMap } from "../components/mapTemplate.js";
-import { globalSettings } from "../misc/gameSetting.js";
+import { globalSettings } from "../misc/gameSettings.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
-import { drawSnake } from "../components/players.js";
+//import { drawSnake } from "../components/players.js";
+import { storeSnakes } from "../misc/animationLoop.js";
 
 export let socket;
 let uname;
@@ -128,9 +129,10 @@ export function startSockets() {
     // Listen for updated snake positions on the client
     socket.on("tick", function (updatedSnakes, foodArray) {
       console.log("tick", updatedSnakes, foodArray);
-      //snakes = updatedSnakes;
+      // Send updated snakes to animation engine
+      storeSnakes(updatedSnakes);
       Object.values(updatedSnakes).forEach((snake) => {
-        drawSnake(snake);
+        //drawSnake(snake);
         if (snake.playerNumber === socket.playerNumber) {
           mySnake = snake;
         }

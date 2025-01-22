@@ -1,4 +1,4 @@
-import { globalSettings } from "../misc/gameSetting.js";
+import { globalSettings } from "../misc/gameSettings.js";
 
 export let foodArray = [];
 

@@ -4,7 +4,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { Snake } from "./components/players.js";
 import { placeFood, foodArray } from "./components/food.js";
-import { globalSettings } from "./misc/gameSetting.js";
+import { globalSettings } from "./misc/gameSettings.js";
 
 // Create an express app and HTTP server
 const app = express();

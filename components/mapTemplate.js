@@ -1,4 +1,4 @@
-import { globalSettings } from "../misc/gameSetting.js";
+import { globalSettings } from "../misc/gameSettings.js";
 
 // @ = hard wall, 1;2;3;4 = spawn locations, h/b = head/body, empty = grass
 // Keep in mind globalSettings.numOfRows & globalSettings.numOfColumns
