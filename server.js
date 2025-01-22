@@ -269,6 +269,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       }
 
       stopGameTicker();
+      pauseGameTimer();
 
       if (playerPauseInfo.paused) {
         socket.emit("pause-rejected", {
@@ -352,6 +353,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           clearInterval(countdownInterval);
 
           startGameTicker();
+          startGameCountdown();
 
           io.emit("game-status-update", {
             status,
