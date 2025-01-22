@@ -2,11 +2,19 @@
 
 export const globalSettings = {
 
-    fps: 60,
+    // Animation settings
+    fps: 75,
 
+    // Game board settings
     numOfRows: 20,
     numOfColumns: 20,
+
+    // Game ticker settings
+    initialGameInterval: 500,
+    minGameInterval: 150,
+    gameIntervalStep: 50,
     
+    // Visual settings
     gameSquareSize: 50,
     gameSquareSrc: {
         rock: "./img/rock.png",

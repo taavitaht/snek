@@ -47,6 +47,12 @@ export class Snake {
     if (!foundFood) {
       this.segments.pop(); // Remove the tail if no food was found
     }
+
+    // Return true if snake found food
+    if (foundFood) {
+      return true;
+    }
+    return false;
   }
 
   // Check for collisions with wall or snake
@@ -196,11 +202,13 @@ export function drawSnake(snake) {
   if (!gameWrapper) {
     return;
   }
-   // If snake has no segments, erase all its segments from DOM
-   if (snake.segments.length === 0) {
+  // If snake has no segments, erase all its segments from DOM
+  if (snake.segments.length === 0) {
     // Find all elements of snake by class
-    const snakeElements = gameWrapper.querySelectorAll(`.snake-${snake.playerNumber}`);
-    snakeElements.forEach(element => {
+    const snakeElements = gameWrapper.querySelectorAll(
+      `.snake-${snake.playerNumber}`
+    );
+    snakeElements.forEach((element) => {
       element.remove();
     });
     return;

@@ -4,6 +4,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { Snake } from "./components/players.js";
 import { placeFood, foodArray } from "./components/food.js";
+import { globalSettings } from "./misc/gameSetting.js";
 
 // Create an express app and HTTP server
 const app = express();
@@ -15,6 +16,8 @@ const port = 5000;
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
+//let tickInterval = 500; // Time between game ticks in milliseconds
+let tickInterval = globalSettings.initialGameInterval
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
@@ -159,22 +162,25 @@ function resumeGameTimer() {
 function startGameTicker() {
   console.log("Starting game");
   gameInterval = setInterval(() => {
+
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
       // Stop rendering snakes that crashed during previous tick
       if (snake.crashed) {
         snake.kill();
       }
-
-      // Check if snake collided with itself or with other snakes
-
       // Update moving direction of snake if there is a keypress
       const direction = playerKeypresses[snake.playerNumber];
       if (direction) {
         snake.setDirection(direction);
       }
       // Update the position of each snake and check for food
-      snake.move();
+      let foundFood = snake.move();
+      // Speed up game if a snake found food
+      if (foundFood && tickInterval > globalSettings.minGameInterval) {
+        changeTickInterval(tickInterval - globalSettings.gameIntervalStep);
+        console.log("tickInterval:", tickInterval)
+      }
     });
 
     // Loop again to check for collision in new positions
@@ -185,7 +191,14 @@ function startGameTicker() {
 
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray);
-  }, 500);
+  }, tickInterval);
+}
+
+// Later in the game, you can change the tick interval
+function changeTickInterval(newInterval) {
+  tickInterval = newInterval;
+  clearInterval(gameInterval); // Stop the current ticker
+  startGameTicker(); // Restart the ticker with the new interval
 }
 
 // Stop the game ticker
