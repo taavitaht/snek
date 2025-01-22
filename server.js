@@ -256,7 +256,10 @@ function resetGameState() {
 function handleGameStatus(socket, event, username, status, remainingTime) {
   switch (status) {
     case "paused": {
-      const playerPauseInfo = activePauses.get(username);
+      let playerPauseInfo = activePauses.get(username) || {
+        paused: false,
+        pauseUsed: false,
+      };
 
       if (playerPauseInfo.pauseUsed) {
         socket.emit("pause-rejected", {
