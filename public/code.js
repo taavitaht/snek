@@ -13,7 +13,7 @@ import { drawSnake } from "../components/players.js";
 export let socket;
 let uname;
 let map;
-export let snakes = [];
+export let snakes = {};
 export let mySnake;
 
 export function startSockets() {
@@ -128,8 +128,8 @@ export function startSockets() {
     // Listen for updated snake positions on the client
     socket.on("tick", function (updatedSnakes, foodArray) {
       console.log("tick", updatedSnakes, foodArray);
-      snakes = updatedSnakes;
-      updatedSnakes.forEach((snake) => {
+      //snakes = updatedSnakes;
+      Object.values(updatedSnakes).forEach((snake) => {
         drawSnake(snake);
         if (snake.playerNumber === socket.playerNumber) {
           mySnake = snake;

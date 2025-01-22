@@ -21,8 +21,12 @@ export class Snake {
     this.direction = newDirection;
   }
 
-  // Method to move the snake
+  // Method to move the snake, also checks for food
   move() {
+    // Skip if snake has already crashed
+    if (this.crashed) {
+      return;
+    }
     const newHead = { ...this.position }; // Copy the current head position
     let foundFood = false;
 
@@ -32,18 +36,7 @@ export class Snake {
     else if (this.direction === "Up") newHead.y -= 1;
     else if (this.direction === "Down") newHead.y += 1;
 
-    // Check for crash
-    if (wallCollisionCheck(newHead)) {
-      this.crashed = "wall";
-      return;
-    }
-    /*
-    if (snakeCollisionCheck(newHead)) {
-      this.crashed = "snake";
-      return;
-    }
-      */
-    // Check for food
+    // Check if snake found food
     if (checkForFood(newHead)) {
       foundFood = true;
       this.score++;
@@ -54,6 +47,55 @@ export class Snake {
     if (!foundFood) {
       this.segments.pop(); // Remove the tail if no food was found
     }
+  }
+
+  // Check for collisions with wall or snake
+  collisionCheck(allSnakes) {
+    // Skip if snake has already crashed
+    if (this.crashed) {
+      return;
+    }
+
+    let snakeHead = this.segments[0];
+
+    // Check collision with walls
+    if (wallCollisionCheck(snakeHead)) {
+      this.crashed = "wall";
+      console.error("Snake collided with a wall!");
+      return "wall";
+    }
+
+    // Check collision with all snake segments
+    for (let snake of Object.values(allSnakes)) {
+      for (let i = 0; i < snake.segments.length; i++) {
+        const segment = snake.segments[i];
+
+        // Do not check for collision with own head
+        if (snake === this && i === 0) {
+          continue;
+        }
+
+        if (snakeHead.x === segment.x && snakeHead.y === segment.y) {
+          if (snake === this) {
+            // Collision with own tail
+            console.error("Snake collided with itself!");
+            this.crashed = "itself";
+            return "itself";
+          } else {
+            // Collision with another snake
+            console.error("Snake collided with another snake!");
+            this.crashed = "snake";
+            return "snake";
+          }
+        }
+      }
+    }
+
+    return false; // No collisions detected
+  }
+  // Method to kill the snake
+  kill() {
+    this.segments = [];
   }
 }
 
@@ -135,41 +177,35 @@ function determineDirection(initialSnakePosition) {
 }
 
 // Collision checks
-function wallCollisionCheck(newHead) {
+function wallCollisionCheck(position) {
   if (
-    newHead.x <= 0 || // Left wall
-    newHead.x >= globalSettings.numOfColumns - 1 || // Right wall
-    newHead.y <= 0 || // Top wall
-    newHead.y >= globalSettings.numOfRows - 1 // Bottom wall
+    position.x <= 0 || // Left wall
+    position.x >= globalSettings.numOfColumns - 1 || // Right wall
+    position.y <= 0 || // Top wall
+    position.y >= globalSettings.numOfRows - 1 // Bottom wall
   ) {
-    console.error("Snake hit the wall! Game over.");
     return true;
   }
   return false;
 }
-/*
-function snakeCollisionCheck(newHead) {
-  // Loop through all snakes in the game
-  for (let snake of snakes) {
-    // Check collision with each segment of the snake
-    for (let segment of snake.segments) {
-      if (newHead.x === segment.x && newHead.y === segment.y) {
-        // Collision detected
-        console.error("Snake collided with a snake! Game over.");
-        return true;
-      }
-    }
-  }
-  return false;
-}
-*/
 
 // Render snake
 export function drawSnake(snake) {
   const gameWrapper = document.getElementById("game-wrapper");
+  // Don't draw snake until gameWrapper is loaded
   if (!gameWrapper) {
     return;
   }
+   // If snake has no segments, erase all its segments from DOM
+   if (snake.segments.length === 0) {
+    // Find all elements of snake by class
+    const snakeElements = gameWrapper.querySelectorAll(`.snake-${snake.playerNumber}`);
+    snakeElements.forEach(element => {
+      element.remove();
+    });
+    return;
+  }
+
   // Loop through each segment of the snake
   snake.segments.forEach((segment, index) => {
     // Create a unique ID or data attribute to associate the segment with the DOM element

@@ -5,8 +5,10 @@ import { socket, mySnake } from "../public/code.js";
 export let arrow;
 export let escapePressed = false;
 
-document.addEventListener("keydown", arrowKeyHandler, false);
-document.addEventListener("keydown", escapeKeyHandler);
+if (typeof document !== "undefined") {
+  document.addEventListener("keydown", arrowKeyHandler, false);
+  document.addEventListener("keydown", escapeKeyHandler);
+}
 
 function arrowKeyHandler(e) {
   // Wait until game has begun

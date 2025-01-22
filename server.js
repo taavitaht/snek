@@ -12,7 +12,7 @@ const io = new Server(server);
 const port = 5000;
 
 // Game state variables
-let serverSnakes = []; // Array holding all snakes
+let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
 let waitingTimer, startGameTimer;
@@ -61,10 +61,6 @@ io.on("connection", (socket) => {
       );
       socket.disconnect(true);
     }
-  });
-
-  socket.on("player-movement", (newSnake) => {
-    updateSnakeArray(newSnake);
   });
 
   socket.on("keypress", (arrow) => {
@@ -128,34 +124,34 @@ io.on("connection", (socket) => {
   });
 });
 
-// Update snake array with the latest snake positions
-function updateSnakeArray(newSnake) {
-  const index = serverSnakes.findIndex(
-    (snake) => snake.playerNumber === newSnake.playerNumber
-  );
-
-  if (index === -1) {
-    serverSnakes.push(newSnake);
-  } else {
-    serverSnakes[index] = newSnake;
-  }
-}
-
 // Start the game ticker
 function startGameTicker() {
   console.log("Starting game");
   gameInterval = setInterval(() => {
-    // Update the position of each snake
-    serverSnakes.forEach((snake) => {
-      const direction = playerKeypresses[snake.playerNumber];
+    // Loop all snakes
+    Object.values(serverSnakes).forEach((snake) => {
+      // Stop rendering snakes that crashed during previous tick
+      if (snake.crashed) {
+        snake.kill();
+      }
+
+      // Check if snake collided with itself or with other snakes
 
       // Update moving direction of snake if there is a keypress
+      const direction = playerKeypresses[snake.playerNumber];
       if (direction) {
         snake.setDirection(direction);
       }
-      // Move the snake
+      // Update the position of each snake and check for food
       snake.move();
     });
+
+    // Loop again to check for collision in new positions
+    Object.values(serverSnakes).forEach((snake) => {
+      snake.collisionCheck(serverSnakes);
+      // Do stuff if snake collided
+    });
+
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray);
   }, 500);
@@ -202,12 +198,12 @@ function startGameCountdown() {
 function resetGameState() {
   stopGameTicker();
   playerKeypresses = {};
-  serverSnakes.length = 0;
+  serverSnakes = {};
   foodArray.length = 0;
   // Create new snakes
   io.sockets.sockets.forEach((connected) => {
     const snake = new Snake(connected.playerNumber, connected.username);
-    serverSnakes.push(snake);
+    serverSnakes[connected.playerNumber] = snake;
     placeFood(2); //2 food items per snake
   });
 }
