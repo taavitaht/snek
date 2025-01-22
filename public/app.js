@@ -1,24 +1,22 @@
-import RJNA from "../rjna/engine.js";
-import { congratulationsContainer, layoutContainer } from "../components/gameContainer.js";
-import { waitingRoomGrid } from "../components/waitingRoom.js"
+import {
+  congratulationsContainer,
+  mainContainer,
+} from "../components/gameContainer.js";
+import { waitingRoomContainer } from "../components/waitingRoom.js";
 import { startSockets } from "./code.js";
 
 function openGame() {
-    return new Promise((resolve) => {
-        const rootObj = RJNA.tag.div({ class: "app" }, {}, {});
-        const rootEl = RJNA.createNode(rootObj);
-        orbital.obj = rootObj;
-        orbital.rootEl = rootEl;
-        document.body.appendChild(orbital.rootEl);
-        const mainContainer = layoutContainer()
-        rootObj.setChild(waitingRoomGrid);
-        rootObj.setChild(mainContainer);
-        rootObj.setChild(congratulationsContainer)
-        resolve("success")
-    })
+  return new Promise((resolve) => {
+    const app = document.createElement("div");
+    app.classList.add("app");
+    document.body.appendChild(app);
+    app.appendChild(waitingRoomContainer);
+    app.appendChild(mainContainer);
+    app.appendChild(congratulationsContainer);
+    resolve("success");
+  });
 }
 
-openGame().then(
-startSockets()
-);
-
+openGame().then(() => {
+  startSockets();
+});

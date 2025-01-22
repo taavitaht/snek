@@ -1,14 +1,12 @@
 // Game state management (updating positions, rendering visuals, etc)
 // Communication with server for game updates
 
-import RJNA from "../rjna/engine.js";
 import { playerCard } from "../components/waitingRoom.js";
 import { startAnimating } from "../misc/animationLoop.js";
 import { createMap } from "../components/mapTemplate.js";
 import { globalSettings } from "../misc/gameSettings.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
-//import { drawSnake } from "../components/players.js";
 import { storeSnakes } from "../misc/animationLoop.js";
 
 export let socket;
@@ -40,44 +38,39 @@ export function startSockets() {
   });
 
   function runSocket() {
-    // adds recently joined player-card to the waiting room
+    // Add recently joined player-card to the waiting room
     socket.on("waiting", function (userObj) {
-      RJNA.getObjByAttrsAndPropsVal(
-        orbital.obj,
-        "players-waiting-container"
-      ).setChild(playerCard(userObj));
-      //updatePlayerOrbital(userObj);
-      document.querySelector(".players-waiting-counter").innerHTML = // TODO: this line gives error when joining lobby
-        Object.keys(orbital.players).length;
+      const waitingContainer = document.querySelector(
+        ".players-waiting-container"
+      );
+      waitingContainer.appendChild(playerCard(userObj));
     });
 
-    // retrieves and displays all connected users on recently joined user's waiting room
+    // Retrieves and displays all connected users on recently joined user's waiting room
     socket.on("join-lobby", function (userObj) {
       if (Object.keys(userObj).length != 0)
         if (userObj.username == uname) {
           socket.username = uname;
           socket.playerNumber = userObj.count;
         }
-      RJNA.getObjByAttrsAndPropsVal(orbital.obj, "join-screen").removeAttr(
-        "class",
-        "active",
-        ""
+      // Hide join screen
+      const joinScreen = document.querySelector(".join-screen");
+      joinScreen.style.display = "none";
+
+      const waitingContainer = document.querySelector(
+        ".players-waiting-container"
       );
+      console.log("container:", waitingContainer);
+      console.log(typeof waitingContainer);
 
-      RJNA.getObjByAttrsAndPropsVal(
-        orbital.obj,
-        "players-waiting-container"
-      ).setChild(playerCard(userObj));
-      // Create map
-      socket.emit("generate-map");
-      //updatePlayerOrbital(userObj);
+      waitingContainer.appendChild(playerCard(userObj));
     });
-
+    // TODO: Rewrite or delete this
     socket.on("remove-waiting-player", function (count) {
-      delete orbital.players[count];
-      document.querySelector(`.player-${count}-card`).remove();
-      document.querySelector(".players-waiting-counter").innerHTML =
-        Object.keys(orbital.players).length;
+      // delete orbital.players[count];
+      //document.querySelector(`.player-${count}-card`).remove();
+      //document.querySelector(".players-waiting-counter").innerHTML =
+      // Object.keys(orbital.players).length;
     });
 
     // display 10s countdown before game starts
@@ -89,21 +82,17 @@ export function startSockets() {
 
     // displays full lobby message on form
     socket.on("connection-limit-reached", function (message) {
-      const fullLobbyMessage = RJNA.tag.p(
-        { class: "full-lobby-message" },
-        {},
-        {},
-        message
-      );
+      // Create full lobby message
+      const fullLobbyMessage = document.createElement("p");
+      fullLobbyMessage.classList.add("full-lobby-message");
+      fullLobbyMessage.textContent = message;
       if (
         document.querySelector(".full-lobby-message") == null ||
         document.querySelector(".full-lobby-message") == undefined
       ) {
-        RJNA.getObjByAttrsAndPropsVal(orbital.obj, "form").setChild(
-          fullLobbyMessage
-        );
+        const form = app.querySelector(".form");
+        form.appendChild(fullLobbyMessage);
       }
-      socket.emit("exituser", uname);
       socket.close();
     });
 
@@ -116,11 +105,8 @@ export function startSockets() {
         gameContainer.appendChild(map);
       }
       // Hide waiting room
-      const waitingRoomContainer = RJNA.getObjByAttrsAndPropsVal(
-        orbital.obj,
-        "waiting-room-container"
-      );
-      waitingRoomContainer.removeAttr("style", "", { display: "none" });
+      const waitingRoom = app.querySelector(".waiting-room-container");
+      waitingRoom.style.display = "none";
 
       // Begin
       startAnimating(globalSettings.fps);
@@ -145,42 +131,10 @@ export function startSockets() {
       document.querySelector(`.player-${userObj.count}`).remove();
       document.querySelector(`#player-${userObj.count}-lives`).remove();
     });
-    socket.on("receive-cells", function () {
-      socket.emit("update-cells", orbital.cells);
-    });
 
     // Messages on game update display on left of game area
     socket.on("game-update", function (message) {
-      let updateMessage;
-      switch (message.event) {
-        case "player-killed":
-          let playerNumber = parseInt(message.playerKilled);
-          let deathMessageArr = [
-            `${orbital["players"][`${playerNumber}`].name} was caught in  ${
-              orbital["players"][`${message.bomber}`].name
-            }'s explosion`,
-            `${orbital["players"][`${playerNumber}`].name} GOT MERKED by ${
-              orbital["players"][`${message.bomber}`].name
-            }`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } has met Allah!! Thanks  ${
-              orbital["players"][`${message.bomber}`].name
-            }`,
-            `${orbital["players"][`${message.bomber}`].name} says "RIP ${
-              orbital["players"][`${playerNumber}`].name
-            }"`,
-            `${
-              orbital["players"][`${playerNumber}`].name
-            } sadly passed away- Thanks ${
-              orbital["players"][`${message.bomber}`].name
-            }`,
-          ];
-          let finalDeathMessage = `${
-            orbital["players"][`${message.bomber}`].name
-          } has ELIMINATED ${orbital["players"][`${playerNumber}`].name}`;
-          if (orbital["players"][`${playerNumber}`].lives != 0) {
-            updateMessage = RJNA.createNode(
+      /*updateMessage = RJNA.createNode(
               RJNA.tag.p(
                 { class: "live-updates-message" },
                 {},
@@ -189,19 +143,12 @@ export function startSockets() {
                   Math.floor(Math.random() * deathMessageArr.length)
                 ]
               )
-            );
-          } else {
-            updateMessage = RJNA.createNode(
-              RJNA.tag.p(
-                { class: "live-updates-message" },
-                {},
-                {},
-                finalDeathMessage
-              )
-            );
-          }
-          break;
-      }
+            );*/
+
+      const updateMessage = document.createElement("p");
+      updateMessage.classList.add("live-updates-message");
+      updateMessage.textContent = "sometexthere";
+
       appendLiveUpdateMessage(updateMessage);
     });
 
@@ -218,7 +165,7 @@ export function startSockets() {
           .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
       }
     });
-    // Disable game end
+    // Disable game end TODO: figure out how to handle game end
     /*
     socket.on("end-game", function (winner) {
       function startTimer(duration, display) {

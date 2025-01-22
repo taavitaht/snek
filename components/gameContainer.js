@@ -1,42 +1,66 @@
-import { globalSettings } from "../misc/gameSettings.js";
-import RJNA from "../rjna/engine.js";
 
 // Game container
-export const gameContainer = RJNA.tag.div({ id: "game-container", class: "game-container" }, {}, {});
+export const gameContainer = document.createElement('div');
+gameContainer.id = 'game-container';
+gameContainer.classList.add('game-container');
+
 
 // Scoreboard container
-export const gameUpdatesContainer = RJNA.tag.div(
-  { class: "game-updates-container" },
-  {},
-  {},
-  RJNA.tag.div({ class: "timer" }, {}, {}, "TIMER"),
-  RJNA.tag.h3({ class: "game-updates-title" }, {}, {}, "GAME UPDATES:"),
-  RJNA.tag.div({ class: "live-updates" }, {}, {})
-);
+export const gameUpdatesContainer = document.createElement('div');
+gameUpdatesContainer.classList.add('game-updates-container');
+// Timer
+const timer = document.createElement('div');
+timer.classList.add('timer');
+timer.textContent = 'TIMER';
+// Game Updates Title
+const gameUpdatesTitle = document.createElement('h3');
+gameUpdatesTitle.classList.add('game-updates-title');
+gameUpdatesTitle.textContent = 'GAME UPDATES:';
+// Live Updates
+const liveUpdates = document.createElement('div');
+liveUpdates.classList.add('live-updates');
+// Append elements to the game updates container
+gameUpdatesContainer.appendChild(timer);
+gameUpdatesContainer.appendChild(gameUpdatesTitle);
+gameUpdatesContainer.appendChild(liveUpdates);
+
 
 // Pause menu container
-export const congratulationsContainer = RJNA.tag.div(
-  { class: "congratulations-container hidden" },
-  {},
-  {},
-  RJNA.tag.h1({}, {}, {}, "Paused"),
-  RJNA.tag.p({ class: "pause-timer" }, {}, {}, ""),
-  RJNA.tag.p({ class: "pause-reason hidden" }, {}, {}, ""),
-  RJNA.tag.button({ class: "resume-button" }, {}, {}, "Resume"),
-  RJNA.tag.button({ class: "quit-button" }, {}, {}, "Quit"),
-  RJNA.tag.button({ class: "restart-button" }, {}, {}, "Restart")
-);
-// -- //
+export const congratulationsContainer = document.createElement('div');
+congratulationsContainer.classList.add('congratulations-container', 'hidden');
+// Pause Title
+const pauseTitle = document.createElement('h1');
+pauseTitle.textContent = 'Paused';
+// Pause Timer
+const pauseTimer = document.createElement('p');
+pauseTimer.classList.add('pause-timer');
+// Pause Reason
+const pauseReason = document.createElement('p');
+pauseReason.classList.add('pause-reason', 'hidden');
+// Resume Button
+const resumeButton = document.createElement('button');
+resumeButton.classList.add('resume-button');
+resumeButton.textContent = 'Resume';
+// Quit Button
+const quitButton = document.createElement('button');
+quitButton.classList.add('quit-button');
+quitButton.textContent = 'Quit';
+// Restart Button
+const restartButton = document.createElement('button');
+restartButton.classList.add('restart-button');
+restartButton.textContent = 'Restart';
+// Append elements to the pause menu container
+congratulationsContainer.appendChild(pauseTitle);
+congratulationsContainer.appendChild(pauseTimer);
+congratulationsContainer.appendChild(pauseReason);
+congratulationsContainer.appendChild(resumeButton);
+congratulationsContainer.appendChild(quitButton);
+congratulationsContainer.appendChild(restartButton);
+
 
 // Main container
-export const layoutContainer = () => {
-  return RJNA.tag.div(
-    {
-      class: "main-container",
-    },
-    {},
-    {},
-    gameUpdatesContainer,
-    gameContainer
-  );
-};
+  export const mainContainer = document.createElement('div');
+  mainContainer.classList.add('main-container');
+  // Append game updates container and game container as children
+  mainContainer.appendChild(gameUpdatesContainer);
+  mainContainer.appendChild(gameContainer);
