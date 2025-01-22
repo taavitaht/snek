@@ -15,7 +15,7 @@ const port = 5000;
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
-let waitingTimer, startGameTimer;
+let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
   socket.on("newuser", (username) => {
     // io.of("/").sockets.size is number of connected sockets
     if (io.of("/").sockets.size <= 4) {
-      if (startGameTimer || gameStarted) {
+      if (startCountdownTimer || gameStarted) {
         socket.emit("connection-limit-reached", "Game Currently In Session");
         socket.disconnect(true);
       } else {
@@ -93,7 +93,7 @@ io.on("connection", (socket) => {
 
     if (io.of("/").sockets.size < 2 && waitingTimer) {
       stopCountdown();
-    } else if (io.of("/").sockets.size < 2 && startGameTimer) {
+    } else if (io.of("/").sockets.size < 2 && startCountdownTimer) {
       stopGameCountdown();
     }
 
@@ -123,6 +123,37 @@ io.on("connection", (socket) => {
     });
   });
 });
+
+function startGameTimer() {
+  if (gameTimer) clearInterval(gameTimer);
+  let gameTime = 60; //should be set in globalSettings
+
+  gameTimer = setInterval(() => {
+    if (gameTime > 0) {
+      gameTime--;
+      io.emit("game-timer-update", { remainingTime: gameTime });
+    } else {
+      clearInterval(gameTimer);
+      io.emit("game-over", { reason: "time-up" });
+    }
+  }, 1000);
+}
+
+function pauseGameTimer() {
+  clearInterval(gameTimer);
+}
+
+function resumeGameTimer() {
+  gameTimer = setInterval(() => {
+    if (gameTime > 0) {
+      gameTime--;
+      io.emit("game-timer-update", { remainingTime: gameTime });
+    } else {
+      clearInterval(gameTimer);
+      io.emit("game-over", { reason: "time-up" });
+    }
+  });
+}
 
 // Start the game ticker
 function startGameTicker() {
@@ -183,10 +214,11 @@ function startGameCountdown() {
 
     if (countdown > 0) {
       countdown--;
-      startGameTimer = setTimeout(emitGameCountdown, 1000);
+      startCountdownTimer = setTimeout(emitGameCountdown, 1000);
     } else {
-      startGameTimer = null;
+      startCountdownTimer = null;
       startGameTicker();
+      startGameTimer();
       io.emit("start-game", { allPlayers });
       gameStarted = true;
     }
