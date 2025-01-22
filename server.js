@@ -17,7 +17,7 @@ let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
 //let tickInterval = 500; // Time between game ticks in milliseconds
-let tickInterval = globalSettings.initialGameInterval
+let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
@@ -88,10 +88,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", (reason) => {
     if (socket.username) {
-      socket.broadcast.emit(
-        "update",
-        `${socket.username} has left the conversation`
-      );
+      socket.broadcast.emit("update", `${socket.username} has left the game`);
     }
 
     if (io.of("/").sockets.size < 2 && waitingTimer) {
@@ -107,13 +104,20 @@ io.on("connection", (socket) => {
 
     if (io.of("/").sockets.size === 0 && gameStarted) {
       gameStarted = false;
+      resetGameState();
     }
   });
 
   socket.on("start-game-button", () => {
+    gameStarted = true;
     startGameCountdown();
     resetGameState();
-    gameStarted = true;
+    // Create new snakes
+    io.sockets.sockets.forEach((connected) => {
+      const snake = new Snake(connected.playerNumber, connected.username);
+      serverSnakes[connected.playerNumber] = snake;
+      placeFood(2); //2 food items per snake
+    });
   });
 
   gameStatusUpdates.forEach((event) => {
@@ -162,7 +166,6 @@ function resumeGameTimer() {
 function startGameTicker() {
   console.log("Starting game");
   gameInterval = setInterval(() => {
-
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
       // Stop rendering snakes that crashed during previous tick
@@ -179,7 +182,7 @@ function startGameTicker() {
       // Speed up game if a snake found food
       if (foundFood && tickInterval > globalSettings.minGameInterval) {
         changeTickInterval(tickInterval - globalSettings.gameIntervalStep);
-        console.log("tickInterval:", tickInterval)
+        console.log("tickInterval:", tickInterval);
       }
     });
 
@@ -241,16 +244,12 @@ function startGameCountdown() {
 
 // Reset game state before new game is started
 function resetGameState() {
+  //console.log("Reset game state");
   stopGameTicker();
+  tickInterval = globalSettings.initialGameInterval;
   playerKeypresses = {};
   serverSnakes = {};
   foodArray.length = 0;
-  // Create new snakes
-  io.sockets.sockets.forEach((connected) => {
-    const snake = new Snake(connected.playerNumber, connected.username);
-    serverSnakes[connected.playerNumber] = snake;
-    placeFood(2); //2 food items per snake
-  });
 }
 
 // Handle game status updates (pause, resume, quit, restart)
