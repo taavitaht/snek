@@ -409,6 +409,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
+
+      //TODO: send to lobby, check for game end 
       break;
     }
 

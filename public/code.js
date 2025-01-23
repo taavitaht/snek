@@ -38,7 +38,7 @@ export function startSockets() {
       return;
     }
 
-// TODO: server full message
+    // TODO: server full message
 
     socket.once("all-usernames", (receivedUsernames) => {
       if (receivedUsernames.includes(username)) {
@@ -302,7 +302,6 @@ export function startSockets() {
     // start countdown on main screen
     socket.on("countdown-update", function (data) {
       const { username, pauseCountdown } = data;
-      console.log(`${username} pause countdown: ${pauseCountdown} seconds`);
 
       const container = document.querySelector(".congratulations-container");
       const timerElement = container.querySelector(".pause-timer");
@@ -343,12 +342,13 @@ export function startSockets() {
     socket.on("resume-countdown", function (data) {
       const container = document.querySelector(".congratulations-container");
       const reasonElement = container.querySelector(".pause-reason");
+      const timerElement = container.querySelector(".pause-timer");
 
       if (reasonElement) {
+        reasonElement.classList.remove("hidden");
         reasonElement.textContent = data.message;
       }
 
-      const timerElement = container.querySelector(".pause-timer");
       if (timerElement) {
         timerElement.textContent = "";
       }
