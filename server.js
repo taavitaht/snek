@@ -396,6 +396,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
+      serverSnakes[socket.playerNumber].crashed = "quit";
+      playerCountCheck();
 
       //TODO: send to lobby, check for game end 
       break;
@@ -414,6 +416,10 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       // Do nothing
       break;
   }
+}
+
+function playerCountCheck() {
+
 }
 
 // Function to find the first unused player number
