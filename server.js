@@ -13,6 +13,12 @@ const io = new Server(server);
 const port = 5001;
 
 // Game state variables
+const players = {
+  1: null, // Player 1
+  2: null, // Player 2
+  3: null, // Player 3
+  4: null, // Player 4
+};
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
@@ -29,47 +35,35 @@ const pauseTimers = new Map();
 // Serve static files
 app.use(express.static(path.resolve()));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.resolve("index.html"));
-});
+//app.get("/", (req, res) => {
+//  res.sendFile(path.resolve("index.html"));
+//});
 
+
+// Handle socket connections
 io.on("connection", (socket) => {
+  // Add new player
   socket.on("newuser", (username) => {
-    // io.of("/").sockets.size is number of connected sockets
+    // No more than 4 connections allowed (io.of("/").sockets.size is number of connected sockets)
     if (io.of("/").sockets.size <= 4) {
-      if (startCountdownTimer || gameStarted) {
-        socket.emit("connection-limit-reached", "Game Currently In Session");
-        socket.disconnect(true);
-      } else {
-        const connectedSockets = io.sockets.sockets;
-        socket.username = username;
-        socket.playerNumber = findPlayerCount();
-        const userObj = {
-          username: socket.username,
-          count: socket.playerNumber,
-        };
-        socket.broadcast.emit("waiting");
+      // Add to players object
+      let number = assignPlayerNumber();
+      players[number] = {
+        username: username,
+      };
+      // Add to socket
+      socket.username = username;
+      socket.playerNumber = number;
 
-        connectedSockets.forEach((connected) => {
-          const previouslyJoinedSocket = {
-            username: connected.username,
-            count: connected.playerNumber,
-          };
-          socket.emit("join-lobby", previouslyJoinedSocket);
-        });
-        socket.broadcast.emit("update", `${username} joined the lobby`);
-      }
+      // Broadcast new player to all connected sockets
+      io.emit("player-new", number, username, players);
     } else {
-      socket.emit(
-        "connection-limit-reached",
-        "Lobby is now full! Please Try Again Later"
-      );
       socket.disconnect(true);
     }
   });
 
-  // Retrieve all connected usernames
-  socket.on("get-all-usernames", () => {
+  // Request to connect. Respond with all connected usernames and game running status
+  socket.on("join-request", () => {
     const usernames = [];
     // Iterate through all connected sockets
     for (const [id, clientSocket] of io.sockets.sockets) {
@@ -77,51 +71,36 @@ io.on("connection", (socket) => {
         usernames.push(clientSocket.username);
       }
     }
-    socket.emit("all-usernames", usernames);
+    socket.emit("join-response", usernames, gameStarted);
   });
 
-  socket.on("keypress", (arrow) => {
-    if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
-      playerKeypresses[socket.playerNumber] = arrow;
-      //console.log(playerKeypresses);
-    }
-  });
-
-  socket.on("game-over", (aliveCount) => {
-    if (aliveCount.length === 1 && gameStarted) {
-      io.emit("end-game", {
-        event: "winner",
-        playerNum: aliveCount[0].playerNum,
-        name: aliveCount[0].name,
-      });
-    }
-    if (aliveCount.length === 0 && gameStarted) {
-      io.emit("end-game", { event: "draw" });
-    }
-  });
-
+  // User disconnected
   socket.on("disconnect", (reason) => {
     if (socket.username) {
-      socket.broadcast.emit("update", `${socket.username} has left the game`);
+      io.emit("user-disconnect", socket.playerNumber, socket.username);
+      players[socket.playerNumber] = null;
+      if (gameStarted && socket.playerNumber) {
+        serverSnakes[socket.playerNumber].kill();
+        // TODO: display disconnect message in game info?
+      }
     }
 
-    if (io.of("/").sockets.size < 2 && waitingTimer) {
-      stopCountdown();
-    } else if (io.of("/").sockets.size < 2 && startCountdownTimer) {
-      stopGameCountdown();
-    }
-
-    socket.broadcast.emit("remove-waiting-player", socket.playerNumber);
-    if (gameStarted && socket.playerNumber) {
-      socket.broadcast.emit("remove-player", socket.playerNumber);
-    }
-
+    // If that was the only connected socket reset game
     if (io.of("/").sockets.size === 0 && gameStarted) {
       gameStarted = false;
       resetGameState();
     }
+    refreshPlayers();
   });
 
+  // Player pressed an arrow key
+  socket.on("keypress", (arrow) => {
+    if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
+      playerKeypresses[socket.playerNumber] = arrow;
+    }
+  });
+
+  // Start game button was pressed
   socket.on("start-game-button", () => {
     gameStarted = true;
     startGameCountdown();
@@ -134,6 +113,7 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Handle game status updates
   gameStatusUpdates.forEach((event) => {
     socket.on(event, () => {
       const status = event.split("-")[1];
@@ -231,7 +211,7 @@ function startGameCountdown() {
   io.sockets.sockets.forEach((connected) => {
     allPlayers.push({
       username: connected.username,
-      count: connected.playerNumber,
+      playerNumber: connected.playerNumber,
     });
   });
 
@@ -425,26 +405,36 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       break;
   }
 }
-// Returns number of connected players
-function findPlayerCount() {
-  let smallestMissingValue = null;
-  for (let n = 1; n <= 4; n++) {
-    let found = false;
 
+// Function to find the first unused player number
+function assignPlayerNumber() {
+  refreshPlayers();
+  for (let i = 1; i <= 4; i++) {
+    if (!players[i]) {
+      //console.log("assignPlayerNumber", i);
+      return i;
+    }
+  }
+  return null; // Return null if no free player number
+}
+
+// Refresh local players object based on socket connections
+function refreshPlayers() {
+  // Loop all 4 player slots
+  for (let i = 1; i <= 4; i++) {
+    players[i] = null;
+    // Loop socket connections
     for (let [id, socket] of io.sockets.sockets) {
-      if (socket.playerNumber === n) {
-        found = true;
+      let pNumber = socket.playerNumber;
+      let pName = socket.username;
+      // If socket with same player number is found refill player slot
+      if (pNumber == i) {
+        players[i] = pName;
         break;
       }
     }
-
-    if (!found) {
-      smallestMissingValue = n;
-      break;
-    }
   }
-
-  return smallestMissingValue;
+  //console.log("refreshed players:", players);
 }
 
 // Start server

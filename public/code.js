@@ -10,20 +10,21 @@ import { escapePressed, resetEscapePressed } from "../misc/input.js";
 import { storeSnakes } from "../misc/animationLoop.js";
 
 export let socket;
-let uname;
+let myUsername;
+let myPlayerNumber;
 let map;
 export let snakes = {};
 export let mySnake;
-//let allUsernames = [];
 
+// Connect to server
 export function startSockets() {
   const app = document.querySelector(".app");
   socket = io();
-  // when the user presses join in the waiting room
+
+  // Join button in the waiting room
   const joinUserButton = document.getElementById("join-user-button");
   joinUserButton.addEventListener("click", function () {
-    // Request all connected usernames from server
-    socket.emit("get-all-usernames");
+    socket.emit("join-request");
 
     let username = app.querySelector(".join-screen #username").value.trim();
     const usernameMessage = document.getElementById("username-message");
@@ -38,59 +39,76 @@ export function startSockets() {
       return;
     }
 
-// TODO: server full message
-
-    socket.once("all-usernames", (receivedUsernames) => {
+    // Make sure server has responded and continue processing
+    socket.once("join-response", (receivedUsernames, gameStarted) => {
+      if (gameStarted) {
+        usernameMessage.textContent =
+          "Game is already started. Try again later";
+        return;
+      }
+      if (receivedUsernames.length >= 4) {
+        usernameMessage.textContent = "Game is full. Try again later";
+        return;
+      }
       if (receivedUsernames.includes(username)) {
         usernameMessage.textContent = "That username is already taken";
         return;
       }
 
-      uname = username;
-      // Add new user to game
+      // Passed all checks, add new user to the game
+      myUsername = username;
       socket.emit("newuser", username);
       runSocket();
     });
   });
 
-  // Start game button
-  const startGameButton = document.getElementById("start-game-button");
-  startGameButton.addEventListener("click", function () {
-    socket.emit("start-game-button");
-  });
-
   function runSocket() {
-    // Add recently joined player-card to the waiting room
-    socket.on("waiting", function (userObj) {
-      const waitingContainer = document.querySelector(
-        ".players-waiting-container"
-      );
-      waitingContainer.appendChild(playerCard(userObj));
-    });
+    ////////////////////////////////////////////////
+    // Handle connectiong and disconnecting users //
+    ////////////////////////////////////////////////
 
-    // Retrieves and displays all connected users on recently joined user's waiting room
-    socket.on("join-lobby", function (userObj) {
-      if (Object.keys(userObj).length != 0)
-        if (userObj.username == uname) {
-          socket.username = uname;
-          socket.playerNumber = userObj.count;
+    // Add recently joined player to the waiting room
+    socket.on("player-new", function (playerNumber, playerName, allPlayers) {
+      const waitingPlayerContainer = document.getElementById(
+        `player-${playerNumber}-card`
+      );
+      waitingPlayerContainer.textContent = playerName;
+      // If new player is this user
+      if (playerName == myUsername) {
+        myPlayerNumber = playerNumber;
+        // Hide join screen
+        const joinScreen = document.querySelector(".join-screen");
+        joinScreen.style.display = "none";
+        // Fill other players cards
+        const playersWaitingContainer = document.getElementById(
+          "players-waiting-container"
+        );
+        for (let i = 1; i <= 4; i++) {
+          if (i != myPlayerNumber) {
+            let otherPlayer = allPlayers[i];
+            if (otherPlayer) {
+              const waitingPlayerContainer = document.getElementById(
+                `player-${i}-card`
+              );
+              waitingPlayerContainer.textContent = otherPlayer;
+            }
+          }
         }
-      // Hide join screen
-      const joinScreen = document.querySelector(".join-screen");
-      joinScreen.style.display = "none";
-
-      // Add new player card
-      const waitingContainer = document.querySelector(
-        ".players-waiting-container"
-      );
-      waitingContainer.appendChild(playerCard(userObj));
+      }
     });
-    // TODO: Rewrite or delete this
-    socket.on("remove-waiting-player", function (count) {
-      // delete orbital.players[count];
-      //document.querySelector(`.player-${count}-card`).remove();
-      //document.querySelector(".players-waiting-counter").innerHTML =
-      // Object.keys(orbital.players).length;
+
+    socket.on("user-disconnect", function (pNum, pName) {
+      // Clear card in waiting room
+      const waitingPlayerContainer = document.getElementById(
+        `player-${pNum}-card`
+      );
+      waitingPlayerContainer.textContent = "";
+    });
+
+    // Start game button
+    const startGameButton = document.getElementById("start-game-button");
+    startGameButton.addEventListener("click", function () {
+      socket.emit("start-game-button");
     });
 
     // display 10s countdown before game starts
@@ -98,22 +116,6 @@ export function startSockets() {
       const startGameCountdown = app.querySelector(".countdown-container");
       startGameCountdown.classList.remove("waiting");
       startGameCountdown.innerHTML = `Game will start in ${countdown} !`;
-    });
-
-    // displays full lobby message on form
-    socket.on("connection-limit-reached", function (message) {
-      // Create full lobby message
-      const fullLobbyMessage = document.createElement("p");
-      fullLobbyMessage.classList.add("full-lobby-message");
-      fullLobbyMessage.textContent = message;
-      if (
-        document.querySelector(".full-lobby-message") == null ||
-        document.querySelector(".full-lobby-message") == undefined
-      ) {
-        const form = app.querySelector(".form");
-        form.appendChild(fullLobbyMessage);
-      }
-      socket.close();
     });
 
     // Game start
@@ -138,18 +140,11 @@ export function startSockets() {
       // Send updated snakes to animation engine
       storeSnakes(updatedSnakes);
       Object.values(updatedSnakes).forEach((snake) => {
-        //drawSnake(snake);
-        if (snake.playerNumber === socket.playerNumber) {
+        if (snake.playerNumber === myPlayerNumber) {
           mySnake = snake;
         }
       });
       drawFood(foodArray);
-    });
-
-    socket.on("remove-player", function (userObj) {
-      delete orbital.players[userObj.count];
-      document.querySelector(`.player-${userObj.count}`).remove();
-      document.querySelector(`#player-${userObj.count}-lives`).remove();
     });
 
     // Messages on game update display on left of game area
@@ -330,13 +325,6 @@ export function startSockets() {
         container.classList.add("hidden");
         reasonElement.classList.add("hidden");
       }, 3000);
-    });
-
-    socket.on("username-taken", function (msg) {
-      const errorElement = document.getElementById("username-taken");
-      if (errorElement) {
-        errorElement.textContent = msg;
-      }
     });
 
     socket.on("resume-countdown", function (data) {

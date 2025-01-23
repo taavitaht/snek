@@ -240,7 +240,7 @@ body {
 .join-container > .screen {
   display: none;
   position: absolute;
-  z-index: 15;
+  z-index: 17;
   background-color: whitesmoke;
 }
 
@@ -250,13 +250,17 @@ body {
   height: 100%;
 }
 
+#start-game-button {
+  grid-area: start-button;
+}
+
 .players-waiting-container {
   position: absolute;
   width: 100%;
   height: 100%;
   display: grid;
   grid-template-areas:
-    "title"
+    "start-button"
     "player-1-card"
     "player-2-card"
     "player-3-card"
@@ -270,8 +274,9 @@ body {
   overflow: hidden;
 }
 
-.player-1-card {
+.player-card {
   z-index: 16;
+  border: 1px solid green;
 }
 
 .congratulations-container {

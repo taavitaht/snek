@@ -1,8 +1,7 @@
 // Generate player card
 export const playerCard = (incomingPlayer) => {
-  console.log(incomingPlayer);
   // Create the outer div for the player card
-  console.log("incomingPlayer:", incomingPlayer)
+  console.log("incomingPlayer:", incomingPlayer);
   const playerCardDiv = document.createElement("div");
   playerCardDiv.classList.add(`player-${incomingPlayer.playerNumber}-card`);
 
@@ -61,11 +60,7 @@ const usernameMessage = document.createElement("p");
 usernameMessage.id = "username-message";
 usernameMessage.textContent = "Choose a unique username up to 10 characters";
 
-formInputUsername.append(
-  usernameLabel,
-  usernameInput,
-  usernameMessage,
-);
+formInputUsername.append(usernameLabel, usernameInput, usernameMessage);
 
 // Create the submit button
 const formInputButton = document.createElement("div");
@@ -99,6 +94,14 @@ startGameButton.textContent = "Start Game!";
 // Add the start game button to the players waiting container
 playersWaitingContainer.appendChild(startGameButton);
 joinContainer.appendChild(playersWaitingContainer);
+
+// Add 4 player divs to the players waiting container
+for (let i = 1; i <= 4; i++) {
+  const waitingPlayerCard = document.createElement("div");
+  waitingPlayerCard.classList.add(`player-${i}-card`, "player-card");
+  waitingPlayerCard.id = `player-${i}-card`;
+  playersWaitingContainer.appendChild(waitingPlayerCard);
+}
 
 // Create the game info container
 const gameInfoContainer = document.createElement("div");
