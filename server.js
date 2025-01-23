@@ -68,6 +68,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Retrieve all connected usernames
+  socket.on("get-all-usernames", () => {
+    const usernames = [];
+    // Iterate through all connected sockets
+    for (const [id, clientSocket] of io.sockets.sockets) {
+      if (clientSocket.username) {
+        usernames.push(clientSocket.username);
+      }
+    }
+    socket.emit("all-usernames", usernames);
+  });
+
   socket.on("keypress", (arrow) => {
     if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
       playerKeypresses[socket.playerNumber] = arrow;
@@ -168,7 +180,6 @@ function resumeGameTimer() {
 
 // Start the game ticker
 function startGameTicker() {
-  console.log("Starting game");
   gameInterval = setInterval(() => {
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
@@ -241,6 +252,7 @@ function startGameCountdown() {
       startGameTimer();
       io.emit("start-game", { allPlayers });
       gameStarted = true;
+      console.log("Game started");
     }
   }
   emitGameCountdown();
@@ -295,7 +307,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         event: "player-paused",
         username,
         remainingTime,
-      })
+      });
 
       let pauseCountdown = 30;
       const interval = setInterval(() => {
