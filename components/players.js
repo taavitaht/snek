@@ -102,6 +102,7 @@ export class Snake {
   // Method to kill the snake
   kill() {
     this.segments = [];
+    this.crashed = "disconnected";
   }
 }
 

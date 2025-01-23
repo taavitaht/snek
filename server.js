@@ -39,7 +39,6 @@ app.use(express.static(path.resolve()));
 //  res.sendFile(path.resolve("index.html"));
 //});
 
-
 // Handle socket connections
 io.on("connection", (socket) => {
   // Add new player
@@ -81,6 +80,7 @@ io.on("connection", (socket) => {
       players[socket.playerNumber] = null;
       if (gameStarted && socket.playerNumber) {
         serverSnakes[socket.playerNumber].kill();
+        serverSnakes[socket.playerNumber].crashed = "disconnected";
         // TODO: display disconnect message in game info?
       }
     }
@@ -164,6 +164,12 @@ function startGameTicker() {
     let scoreboard = [];
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
+      // Check end game conditions
+      let snakesLeft = playerCountCheck();
+      if ((snakesLeft == 1)) {
+        io.emit("end-game");
+        console.log("Game over, only 1 snake left");
+      }
       // Stop rendering snakes that crashed during previous tick
       if (snake.crashed) {
         snake.kill();
@@ -397,9 +403,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
       serverSnakes[socket.playerNumber].crashed = "quit";
-      playerCountCheck();
-
-      //TODO: send to lobby, check for game end 
+      socket.disconnect();
       break;
     }
 
@@ -418,8 +422,15 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
   }
 }
 
+// Return number of alive snakes
 function playerCountCheck() {
-
+  let count = 0;
+  Object.values(serverSnakes).forEach((snake) => {
+    if (!snake.crashed) {
+      count++;
+    }
+  });
+  return count;
 }
 
 // Function to find the first unused player number
