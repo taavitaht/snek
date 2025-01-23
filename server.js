@@ -146,6 +146,7 @@ function pauseGameTimer() {
 
 function resumeGameTimer() {
   console.log("resuming game timer: ", gameTime);
+  if (gameTimer) clearInterval(gameTimer);
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -154,7 +155,7 @@ function resumeGameTimer() {
       clearInterval(gameTimer);
       io.emit("game-over", { reason: "time-up" });
     }
-  });
+  }, 1000);
 }
 
 // Start the game ticker
@@ -288,15 +289,14 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
+      let pauseCountdown = 30;
       const interval = setInterval(() => {
-        remainingTime--;
-        io.emit("countdown-update", { username, remainingTime });
-
-        if (remainingTime === 4) {
+        io.emit("countdown-update", { username, pauseCountdown });
+        if (pauseCountdown === 3) {
           io.emit("play-sound", { sound: "countdown-sound" });
         }
 
-        if (remainingTime <= 0) {
+        if (pauseCountdown <= 0) {
           clearInterval(interval);
           pauseTimers.delete(username);
 
@@ -310,6 +310,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
             message: `${username}'s pause has ended.`,
           });
         }
+        pauseCountdown--;
       }, 1000);
 
       pauseTimers.set(username, interval);
@@ -388,6 +389,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
+
+      //TODO: send to lobby, check for game end 
       break;
     }
 

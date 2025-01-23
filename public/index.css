@@ -174,19 +174,24 @@ body {
 .snake-4 {
   z-index: 4;
   position: absolute;
-  will-change: transform; /* Inform browser that this element's transform property is likely to change */
-  transition: transform 0.2s ease; /* Smooth transition for translate */
+  will-change: transform;
+  /* Inform browser that this element's transform property is likely to change */
+  transition: transform 0.2s ease;
+  /* Smooth transition for translate */
 }
 
 .snake-1 {
   background-color: green;
 }
+
 .snake-2 {
   background-color: blue;
 }
+
 .snake-3 {
   background-color: red;
 }
+
 .snake-4 {
   background-color: yellow;
 }
@@ -195,10 +200,10 @@ body {
   background-color: lightgray;
 }
 
-.player-1 > p,
-.player-2 > p,
-.player-3 > p,
-.player-4 > p {
+.player-1>p,
+.player-2>p,
+.player-3>p,
+.player-4>p {
   position: absolute;
   top: -15px;
   width: 100%;
@@ -212,19 +217,19 @@ body {
   z-index: 15;
 }
 
-.player-1 > p {
+.player-1>p {
   color: #ffffff;
 }
 
-.player-2 > p {
+.player-2>p {
   color: #ffab00;
 }
 
-.player-3 > p {
+.player-3>p {
   color: #99ff00;
 }
 
-.player-4 > p {
+.player-4>p {
   color: #79c3ff;
 }
 
@@ -237,14 +242,14 @@ body {
   z-index: 10;
 }
 
-.join-container > .screen {
+.join-container>.screen {
   display: none;
   position: absolute;
   z-index: 17;
   background-color: whitesmoke;
 }
 
-.join-container > .screen.active {
+.join-container>.screen.active {
   display: block;
   width: 100%;
   height: 100%;
@@ -298,4 +303,17 @@ body {
   text-align: center;
   color: #ff4500;
   margin-bottom: 10px;
+}
+
+.disabled-button {
+  background-color: #d3d3d3;
+  color: #808080;
+  border: 1px solid #a9a9a9;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.hidden {
+  display: none;
 }
