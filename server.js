@@ -161,15 +161,26 @@ function resumeGameTimer() {
 // Start the game ticker
 function startGameTicker() {
   gameInterval = setInterval(() => {
+
     let scoreboard = [];
-    // Loop all snakes
-    Object.values(serverSnakes).forEach((snake) => {
+
       // Check end game conditions
       let snakesLeft = playerCountCheck();
-      if ((snakesLeft == 1)) {
+      // Multiplayer
+      if ((Object.entries(serverSnakes).length > 1 && snakesLeft == 1)) {
         io.emit("end-game");
         console.log("Game over, only 1 snake left");
       }
+      // Singleplayer
+      if ((Object.entries(serverSnakes).length == 1 && snakesLeft == 0)) {
+        io.emit("end-game");
+        console.log("Game over, you died");
+      }
+      
+
+    // Loop all snakes
+    Object.values(serverSnakes).forEach((snake) => {
+
       // Stop rendering snakes that crashed during previous tick
       if (snake.crashed) {
         snake.kill();
