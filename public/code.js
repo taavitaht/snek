@@ -14,21 +14,43 @@ let uname;
 let map;
 export let snakes = {};
 export let mySnake;
+//let allUsernames = [];
 
 export function startSockets() {
   const app = document.querySelector(".app");
+  socket = io();
   // when the user presses join in the waiting room
   const joinUserButton = document.getElementById("join-user-button");
   joinUserButton.addEventListener("click", function () {
-    let username = app.querySelector(".join-screen #username").value;
+    // Request all connected usernames from server
+    socket.emit("get-all-usernames");
+
+    let username = app.querySelector(".join-screen #username").value.trim();
+    const usernameMessage = document.getElementById("username-message");
+
     if (username.length == 0) {
-      // TODO: also check that name is unique
+      usernameMessage.textContent = "Username cannot be empty";
       return;
     }
-    socket = io();
-    socket.emit("newuser", username);
-    uname = username;
-    runSocket();
+    if (username.length > 10) {
+      usernameMessage.textContent =
+        "Username must be between 1 and 10 characters";
+      return;
+    }
+
+// TODO: server full message
+
+    socket.once("all-usernames", (receivedUsernames) => {
+      if (receivedUsernames.includes(username)) {
+        usernameMessage.textContent = "That username is already taken";
+        return;
+      }
+
+      uname = username;
+      // Add new user to game
+      socket.emit("newuser", username);
+      runSocket();
+    });
   });
 
   // Start game button
@@ -57,12 +79,10 @@ export function startSockets() {
       const joinScreen = document.querySelector(".join-screen");
       joinScreen.style.display = "none";
 
+      // Add new player card
       const waitingContainer = document.querySelector(
         ".players-waiting-container"
       );
-      console.log("container:", waitingContainer);
-      console.log(typeof waitingContainer);
-
       waitingContainer.appendChild(playerCard(userObj));
     });
     // TODO: Rewrite or delete this
@@ -137,16 +157,16 @@ export function startSockets() {
       let updateMessage;
       const minutes = Math.floor(message.remainingTime / 60);
       const seconds = Math.floor(message.remainingTime % 60);
-      const timeStamp = `${minutes
+      const timeStamp = `${minutes.toString().padStart(2, "0")}:${seconds
         .toString()
-        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        .padStart(2, "0")}`;
 
       switch (message.event) {
         case "player-killed":
           updateMessage = `${timeStamp}: ${message.username} died`;
           break;
         case "player-quit":
-          updateMessage = `${timeStamp}: ${message.username} quit`
+          updateMessage = `${timeStamp}: ${message.username} quit`;
           break;
         case "player-paused":
           updateMessage = `${timeStamp}: ${message.username} paused`;
@@ -156,7 +176,6 @@ export function startSockets() {
           break;
       }
       appendLiveUpdateMessage(updateMessage);
-
     });
 
     socket.on("game-timer-update", function (data) {
@@ -339,10 +358,10 @@ export function startSockets() {
 }
 
 export function appendLiveUpdateMessage(updateMessage) {
-  let gameUpdatesContainer = document.querySelector('.live-updates');
+  let gameUpdatesContainer = document.querySelector(".live-updates");
 
-  const messageElement = document.createElement('div');
-  messageElement.classList.add('update-message');
+  const messageElement = document.createElement("div");
+  messageElement.classList.add("update-message");
   messageElement.textContent = updateMessage;
 
   if (gameUpdatesContainer.childNodes.length != 0) {

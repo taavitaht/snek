@@ -2,8 +2,9 @@
 export const playerCard = (incomingPlayer) => {
   console.log(incomingPlayer);
   // Create the outer div for the player card
+  console.log("incomingPlayer:", incomingPlayer)
   const playerCardDiv = document.createElement("div");
-  playerCardDiv.classList.add(`player-${incomingPlayer.count}-card`);
+  playerCardDiv.classList.add(`player-${incomingPlayer.playerNumber}-card`);
 
   // Create the inner span element for the player username
   const playerCardSpan = document.createElement("span");
@@ -57,16 +58,13 @@ usernameInput.required = true;
 usernameInput.value = "";
 
 const usernameMessage = document.createElement("p");
-usernameMessage.textContent = "Enter up to 6 Characters";
-
-const usernameTakenMessage = document.createElement("p");
-usernameTakenMessage.id = "username-taken";
+usernameMessage.id = "username-message";
+usernameMessage.textContent = "Choose a unique username up to 10 characters";
 
 formInputUsername.append(
   usernameLabel,
   usernameInput,
   usernameMessage,
-  usernameTakenMessage
 );
 
 // Create the submit button
@@ -99,7 +97,7 @@ startGameButton.id = "start-game-button";
 startGameButton.textContent = "Start Game!";
 
 // Add the start game button to the players waiting container
-joinContainer.appendChild(startGameButton);
+playersWaitingContainer.appendChild(startGameButton);
 joinContainer.appendChild(playersWaitingContainer);
 
 // Create the game info container
