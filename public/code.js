@@ -245,7 +245,6 @@ export function startSockets() {
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message}`;
           if (timerElement) {
-            timerElement.textContent = "60 seconds remaining";
             timerElement.style.display = "block";
           }
           break;
@@ -261,9 +260,6 @@ export function startSockets() {
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message} `;
           //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY or disconnect?
-          break;
-        case "restart":
-          // TODO: Implement restart logic
           break;
       }
     });
@@ -286,13 +282,13 @@ export function startSockets() {
 
     // start countdown on main screen
     socket.on("countdown-update", function (data) {
-      const { username, remainingTime } = data;
-      console.log(`${username} pause countdown: ${remainingTime} seconds`);
+      const { username, pauseCountdown } = data;
+      console.log(`${username} pause countdown: ${pauseCountdown} seconds`);
 
       const container = document.querySelector(".congratulations-container");
       const timerElement = container.querySelector(".pause-timer");
       if (timerElement) {
-        timerElement.textContent = `${remainingTime} seconds remaining`;
+        timerElement.textContent = `${pauseCountdown} seconds remaining in pause`;
       }
     });
 
@@ -300,13 +296,18 @@ export function startSockets() {
     socket.on("pause-rejected", (data) => {
       const container = document.querySelector(".congratulations-container");
       const reasonElement = container.querySelector(".pause-reason");
-      if (!reasonElement) return;
+      const resumeButton = container.querySelector(".resume-button");
+      const pauseTitle = container.querySelector("h1")
+      if (!reasonElement || !resumeButton || !pauseTitle) return;
 
       reasonElement.textContent = data.reason;
 
+      pauseTitle.classList.add("hidden");
+      resumeButton.classList.add("hidden");
+
       container.classList.remove("hidden");
       reasonElement.classList.remove("hidden");
-      // for testing, later popup msg, but the user still should have the options to quit or restart? mby move buttons somewhere else
+
       setTimeout(() => {
         container.classList.add("hidden");
         reasonElement.classList.add("hidden");
@@ -363,6 +364,7 @@ function pauseMenu(socket) {
   if (resumeButton) {
     resumeButton.addEventListener("click", () => {
       console.log("[CLIENT] Resume button clicked -> Emitting 'game-resumed'");
+      resumeButton.classList.add('disabled-button');
       socket.emit("game-resumed");
     });
   }

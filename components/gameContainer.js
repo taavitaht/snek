@@ -45,22 +45,17 @@ resumeButton.textContent = 'Resume';
 const quitButton = document.createElement('button');
 quitButton.classList.add('quit-button');
 quitButton.textContent = 'Quit';
-// Restart Button
-const restartButton = document.createElement('button');
-restartButton.classList.add('restart-button');
-restartButton.textContent = 'Restart';
 // Append elements to the pause menu container
 congratulationsContainer.appendChild(pauseTitle);
 congratulationsContainer.appendChild(pauseTimer);
 congratulationsContainer.appendChild(pauseReason);
 congratulationsContainer.appendChild(resumeButton);
 congratulationsContainer.appendChild(quitButton);
-congratulationsContainer.appendChild(restartButton);
 
 
 // Main container
-  export const mainContainer = document.createElement('div');
-  mainContainer.classList.add('main-container');
-  // Append game updates container and game container as children
-  mainContainer.appendChild(gameUpdatesContainer);
-  mainContainer.appendChild(gameContainer);
+export const mainContainer = document.createElement('div');
+mainContainer.classList.add('main-container');
+// Append game updates container and game container as children
+mainContainer.appendChild(gameUpdatesContainer);
+mainContainer.appendChild(gameContainer);
