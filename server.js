@@ -161,6 +161,7 @@ function resumeGameTimer() {
 // Start the game ticker
 function startGameTicker() {
   gameInterval = setInterval(() => {
+    let scoreboard = [];
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
       // Stop rendering snakes that crashed during previous tick
@@ -175,18 +176,24 @@ function startGameTicker() {
       // Update the position of each snake and check for food
       let foundFood = snake.move();
       // Speed up game if a snake found food
-      if (foundFood && tickInterval > globalSettings.minGameInterval) {
-        changeTickInterval(tickInterval - globalSettings.gameIntervalStep);
-        console.log("tickInterval:", tickInterval);
+      if (foundFood) {
+        if (tickInterval > globalSettings.minGameInterval) {
+          changeTickInterval(tickInterval - globalSettings.gameIntervalStep);
+          console.log("tickInterval:", tickInterval);
+        }
       }
-    });
 
-    // Loop again to check for collision in new positions
-    Object.values(serverSnakes).forEach((snake) => {
       snake.collisionCheck(serverSnakes);
       // Do stuff if snake collided
+
+      scoreboard.push({
+        username: snake.username,
+        score: snake.score,
+        crashed: snake.crashed,
+      });
     });
 
+    io.emit("score-update", scoreboard);
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray);
   }, tickInterval);

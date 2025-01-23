@@ -342,6 +342,30 @@ export function startSockets() {
       }
     });
 
+    socket.on("score-update", function (scoreboard) {
+      const scoreboardList = document.querySelector(".scoreboard-list");
+
+      scoreboardList.innerHTML = "";
+
+      scoreboard.sort((a, b) => {
+        if (a.crashed === b.crashed) {
+          return b.score - a.score; // Sort by score if neither/both are crashed
+        }
+        return a.crashed - b.crashed; // Put non-crashed players first
+      });
+
+      scoreboard.forEach((player) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${player.username}: ${player.score}`;
+        if (player.crashed) {
+          listItem.style.textDecoration = "line-through";
+          listItem.style.color = "grey";
+        }
+
+        scoreboardList.appendChild(listItem);
+      });
+    });
+
     requestAnimationFrame(checkForEscape);
   }
 }
