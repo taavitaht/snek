@@ -312,3 +312,20 @@ body {
 .hidden {
   display: none;
 }
+
+.scoreboard-title {
+  font-size: 1.2em;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.scoreboard-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.scoreboard-list li {
+  font-size: 1em;
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+}

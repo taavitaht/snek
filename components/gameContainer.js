@@ -12,6 +12,12 @@ gameUpdatesContainer.classList.add('game-updates-container');
 const timer = document.createElement('div');
 timer.classList.add('timer');
 timer.textContent = 'TIMER';
+//Scoreboard
+const scoreboardTitle = document.createElement('h3');
+scoreboardTitle.classList.add('scoreboard-title');
+scoreboardTitle.textContent = 'SCOREBOARD:';
+const scoreboardList = document.createElement('ul');
+scoreboardList.classList.add('scoreboard-list');
 // Game Updates Title
 const gameUpdatesTitle = document.createElement('h3');
 gameUpdatesTitle.classList.add('game-updates-title');
@@ -21,6 +27,8 @@ const liveUpdates = document.createElement('div');
 liveUpdates.classList.add('live-updates');
 // Append elements to the game updates container
 gameUpdatesContainer.appendChild(timer);
+gameUpdatesContainer.appendChild(scoreboardTitle);
+gameUpdatesContainer.appendChild(scoreboardList);
 gameUpdatesContainer.appendChild(gameUpdatesTitle);
 gameUpdatesContainer.appendChild(liveUpdates);
 
