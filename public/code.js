@@ -133,23 +133,30 @@ export function startSockets() {
     });
 
     // Messages on game update display on left of game area
-    socket.on("game-update", function (message) {
-      /*updateMessage = RJNA.createNode(
-              RJNA.tag.p(
-                { class: "live-updates-message" },
-                {},
-                {},
-                deathMessageArr[
-                  Math.floor(Math.random() * deathMessageArr.length)
-                ]
-              )
-            );*/
+    socket.on("live-game-update", function (message) {
+      let updateMessage;
+      const minutes = Math.floor(message.remainingTime / 60);
+      const seconds = Math.floor(message.remainingTime % 60);
+      const timeStamp = `${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
-      const updateMessage = document.createElement("p");
-      updateMessage.classList.add("live-updates-message");
-      updateMessage.textContent = "sometexthere";
-
+      switch (message.event) {
+        case "player-killed":
+          updateMessage = `${timeStamp}: ${message.username} died`;
+          break;
+        case "player-quit":
+          updateMessage = `${timeStamp}: ${message.username} quit`
+          break;
+        case "player-paused":
+          updateMessage = `${timeStamp}: ${message.username} paused`;
+          break;
+        default:
+          updateMessage = `${timeStamp}: Unknown event occurred.`;
+          break;
+      }
       appendLiveUpdateMessage(updateMessage);
+
     });
 
     socket.on("game-timer-update", function (data) {
@@ -332,14 +339,19 @@ export function startSockets() {
 }
 
 export function appendLiveUpdateMessage(updateMessage) {
-  let gameUpdatesContainer = document.querySelector(".live-updates");
+  let gameUpdatesContainer = document.querySelector('.live-updates');
+
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('update-message');
+  messageElement.textContent = updateMessage;
+
   if (gameUpdatesContainer.childNodes.length != 0) {
     gameUpdatesContainer.insertBefore(
-      updateMessage,
+      messageElement,
       gameUpdatesContainer.firstChild
     );
   } else {
-    gameUpdatesContainer.appendChild(updateMessage);
+    gameUpdatesContainer.appendChild(messageElement);
   }
 }
 

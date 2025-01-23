@@ -16,6 +16,8 @@ const port = 5001;
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
+let gameTime = 60; //should be set in globalSettings
+
 //let tickInterval = 500; // Time between game ticks in milliseconds
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
@@ -124,17 +126,16 @@ io.on("connection", (socket) => {
     socket.on(event, () => {
       const status = event.split("-")[1];
       const username = socket.username;
-      let remainingTime = 60;
 
-      handleGameStatus(socket, event, username, status, remainingTime);
+      handleGameStatus(socket, event, username, status, gameTime);
     });
   });
 });
 
 function startGameTimer() {
+  console.log("starting game timer: ", gameTime);
   if (gameTimer) clearInterval(gameTimer);
-  let gameTime = 60; //should be set in globalSettings
-
+  gameTime = 60; //to be set in globalSettings
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -147,10 +148,12 @@ function startGameTimer() {
 }
 
 function pauseGameTimer() {
+  console.log("pausing game timer: ", gameTime);
   clearInterval(gameTimer);
 }
 
 function resumeGameTimer() {
+  console.log("resuming game timer: ", gameTime);
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -287,6 +290,12 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         message: `${username} paused the game`,
       });
 
+      io.emit("live-game-update", {
+        event: "player-paused",
+        username,
+        remainingTime,
+      })
+
       const interval = setInterval(() => {
         remainingTime--;
         io.emit("countdown-update", { username, remainingTime });
@@ -300,6 +309,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           pauseTimers.delete(username);
 
           activePauses.set(username, { paused: false, pauseUsed: true });
+          startGameTicker();
+          resumeGameTimer();
 
           io.emit("game-status-update", {
             status: "resumed",
@@ -353,7 +364,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           clearInterval(countdownInterval);
 
           startGameTicker();
-          startGameCountdown();
+          resumeGameTimer();
 
           io.emit("game-status-update", {
             status,
@@ -378,6 +389,12 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         status,
         username,
         message: `${username} has quit the game.`,
+      });
+
+      io.emit("live-game-update", {
+        event: "player-quit",
+        username,
+        remainingTime,
       });
       break;
     }
