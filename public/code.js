@@ -8,7 +8,10 @@ import { globalSettings } from "../misc/gameSettings.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
 import { storeSnakes } from "../misc/animationLoop.js";
-import { makeEndContainer, removeEndContainer } from "../components/gameEndContainer.js";
+import {
+  makeEndContainer,
+  removeEndContainer,
+} from "../components/gameEndContainer.js";
 
 export let socket;
 let myUsername;
@@ -16,6 +19,7 @@ let myPlayerNumber;
 let map;
 export let snakes = {};
 export let mySnake;
+let numOfPlayers;
 
 // Connect to server
 export function startSockets() {
@@ -96,6 +100,10 @@ export function startSockets() {
           }
         }
       }
+      numOfPlayers = Object.values(allPlayers).filter((value) => value).length;
+      console.log("numOfPlayers", numOfPlayers);
+      console.log(allPlayers);
+      startButton();
     });
 
     socket.on("user-disconnect", function (pNum, pName) {
@@ -104,13 +112,30 @@ export function startSockets() {
         `player-${pNum}-card`
       );
       waitingPlayerContainer.textContent = "";
+      startButton();
     });
 
     // Start game button
-    const startGameButton = document.getElementById("start-game-button");
-    startGameButton.addEventListener("click", function () {
-      socket.emit("start-game-button");
-    });
+    function startButton() {
+      let enabled = false;
+      const startGameButton = document.getElementById("start-game-button");
+      startGameButton.addEventListener("click", function () {
+        if (enabled) {
+          socket.emit("start-game-button");
+        }
+      });
+      if (numOfPlayers < 2 && !globalSettings.singlePlayerEnabled) {
+        startGameButton.textContent = "";
+        enabled = false;
+      }
+      if (
+        (numOfPlayers >= 2 && myPlayerNumber == 1) ||
+        globalSettings.singlePlayerEnabled
+      ) {
+        startGameButton.textContent = "Start game!";
+        enabled = true;
+      }
+    }
 
     // display 10s countdown before game starts
     socket.on("start-game-countdown", function (countdown) {
@@ -189,19 +214,24 @@ export function startSockets() {
     });
 
     // TODO: figure out how to handle game end
-
     socket.on("end-game", function (snakes) {
       // Genereate game over div
       makeEndContainer(snakes);
       // After timeout reset game
       setTimeout(() => {
+        // TODO: erase all snakes from game field
         const startGameCountdown = app.querySelector(".countdown-container");
         startGameCountdown.classList.add("waiting");
         startGameCountdown.textContent = "Snek";
-        removeEndContainer();
         // Show waiting room
-      const waitingRoom = app.querySelector(".waiting-room-container");
-      waitingRoom.style.display = "grid";
+        removeEndContainer();
+        const waitingRoom = app.querySelector(".waiting-room-container");
+        waitingRoom.style.display = "grid";
+        // Erase all snakes
+        let SnakeHeads = app.querySelectorAll(".snake-head");
+        SnakeHeads.forEach((element) => {element.remove()})
+        let SnakeBodys = app.querySelectorAll(".snake-body");
+        SnakeBodys.forEach((element) => {element.remove()})
       }, 5000);
     });
 

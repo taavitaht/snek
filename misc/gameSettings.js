@@ -2,6 +2,12 @@
 
 export const globalSettings = {
 
+    // Single player mode enabled
+    singlePlayerEnabled: true,
+
+    // Time limit of each game in seconds
+    gameTime: 60,
+
     // Animation settings
     fps: 60,
 
@@ -12,7 +18,7 @@ export const globalSettings = {
     // Game ticker settings
     initialGameInterval: 500,
     minGameInterval: 150,
-    gameIntervalStep: 50,
+    gameIntervalStep: 40,
     
     // Visual settings
     gameSquareSize: 50,
@@ -26,10 +32,10 @@ export const globalSettings = {
         height: 50,
     },
 
-    "food": {
+    food: {
         width: 50,
         height: 50,
         src: "./img/fried-egg.png",
-        count: 5
+        count: 2    // Foods per player
     },
 }

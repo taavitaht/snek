@@ -113,7 +113,7 @@ io.on("connection", (socket) => {
       if (connected.playerNumber && connected.username) {
         const snake = new Snake(connected.playerNumber, connected.username);
         serverSnakes[connected.playerNumber] = snake;
-        placeFood(2); //2 food items per snake
+        placeFood(globalSettings.food.count); //X food items per snake
       }
     });
   });
@@ -132,7 +132,7 @@ io.on("connection", (socket) => {
 function startGameTimer() {
   console.log("starting game timer: ", gameTime);
   if (gameTimer) clearInterval(gameTimer);
-  gameTime = 60; //to be set in globalSettings
+  gameTime = globalSettings.gameTime
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -187,7 +187,8 @@ function startGameTicker() {
       // Speed up game if a snake found food
       if (foundFood) {
         if (tickInterval > globalSettings.minGameInterval) {
-          changeTickInterval(tickInterval - globalSettings.gameIntervalStep);
+          let numOfPlayers = playerCountCheck()
+          changeTickInterval(tickInterval - (globalSettings.gameIntervalStep / numOfPlayers));
           console.log("tickInterval:", tickInterval);
         }
       }
@@ -258,6 +259,7 @@ function startGameCountdown() {
 function resetGameState() {
   //console.log("Reset game state");
   stopGameTicker();
+  pauseGameTimer();
   tickInterval = globalSettings.initialGameInterval;
   playerKeypresses = {};
   serverSnakes = {};

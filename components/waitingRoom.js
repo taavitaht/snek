@@ -89,7 +89,7 @@ playersWaitingContainer.classList.add("players-waiting-container");
 // Create the start game button
 const startGameButton = document.createElement("button");
 startGameButton.id = "start-game-button";
-startGameButton.textContent = "Start Game!";
+startGameButton.textContent = "";
 
 // Add the start game button to the players waiting container
 playersWaitingContainer.appendChild(startGameButton);
