@@ -107,9 +107,12 @@ io.on("connection", (socket) => {
     resetGameState();
     // Create new snakes
     io.sockets.sockets.forEach((connected) => {
-      const snake = new Snake(connected.playerNumber, connected.username);
-      serverSnakes[connected.playerNumber] = snake;
-      placeFood(2); //2 food items per snake
+      // Make sure connection is properly initialized
+      if (connected.playerNumber && connected.username) {
+        const snake = new Snake(connected.playerNumber, connected.username);
+        serverSnakes[connected.playerNumber] = snake;
+        placeFood(2); //2 food items per snake
+      }
     });
   });
 
@@ -161,26 +164,23 @@ function resumeGameTimer() {
 // Start the game ticker
 function startGameTicker() {
   gameInterval = setInterval(() => {
-
     let scoreboard = [];
 
-      // Check end game conditions
-      let snakesLeft = playerCountCheck();
-      // Multiplayer
-      if ((Object.entries(serverSnakes).length > 1 && snakesLeft == 1)) {
-        io.emit("end-game");
-        console.log("Game over, only 1 snake left");
-      }
-      // Singleplayer
-      if ((Object.entries(serverSnakes).length == 1 && snakesLeft == 0)) {
-        io.emit("end-game");
-        console.log("Game over, you died");
-      }
-      
+    // Check end game conditions
+    let snakesLeft = playerCountCheck();
+    // Multiplayer
+    if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
+      io.emit("end-game");
+      console.log("Game over, only 1 snake left");
+    }
+    // Singleplayer
+    if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
+      io.emit("end-game");
+      console.log("Game over, you died");
+    }
 
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
-
       // Stop rendering snakes that crashed during previous tick
       if (snake.crashed) {
         snake.kill();
@@ -474,6 +474,15 @@ function refreshPlayers() {
   }
   //console.log("refreshed players:", players);
 }
+
+// Start server
+
+// Clear connected sockets before starting the server
+io.on("connection", (socket) => {
+});
+io.sockets.sockets.forEach((socket) => {
+  socket.disconnect(true);
+});
 
 // Start server
 server.listen(port, () => {
