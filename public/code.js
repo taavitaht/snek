@@ -225,20 +225,22 @@ export function startSockets() {
         startGameCountdown.textContent = "Snek";
         // Show waiting room
         removeEndContainer();
+        resetPauseUI();
         const waitingRoom = app.querySelector(".waiting-room-container");
         waitingRoom.style.display = "grid";
         // Erase all snakes
         let SnakeHeads = app.querySelectorAll(".snake-head");
-        SnakeHeads.forEach((element) => {element.remove()})
+        SnakeHeads.forEach((element) => {
+          element.remove();
+        });
         let SnakeBodys = app.querySelectorAll(".snake-body");
-        SnakeBodys.forEach((element) => {element.remove()})
+        SnakeBodys.forEach((element) => {
+          element.remove();
+        });
       }, 5000);
     });
 
     socket.on("game-status-update", function (data) {
-      console.log(
-        `[CLIENT] Game status updated: ${data.status} by ${data.username}`
-      );
       const container = document.querySelector(".congratulations-container");
       const timerElement = container.querySelector(".pause-timer");
       if (!container) return;
@@ -261,7 +263,7 @@ export function startSockets() {
         case "quit":
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message} `;
-          //TODO: AUTOMATICALLY AFTER COUPLE OF SECONDS REDIRECT TO MAIN LOBBY or disconnect?
+
           break;
       }
     });
@@ -293,7 +295,6 @@ export function startSockets() {
       }
     });
 
-    // TODO: popup message for pause-rejected w/o buttons?
     socket.on("pause-rejected", (data) => {
       const container = document.querySelector(".congratulations-container");
       const reasonElement = container.querySelector(".pause-reason");
@@ -382,15 +383,13 @@ function pauseMenu(socket) {
 
   if (resumeButton) {
     resumeButton.addEventListener("click", () => {
-      console.log("[CLIENT] Resume button clicked -> Emitting 'game-resumed'");
-      resumeButton.classList.add("disabled-button");
+      resumeButton.classList.add("c");
       socket.emit("game-resumed");
     });
   }
 
   if (quitButton) {
     quitButton.addEventListener("click", () => {
-      console.log("[CLIENT] Quit button clicked -> Emitting 'game-quit'");
       socket.emit("game-quit");
     });
   }
@@ -398,9 +397,38 @@ function pauseMenu(socket) {
 
 function checkForEscape() {
   if (escapePressed) {
-    console.log("[CLIENT] 'escapePressed' is true -> Emitting 'game-paused'");
     socket.emit("game-paused");
     resetEscapePressed();
   }
   requestAnimationFrame(checkForEscape);
+}
+
+function resetPauseUI() {
+  const container = document.querySelector(".congratulations-container");
+  if (!container) return;
+
+  container.classList.add("hidden");
+
+  const reasonElement = container.querySelector(".pause-reason");
+  if (reasonElement) {
+    reasonElement.textContent = "";
+    reasonElement.classList.add("hidden");
+  }
+
+  const pauseTitle = container.querySelector("h1");
+  if (pauseTitle) {
+    pauseTitle.classList.remove("hidden");
+    pauseTitle.textContent = "";
+  }
+
+  const resumeButton = container.querySelector(".resume-button");
+  if (resumeButton) {
+    resumeButton.classList.remove("hidden");
+  }
+
+  const timerElement = container.querySelector(".pause-timer");
+  if (timerElement) {
+    timerElement.textContent = "";
+    timerElement.style.display = "none";
+  }
 }

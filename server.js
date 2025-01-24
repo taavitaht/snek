@@ -132,7 +132,7 @@ io.on("connection", (socket) => {
 function startGameTimer() {
   console.log("starting game timer: ", gameTime);
   if (gameTimer) clearInterval(gameTimer);
-  gameTime = globalSettings.gameTime
+  gameTime = globalSettings.gameTime;
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -187,8 +187,10 @@ function startGameTicker() {
       // Speed up game if a snake found food
       if (foundFood) {
         if (tickInterval > globalSettings.minGameInterval) {
-          let numOfPlayers = playerCountCheck()
-          changeTickInterval(tickInterval - (globalSettings.gameIntervalStep / numOfPlayers));
+          let numOfPlayers = playerCountCheck();
+          changeTickInterval(
+            tickInterval - globalSettings.gameIntervalStep / numOfPlayers
+          );
           console.log("tickInterval:", tickInterval);
         }
       }
@@ -265,6 +267,8 @@ function resetGameState() {
   serverSnakes = {};
   foodArray.length = 0;
   gameStarted = false;
+  activePauses.clear();
+  pauseTimers.clear();
 }
 
 // Handle game status updates (pause, resume, quit, restart)
@@ -413,15 +417,6 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       break;
     }
 
-    case "restart": {
-      io.emit("game-status-update", {
-        status,
-        username,
-        message: `${username} restarted the game.`,
-      });
-      break;
-    }
-
     default:
       // Do nothing
       break;
@@ -475,14 +470,14 @@ function gameEndCheck() {
   let snakesLeft = playerCountCheck();
   // Multiplayer
   if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
-    io.emit("end-game", {serverSnakes});
+    io.emit("end-game", { serverSnakes });
     console.log("Game over, only 1 snake left");
     stopGameTicker();
     resetGameState();
   }
   // Singleplayer
   if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
-    io.emit("end-game", {serverSnakes});
+    io.emit("end-game", { serverSnakes });
     console.log("Game over, you died");
     stopGameTicker();
     resetGameState();
