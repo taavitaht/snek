@@ -79,8 +79,10 @@ io.on("connection", (socket) => {
       io.emit("user-disconnect", socket.playerNumber, socket.username);
       players[socket.playerNumber] = null;
       if (gameStarted && socket.playerNumber) {
-        serverSnakes[socket.playerNumber].kill();
-        serverSnakes[socket.playerNumber].crashed = "disconnected";
+        if (serverSnakes[socket.playerNumber]) {
+          serverSnakes[socket.playerNumber].kill();
+          serverSnakes[socket.playerNumber].crashed = "disconnected";
+        }
         // TODO: display disconnect message in game info?
       }
     }
@@ -167,17 +169,7 @@ function startGameTicker() {
     let scoreboard = [];
 
     // Check end game conditions
-    let snakesLeft = playerCountCheck();
-    // Multiplayer
-    if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
-      io.emit("end-game");
-      console.log("Game over, only 1 snake left");
-    }
-    // Singleplayer
-    if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
-      io.emit("end-game");
-      console.log("Game over, you died");
-    }
+    gameEndCheck();
 
     // Loop all snakes
     Object.values(serverSnakes).forEach((snake) => {
@@ -270,6 +262,7 @@ function resetGameState() {
   playerKeypresses = {};
   serverSnakes = {};
   foodArray.length = 0;
+  gameStarted = false;
 }
 
 // Handle game status updates (pause, resume, quit, restart)
@@ -475,11 +468,29 @@ function refreshPlayers() {
   //console.log("refreshed players:", players);
 }
 
+// Check if conditions are met to end game
+function gameEndCheck() {
+  let snakesLeft = playerCountCheck();
+  // Multiplayer
+  if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
+    io.emit("end-game", {serverSnakes});
+    console.log("Game over, only 1 snake left");
+    stopGameTicker();
+    resetGameState();
+  }
+  // Singleplayer
+  if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
+    io.emit("end-game", {serverSnakes});
+    console.log("Game over, you died");
+    stopGameTicker();
+    resetGameState();
+  }
+}
+
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {
-});
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

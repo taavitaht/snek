@@ -8,6 +8,7 @@ import { globalSettings } from "../misc/gameSettings.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
 import { storeSnakes } from "../misc/animationLoop.js";
+import { makeEndContainer } from "../components/gameEndContainer.js";
 
 export let socket;
 let myUsername;
@@ -186,66 +187,12 @@ export function startSockets() {
           .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
       }
     });
-    // Disable game end TODO: figure out how to handle game end
-    /*
-    socket.on("end-game", function (winner) {
-      function startTimer(duration, display) {
-        var timer = duration, minutes, seconds;
-        setInterval(function () {
-          minutes = parseInt(timer / 60, 10);
-          seconds = parseInt(timer % 60, 10);
 
-          minutes = minutes < 10 ? "0" + minutes : minutes;
-          seconds = seconds < 10 ? "0" + seconds : seconds;
+    // TODO: figure out how to handle game end
 
-          display.textContent = minutes + ":" + seconds;
-
-          if (--timer < 0) {
-            // for refresh webpage
-            window.location.reload()
-            timer = duration;
-          }
-        }, 1000);
-      }
-      const congratulations = document.querySelector(".congratulations-container")
-      if (congratulations.childElementCount == 0) {
-        switch (winner.event) {
-          case "draw":
-            congratulations.innerHTML += `
-            <div class="wrapper">
-              <div class="modal modal--congratulations">
-                <div class="modal-top">
-                  <img class="modal-icon u-imgResponsive" src="https://emojiisland.com/cdn/shop/products/Emoji_Icon_-_Sad_Emoji_grande.png?v=1571606093" alt="Trophy" />
-                  <div class="modal-header">Welp Your All Dead</div>
-                  <div class="modal-subheader"> !!Have Fun with That!!!</div>
-                  <div class="modal-subheader">The window will reload in:</div>
-                  <div class="end-timer"></div>
-                </div>
-              </div>
-            </div>`
-            break
-          case "winner":
-            congratulations.innerHTML += `
-            <div class="wrapper">
-              <div class="modal modal--congratulations">
-                <div class="modal-top">
-                  <div class="modal-header">Congratulations ${winner.name} (player-${winner.playerNum})</div>
-                  <img class="modal-icon u-imgResponsive" src="https://static.vecteezy.com/system/resources/previews/009/315/016/original/winner-trophy-in-flat-style-free-png.png" alt="Trophy" />
-                  <div class="modal-subheader"> !!You Are The Last Man Standing!!!</div>
-                  <div class="modal-subheader">The window will reload in:</div>
-                  <div class="end-timer"></div>
-                </div>
-              </div>
-            </div>`
-            break
-        }
-      }
-      changeStopValue()
-      congratulations.classList.remove("hidden")
-      startTimer(10, document.querySelector(".end-timer"))
+    socket.on("end-game", function (snakes) {
+      makeEndContainer(snakes);
     });
-
-    */
 
     socket.on("game-status-update", function (data) {
       console.log(
@@ -310,7 +257,7 @@ export function startSockets() {
       const container = document.querySelector(".congratulations-container");
       const reasonElement = container.querySelector(".pause-reason");
       const resumeButton = container.querySelector(".resume-button");
-      const pauseTitle = container.querySelector("h1")
+      const pauseTitle = container.querySelector("h1");
       if (!reasonElement || !resumeButton || !pauseTitle) return;
 
       reasonElement.textContent = data.reason;
@@ -355,7 +302,7 @@ export function startSockets() {
       });
 
       scoreboard.forEach((player) => {
-        const listItem = document.createElement('li');
+        const listItem = document.createElement("li");
         listItem.textContent = `${player.username}: ${player.score}`;
         if (player.crashed) {
           listItem.style.textDecoration = "line-through";
@@ -395,7 +342,7 @@ function pauseMenu(socket) {
   if (resumeButton) {
     resumeButton.addEventListener("click", () => {
       console.log("[CLIENT] Resume button clicked -> Emitting 'game-resumed'");
-      resumeButton.classList.add('disabled-button');
+      resumeButton.classList.add("disabled-button");
       socket.emit("game-resumed");
     });
   }
