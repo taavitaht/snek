@@ -8,7 +8,7 @@ import { globalSettings } from "../misc/gameSettings.js";
 import { drawFood } from "../components/food.js";
 import { escapePressed, resetEscapePressed } from "../misc/input.js";
 import { storeSnakes } from "../misc/animationLoop.js";
-import { makeEndContainer } from "../components/gameEndContainer.js";
+import { makeEndContainer, removeEndContainer } from "../components/gameEndContainer.js";
 
 export let socket;
 let myUsername;
@@ -116,7 +116,7 @@ export function startSockets() {
     socket.on("start-game-countdown", function (countdown) {
       const startGameCountdown = app.querySelector(".countdown-container");
       startGameCountdown.classList.remove("waiting");
-      startGameCountdown.innerHTML = `Game will start in ${countdown} !`;
+      startGameCountdown.textContent = `Game will start in ${countdown} !`;
     });
 
     // Game start
@@ -191,7 +191,18 @@ export function startSockets() {
     // TODO: figure out how to handle game end
 
     socket.on("end-game", function (snakes) {
+      // Genereate game over div
       makeEndContainer(snakes);
+      // After timeout reset game
+      setTimeout(() => {
+        const startGameCountdown = app.querySelector(".countdown-container");
+        startGameCountdown.classList.add("waiting");
+        startGameCountdown.textContent = "Snek";
+        removeEndContainer();
+        // Show waiting room
+      const waitingRoom = app.querySelector(".waiting-room-container");
+      waitingRoom.style.display = "grid";
+      }, 5000);
     });
 
     socket.on("game-status-update", function (data) {

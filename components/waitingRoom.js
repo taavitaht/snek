@@ -24,7 +24,7 @@ waitingRoomContainer.classList.add("waiting-room-container");
 // Create the countdown container
 const countdownContainer = document.createElement("div");
 countdownContainer.classList.add("countdown-container");
-countdownContainer.textContent = "Name of Game";
+countdownContainer.textContent = "Snek";
 
 // Create the join container
 const joinContainer = document.createElement("div");

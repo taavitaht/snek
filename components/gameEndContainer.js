@@ -34,7 +34,7 @@ export function makeEndContainer(snakes) {
 
   // Create the container element
   const endContainer = document.createElement("div");
-  endContainer.classList.add("end-container-sp");
+  endContainer.classList.add("end-container");
 
   // Add the container to the document body or another parent element
   const mainContainer = document.querySelector(".main-container");
@@ -94,4 +94,11 @@ export function makeEndContainer(snakes) {
       angle: 70,
     });
   }
+}
+
+// Remove end container from DOM
+export function removeEndContainer() {
+  const endContainer = document.querySelector(".end-container");
+  console.log("EC",endContainer);
+  endContainer.remove();
 }
