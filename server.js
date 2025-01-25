@@ -267,6 +267,8 @@ function resetGameState() {
   serverSnakes = {};
   foodArray.length = 0;
   gameStarted = false;
+  activePauses.clear();
+  pauseTimers.clear();
 }
 
 // Handle game status updates (pause, resume, quit, restart)
@@ -412,15 +414,6 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       });
       serverSnakes[socket.playerNumber].crashed = "quit";
       socket.disconnect();
-      break;
-    }
-
-    case "restart": {
-      io.emit("game-status-update", {
-        status,
-        username,
-        message: `${username} restarted the game.`,
-      });
       break;
     }
 
