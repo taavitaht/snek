@@ -2,6 +2,9 @@
 
 export const globalSettings = {
 
+    // http://localhost:[port]
+    port: 5001,
+
     // Single player mode enabled
     // Change to "false" and then ctrl+refresh browser for review question "The lead player can start the game once there are between 2 and 4 players."
     singlePlayerEnabled: true,

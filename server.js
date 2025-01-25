@@ -10,7 +10,7 @@ import { globalSettings } from "./misc/gameSettings.js";
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const port = 5001;
+const port = globalSettings.port;
 
 // Game state variables
 const players = {
@@ -22,9 +22,13 @@ const players = {
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
+<<<<<<< HEAD
 let gameTime = globalSettings.gameTime; //should be set in globalSettings
 
 //let tickInterval = 500; // Time between game ticks in milliseconds
+=======
+let gameTime = 60; //should be set in globalSettings
+>>>>>>> a7a4ddb03288ac30c03bbcd9e713da64f0baaf9b
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;

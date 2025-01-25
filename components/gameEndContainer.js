@@ -99,6 +99,7 @@ export function makeEndContainer(snakes) {
 // Remove end container from DOM
 export function removeEndContainer() {
   const endContainer = document.querySelector(".end-container");
-  console.log("EC",endContainer);
-  endContainer.remove();
+  if (endContainer) {
+    endContainer.remove();
+  }
 }
