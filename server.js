@@ -105,8 +105,8 @@ io.on("connection", (socket) => {
   // Start game button was pressed
   socket.on("start-game-button", () => {
     gameStarted = true;
-    startGameCountdown();
     resetGameState();
+    startGameCountdown();
     // Create new snakes
     io.sockets.sockets.forEach((connected) => {
       // Make sure connection is properly initialized
@@ -130,19 +130,9 @@ io.on("connection", (socket) => {
 });
 
 function startGameTimer() {
-  if (gameTimer) clearInterval(gameTimer);
   gameTime = globalSettings.gameTime;
   console.log("starting game timer: ", gameTime);
-
-  gameTimer = setInterval(() => {
-    if (gameTime > 0) {
-      gameTime--;
-      io.emit("game-timer-update", { remainingTime: gameTime });
-    } else {
-      clearInterval(gameTimer);
-      io.emit("game-over", { reason: "time-up" });
-    }
-  }, 1000);
+  runGameTimer();
 }
 
 function pauseGameTimer() {
@@ -152,6 +142,10 @@ function pauseGameTimer() {
 
 function resumeGameTimer() {
   console.log("resuming game timer: ", gameTime);
+  runGameTimer();
+}
+
+function runGameTimer() {
   if (gameTimer) clearInterval(gameTimer);
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
@@ -159,10 +153,12 @@ function resumeGameTimer() {
       io.emit("game-timer-update", { remainingTime: gameTime });
     } else {
       clearInterval(gameTimer);
-      io.emit("game-over", { reason: "time-up" });
+      stopGameTicker();
+      io.emit("end-game", { serverSnakes });
     }
   }, 1000);
 }
+
 
 // Start the game ticker
 function startGameTicker() {
