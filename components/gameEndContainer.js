@@ -4,7 +4,7 @@ export function makeEndContainer(snakes) {
   // Figure out game end reason and scores
   let highestScore = 0;
   let winners = [];
-  let reason = "mp";
+  let reason = "time";
   const snakeCount = Object.keys(snakes.serverSnakes).length;
 
   // Singleplayer (reason is time/wall/snake)
@@ -15,15 +15,17 @@ export function makeEndContainer(snakes) {
   }
   // Multiplayer (reason is time/1 snake left)
   else {
+    let count = 0;
     // Get highest score
     Object.values(snakes.serverSnakes).forEach((snake) => {
       if (snake.score > highestScore) {
         highestScore = snake.score;
-        if (snake.crashed == "time") {
-          reason = "time";
+        if (!snake.crashed) {
+          count++;
         }
       }
     });
+    if (count === 1) { reason = "mp"; }
     // Figure out winner(s)
     Object.values(snakes.serverSnakes).forEach((snake) => {
       if (snake.score == highestScore) {

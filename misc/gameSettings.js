@@ -23,7 +23,7 @@ export const globalSettings = {
     initialGameInterval: 500,
     minGameInterval: 160,
     gameIntervalStep: 40,
-    
+
     // Visual settings
     gameSquareSize: 50,
     gameSquareSrc: {

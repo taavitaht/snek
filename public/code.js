@@ -209,6 +209,9 @@ export function startSockets() {
         case "player-paused":
           updateMessage = `${timeStamp}: ${message.username} paused`;
           break;
+        case "player-disconnect":
+          updateMessage = `${timeStamp}: ${message.username} disconnected`;
+          break;
         default:
           updateMessage = `${timeStamp}: Unknown event occurred.`;
           break;
