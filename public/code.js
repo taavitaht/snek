@@ -24,8 +24,9 @@ let numOfPlayers;
 // Connect to server
 export function startSockets() {
   const app = document.querySelector(".app");
-  socket = io();
-
+  socket = io(`http://localhost:${globalSettings.port}`, {
+    reconnection: false, // Disable auto-reconnection
+  });
   // Join button in the waiting room
   const joinUserButton = document.getElementById("join-user-button");
   joinUserButton.addEventListener("click", function () {
@@ -68,10 +69,7 @@ export function startSockets() {
   });
 
   function runSocket() {
-    ////////////////////////////////////////////////
-    // Handle connectiong and disconnecting users //
-    ////////////////////////////////////////////////
-
+    // Handle connectiong and disconnecting users
     // Add recently joined player to the waiting room
     socket.on("player-new", function (playerNumber, playerName, allPlayers) {
       const waitingPlayerContainer = document.getElementById(
@@ -101,8 +99,8 @@ export function startSockets() {
         }
       }
       numOfPlayers = Object.values(allPlayers).filter((value) => value).length;
-      console.log("numOfPlayers", numOfPlayers);
-      console.log(allPlayers);
+      //console.log("numOfPlayers", numOfPlayers);
+      //console.log(allPlayers);
       startButton();
     });
 
@@ -218,23 +216,7 @@ export function startSockets() {
       makeEndContainer(snakes);
       // After timeout reset game
       setTimeout(() => {
-        const startGameCountdown = app.querySelector(".countdown-container");
-        startGameCountdown.classList.add("waiting");
-        startGameCountdown.textContent = "Snek";
-        // Show waiting room
-        removeEndContainer();
-        resetPauseUI();
-        const waitingRoom = app.querySelector(".waiting-room-container");
-        waitingRoom.style.display = "grid";
-        // Erase all snakes
-        let SnakeHeads = app.querySelectorAll(".snake-head");
-        SnakeHeads.forEach((element) => {
-          element.remove();
-        });
-        let SnakeBodys = app.querySelectorAll(".snake-body");
-        SnakeBodys.forEach((element) => {
-          element.remove();
-        });
+        resetGame();
       }, 5000);
     });
 
@@ -353,6 +335,18 @@ export function startSockets() {
       });
     });
 
+    socket.on("disconnect", (reason) => {
+      console.log("Lost connection to server");
+      // Create error message
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "server-disconnect-error-message";
+      errorDiv.textContent = "Lost connection to server. Page will reload";
+      document.body.appendChild(errorDiv);
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+    });
+
     requestAnimationFrame(checkForEscape);
   }
 }
@@ -429,4 +423,26 @@ function resetPauseUI() {
     timerElement.textContent = "";
     timerElement.style.display = "none";
   }
+}
+
+// Reset game without disconnecting from server
+function resetGame() {
+  const app = document.querySelector(".app");
+  const startGameCountdown = app.querySelector(".countdown-container");
+  startGameCountdown.classList.add("waiting");
+  startGameCountdown.textContent = "Snek";
+  // Show waiting room
+  removeEndContainer();
+  resetPauseUI();
+  const waitingRoom = app.querySelector(".waiting-room-container");
+  waitingRoom.style.display = "grid";
+  // Erase all snakes
+  let SnakeHeads = app.querySelectorAll(".snake-head");
+  SnakeHeads.forEach((element) => {
+    element.remove();
+  });
+  let SnakeBodys = app.querySelectorAll(".snake-body");
+  SnakeBodys.forEach((element) => {
+    element.remove();
+  });
 }
