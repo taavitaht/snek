@@ -223,7 +223,7 @@ export function startSockets() {
       const gameTimerElement = document.querySelector(
         ".game-updates-container .timer"
       );
-      console.log(`timer update: ${data.remainingTime}`);
+      //console.log(`timer update: ${data.remainingTime}`);
       if (gameTimerElement) {
         const minutes = Math.floor(data.remainingTime / 60);
         const seconds = Math.floor(data.remainingTime % 60);

@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import http from "http";
 import { Server } from "socket.io";
@@ -9,8 +10,13 @@ import { globalSettings } from "./misc/gameSettings.js";
 // Create an express app and HTTP server
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 const port = globalSettings.port;
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 // Game state variables
 const players = {
@@ -31,6 +37,14 @@ let gameStarted = false;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
+
+// Cors
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use(cors(corsOptions));
 
 // Serve static files
 app.use(express.static(path.resolve()));
@@ -158,7 +172,6 @@ function runGameTimer() {
     }
   }, 1000);
 }
-
 
 // Start the game ticker
 function startGameTicker() {
@@ -488,7 +501,7 @@ function gameEndCheck() {
   // Time runs out
   if (gameStarted && gameTime <= 0) {
     // Alive snakes.crashed = "time"
-    playerCountCheck("time")
+    playerCountCheck("time");
     io.emit("end-game", { serverSnakes });
     console.log("Game over, time ran out");
     stopGameTicker();
@@ -499,7 +512,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

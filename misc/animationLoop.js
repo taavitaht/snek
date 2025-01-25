@@ -8,7 +8,7 @@ let allSnakes;
 
 // Calculate frame time and start animating
 export function startAnimating(fps) {
-  console.log("Start animating", fps);
+  //console.log("Start animating", fps);
   fpsInterval = 1000 / fps; // fpsInterval is duration of frame in milliseconds (1000/60=16.67ms)
   animate(fpsInterval); // Start animating
 }
