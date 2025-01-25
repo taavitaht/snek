@@ -421,12 +421,15 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
   }
 }
 
-// Return number of alive snakes
-function playerCountCheck() {
+// Return number of alive snakes, apply crashed "reason" to alive snakes
+function playerCountCheck(crash) {
   let count = 0;
   Object.values(serverSnakes).forEach((snake) => {
     if (!snake.crashed) {
       count++;
+      if (crash) {
+        snake.crashed = crash;
+      }
     }
   });
   return count;
@@ -476,6 +479,15 @@ function gameEndCheck() {
   if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
     io.emit("end-game", { serverSnakes });
     console.log("Game over, you died");
+    stopGameTicker();
+    resetGameState();
+  }
+  // Time runs out
+  if (gameStarted && gameTime <= 0) {
+    // Alive snakes.crashed = "time"
+    playerCountCheck("time")
+    io.emit("end-game", { serverSnakes });
+    console.log("Game over, time ran out");
     stopGameTicker();
     resetGameState();
   }

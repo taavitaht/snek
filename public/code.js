@@ -20,6 +20,7 @@ let map;
 export let snakes = {};
 export let mySnake;
 let numOfPlayers;
+let oldFood = [];
 
 // Connect to server
 export function startSockets() {
@@ -160,7 +161,7 @@ export function startSockets() {
 
     // Listen for updated snake positions on the client
     socket.on("tick", function (updatedSnakes, foodArray) {
-      console.log("tick", updatedSnakes, foodArray);
+      //console.log("tick", updatedSnakes, foodArray);
       // Send updated snakes to animation engine
       storeSnakes(updatedSnakes);
       Object.values(updatedSnakes).forEach((snake) => {
@@ -169,6 +170,24 @@ export function startSockets() {
         }
       });
       drawFood(foodArray);
+      // Was food eaten?
+      if (!oldFood || oldFood.length === 0) {
+        // Initialize oldFood if it's undefined or empty
+        oldFood = [...foodArray];
+      } else {
+        let arraysEqual = foodArray.every(
+          (item, index) =>
+            oldFood[index] &&
+            item.x === oldFood[index].x &&
+            item.y === oldFood[index].y
+        );
+        if (!arraysEqual) {
+          const audio = new Audio("/sounds/ding.mp3");
+          audio.play();
+        }
+        // Deep copy foodArray
+        oldFood = JSON.parse(JSON.stringify(foodArray));
+      }
     });
 
     // Messages on game update display on left of game area
