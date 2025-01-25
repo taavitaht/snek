@@ -125,7 +125,8 @@ body {
   position: relative;
 }
 
-.food {
+.food,
+.super-food {
   z-index: 3;
 }
 

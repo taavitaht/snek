@@ -37,9 +37,19 @@ export class Snake {
     else if (this.direction === "Down") newHead.y += 1;
 
     // Check if snake found food
-    if (checkForFood(newHead)) {
+    const foodType = checkForFood(newHead);
+
+    if (foodType) {
       foundFood = true;
-      this.score++;
+
+      // Update score based on food type
+      if (foodType === "superFood") {
+        this.score += 2;
+        console.log("SuperFood eaten! +2 points");
+      } else if (foodType === "food") {
+        this.score += 1;
+        console.log("Regular food eaten! +1 point");
+      }
     }
 
     // Update the snake's position

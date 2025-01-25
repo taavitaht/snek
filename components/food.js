@@ -9,6 +9,14 @@ export class Food {
   }
 }
 
+export class superFood {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.isSuperEgg = true;
+  }
+}
+
 // Place food in random position
 export function placeFood(count) {
   for (let i = 0; i < count; i++) {
@@ -24,8 +32,16 @@ export function placeFood(count) {
       ({ x: xCoord, y: yCoord } = randomCoordinates());
     }
 
+    const isSuperEgg = Math.random() < 0.3;
+
+    if (isSuperEgg) {
+      console.log("Spawning super-egg!");
+    }
+
     // Create a new food item
-    const foodItem = new Food(xCoord, yCoord);
+    const foodItem = isSuperEgg
+      ? new superFood(xCoord, yCoord)
+      : new Food(xCoord, yCoord);
 
     // Add to the food array
     foodArray.push(foodItem);
@@ -40,9 +56,9 @@ export function drawFood(foodArray) {
     return;
   }
   // Get all existing food elements in the DOM
-  const existingFoodIds = Array.from(gameWrapper.querySelectorAll(".food")).map(
-    (foodElement) => foodElement.getAttribute("data-id")
-  );
+  const existingFoodIds = Array.from(
+    gameWrapper.querySelectorAll(".food, .super-food")
+  ).map((foodElement) => foodElement.getAttribute("data-id"));
 
   // Loop through each food item in the food array
   foodArray.forEach((foodItem) => {
@@ -55,20 +71,27 @@ export function drawFood(foodArray) {
     if (!foodElement) {
       foodElement = document.createElement("div");
       foodElement.id = foodId;
-      foodElement.className = "food";
+      foodElement.className = foodItem.isSuperEgg ? "super-food" : "food";
       foodElement.setAttribute("data-id", foodId);
 
       // Set styles for the food element
       foodElement.style.transform = `translate(-50%, -50%) translate(${
         (foodItem.x + 0.5) * globalSettings.gameSquareSize
       }px, ${(foodItem.y + 0.5) * globalSettings.gameSquareSize}px)`;
-      foodElement.style.width = `${globalSettings.food.width}px`;
-      foodElement.style.height = `${globalSettings.food.height}px`;
+      foodElement.style.width = foodItem.isSuperEgg
+        ? `${globalSettings.superFood.width}px`
+        : `${globalSettings.food.width}px`;
+      foodElement.style.height = foodItem.isSuperEgg
+        ? `${globalSettings.superFood.height}px`
+        : `${globalSettings.food.height}px`;
       foodElement.style.position = "absolute";
 
       // Add an image inside the food element
+
       const foodImage = document.createElement("img");
-      foodImage.src = globalSettings.food.src;
+      foodImage.src = foodItem.isSuperEgg
+        ? globalSettings.superFood.src // Special super-egg image
+        : globalSettings.food.src;
       foodImage.className = "food-image";
 
       // Append the image to the food element
@@ -100,26 +123,33 @@ export function drawFood(foodArray) {
 
 // Check if snake found food
 export function checkForFood(snakeHead) {
-  // Check if the head matches any food position
-  const foundFood = foodArray.some(
+  // Find the food item at the snake head position
+  const foodIndex = foodArray.findIndex(
     (foodItem) => foodItem.x === snakeHead.x && foodItem.y === snakeHead.y
   );
 
-  if (foundFood) {
+  if (foodIndex !== -1) {
+    const foundFood = foodArray[foodIndex];
+
     console.log("Found food!");
+
+    // Check if it is a superFood
+    const isSuperEgg = foundFood instanceof superFood;
+
     // Remove the eaten food from the array
     foodArray = foodArray.filter(
       (foodItem) => foodItem.x !== snakeHead.x || foodItem.y !== snakeHead.y
     );
+
     // Replace the eaten food with a new one
     placeFood(1);
 
-    // Return true to indicate food was eaten
-    return true;
+    // Return the type of food found
+    return isSuperEgg ? "superFood" : "food";
   }
 
-  // Return false if no food was eaten
-  return false;
+  // Return null if no food was eaten
+  return null;
 }
 
 // Generate random coordinates within the play area
