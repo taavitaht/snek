@@ -3,6 +3,7 @@
 export const globalSettings = {
 
     // Single player mode enabled
+    // Change to "false" and then ctrl+refresh browser for review question "The lead player can start the game once there are between 2 and 4 players."
     singlePlayerEnabled: true,
 
     // Time limit of each game in seconds
@@ -17,7 +18,7 @@ export const globalSettings = {
 
     // Game ticker settings
     initialGameInterval: 500,
-    minGameInterval: 150,
+    minGameInterval: 160,
     gameIntervalStep: 40,
     
     // Visual settings

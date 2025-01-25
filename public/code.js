@@ -213,13 +213,11 @@ export function startSockets() {
       }
     });
 
-    // TODO: figure out how to handle game end
     socket.on("end-game", function (snakes) {
       // Genereate game over div
       makeEndContainer(snakes);
       // After timeout reset game
       setTimeout(() => {
-        // TODO: erase all snakes from game field
         const startGameCountdown = app.querySelector(".countdown-container");
         startGameCountdown.classList.add("waiting");
         startGameCountdown.textContent = "Snek";

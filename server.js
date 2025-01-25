@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import http from "http";
 import { Server } from "socket.io";
-import { Snake } from "./components/players.js";
+import { Snake } from "./components/snakes.js";
 import { placeFood, foodArray } from "./components/food.js";
 import { globalSettings } from "./misc/gameSettings.js";
 
@@ -34,10 +34,6 @@ const pauseTimers = new Map();
 
 // Serve static files
 app.use(express.static(path.resolve()));
-
-//app.get("/", (req, res) => {
-//  res.sendFile(path.resolve("index.html"));
-//});
 
 // Handle socket connections
 io.on("connection", (socket) => {
@@ -132,7 +128,7 @@ io.on("connection", (socket) => {
 function startGameTimer() {
   console.log("starting game timer: ", gameTime);
   if (gameTimer) clearInterval(gameTimer);
-  gameTime = globalSettings.gameTime
+  gameTime = globalSettings.gameTime;
   gameTimer = setInterval(() => {
     if (gameTime > 0) {
       gameTime--;
@@ -186,9 +182,15 @@ function startGameTicker() {
       let foundFood = snake.move();
       // Speed up game if a snake found food
       if (foundFood) {
-        if (tickInterval > globalSettings.minGameInterval) {
-          let numOfPlayers = playerCountCheck()
-          changeTickInterval(tickInterval - (globalSettings.gameIntervalStep / numOfPlayers));
+        // Interval step size and fastest speed are dependent on number of players
+        let numOfPlayers = playerCountCheck();
+        if (tickInterval > globalSettings.minGameInterval + numOfPlayers * 10) {
+          tickInterval =
+            tickInterval - globalSettings.gameIntervalStep / numOfPlayers;
+          if (tickInterval < globalSettings.minGameInterval) {
+            tickInterval = globalSettings.minGameInterval;
+          }
+          changeTickInterval(tickInterval);
           console.log("tickInterval:", tickInterval);
         }
       }
@@ -467,7 +469,6 @@ function refreshPlayers() {
       }
     }
   }
-  //console.log("refreshed players:", players);
 }
 
 // Check if conditions are met to end game
@@ -475,14 +476,14 @@ function gameEndCheck() {
   let snakesLeft = playerCountCheck();
   // Multiplayer
   if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
-    io.emit("end-game", {serverSnakes});
+    io.emit("end-game", { serverSnakes });
     console.log("Game over, only 1 snake left");
     stopGameTicker();
     resetGameState();
   }
   // Singleplayer
   if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
-    io.emit("end-game", {serverSnakes});
+    io.emit("end-game", { serverSnakes });
     console.log("Game over, you died");
     stopGameTicker();
     resetGameState();
