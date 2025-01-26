@@ -16,7 +16,7 @@ import {
 export let socket;
 let link;
 if (!globalSettings.ngrok) {
-   link = `http://localhost:${globalSettings.port}`;
+  link = `http://localhost:${globalSettings.port}`;
 } else {
   link = globalSettings.ngrok;
 }
@@ -249,7 +249,7 @@ export function startSockets() {
     });
 
     socket.on("game-status-update", function (data) {
-      const container = document.querySelector(".congratulations-container");
+      const container = document.querySelector(".pause-container");
       const timerElement = container.querySelector(".pause-timer");
       if (!container) return;
       switch (data.status) {
@@ -296,7 +296,7 @@ export function startSockets() {
     socket.on("countdown-update", function (data) {
       const { username, pauseCountdown } = data;
 
-      const container = document.querySelector(".congratulations-container");
+      const container = document.querySelector(".pause-container");
       const timerElement = container.querySelector(".pause-timer");
       if (timerElement) {
         timerElement.textContent = `${pauseCountdown} seconds remaining in pause`;
@@ -304,7 +304,7 @@ export function startSockets() {
     });
 
     socket.on("pause-rejected", (data) => {
-      const container = document.querySelector(".congratulations-container");
+      const container = document.querySelector(".pause-container");
       const reasonElement = container.querySelector(".pause-reason");
       const resumeButton = container.querySelector(".resume-button");
       const pauseTitle = container.querySelector("h1");
@@ -325,7 +325,7 @@ export function startSockets() {
     });
 
     socket.on("resume-countdown", function (data) {
-      const container = document.querySelector(".congratulations-container");
+      const container = document.querySelector(".pause-container");
       const reasonElement = container.querySelector(".pause-reason");
       const timerElement = container.querySelector(".pause-timer");
 

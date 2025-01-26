@@ -1,7 +1,4 @@
-import {
-  congratulationsContainer,
-  mainContainer,
-} from "../components/gameContainer.js";
+import { pauseContainer, mainContainer } from "../components/gameContainer.js";
 import { waitingRoomContainer } from "../components/waitingRoom.js";
 import { startSockets } from "./code.js";
 
@@ -12,7 +9,7 @@ function openGame() {
     document.body.appendChild(app);
     app.appendChild(waitingRoomContainer);
     app.appendChild(mainContainer);
-    app.appendChild(congratulationsContainer);
+    app.appendChild(pauseContainer);
     resolve("success");
   });
 }

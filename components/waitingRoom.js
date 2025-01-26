@@ -47,7 +47,7 @@ const formInputUsername = document.createElement("div");
 formInputUsername.classList.add("form-input");
 
 const usernameLabel = document.createElement("label");
-usernameLabel.textContent = "Username";
+usernameLabel.textContent = "Insert your Username:";
 
 const usernameInput = document.createElement("input");
 usernameInput.type = "text";

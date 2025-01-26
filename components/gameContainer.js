@@ -31,13 +31,13 @@ gameUpdatesContainer.appendChild(gameUpdatesTitle);
 gameUpdatesContainer.appendChild(liveUpdates);
 
 // Pause menu main container
-export const congratulationsContainer = document.createElement("div");
-congratulationsContainer.classList.add("congratulations-container", "hidden");
+export const pauseContainer = document.createElement("div");
+pauseContainer.classList.add("pause-container", "hidden");
 
 // Containers
 
-const congratulationsContainerMain = document.createElement("div");
-congratulationsContainerMain.classList.add("congratulations-container-main");
+const pauseContainerMain = document.createElement("div");
+pauseContainerMain.classList.add("pause-container-main");
 
 const buttonMenuContainer = document.createElement("div");
 buttonMenuContainer.classList.add("button-menu-container");
@@ -65,13 +65,11 @@ quitButton.classList.add("quit-button");
 quitButton.textContent = "Quit";
 // Append elements to the pause menu container
 
-congratulationsContainer.appendChild(congratulationsContainerMain);
-congratulationsContainerMain.appendChild(pauseTitle);
-congratulationsContainerMain.appendChild(pauseMenuContainer);
-
+pauseContainer.appendChild(pauseContainerMain);
+pauseContainerMain.appendChild(pauseTitle);
+pauseContainerMain.appendChild(pauseMenuContainer);
 pauseMenuContainer.appendChild(pauseTimer);
 pauseMenuContainer.appendChild(pauseReason);
-
 pauseMenuContainer.appendChild(buttonMenuContainer);
 buttonMenuContainer.appendChild(resumeButton);
 buttonMenuContainer.appendChild(quitButton);
