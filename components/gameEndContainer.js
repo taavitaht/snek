@@ -25,7 +25,8 @@ export function makeEndContainer(snakes) {
         }
       }
     });
-    if (count === 1) { reason = "mp"; }
+    if (count === 1) { reason = "last"; }
+    if (count === 0) { reason = "tie"; }
     // Figure out winner(s)
     Object.values(snakes.serverSnakes).forEach((snake) => {
       if (snake.score == highestScore && !snake.crashed) {
@@ -55,8 +56,10 @@ export function makeEndContainer(snakes) {
     endReason.textContent = "You crashed into a wall";
   } else if (reason == "itself") {
     endReason.textContent = "You crashed into yourself";
-  } else if (reason == "mp") {
+  } else if (reason == "last") {
     endReason.textContent = "One Snake Remained";
+  } else if (reason == "tie") {
+    endReason.textContent = "DRAW!"
   }
   endContainer.appendChild(endReason);
 
