@@ -494,7 +494,7 @@ function gameEndCheck() {
   if (Object.entries(serverSnakes).length > 1 && (snakesLeft == 1 || snakesLeft == 0)) {
     gameStarted = false;
     io.emit("end-game", { serverSnakes });
-    console.log("Game over, only 1 or 0 snake left");
+    console.log("Game over, no more competitors left");
     stopGameTicker();
     resetGameState();
   }

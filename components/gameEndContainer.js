@@ -3,18 +3,21 @@ import { mySnake } from "../public/code.js";
 export function makeEndContainer(snakes) {
   // Figure out game end reason and scores
   let highestScore = 0;
+  let highestSteps = 0;
   let winners = [];
   let reason = "";
   const snakeCount = Object.keys(snakes.serverSnakes).length;
 
   // Singleplayer (reason is time/wall/snake)
   if (snakeCount == 1) {
+    console.log("Single player");
     reason = snakes.serverSnakes[1].crashed;
     highestScore = snakes.serverSnakes[1].score;
     winners = [snakes.serverSnakes[1].username];
   }
-  // Multiplayer (reason is time/1 snake left)
+  // Multiplayer (reason is time/1(0) snake left)
   else {
+    console.log("Multiplayer");
     // If time runs out
     Object.values(snakes.serverSnakes).forEach((snake) => {
       // Loop snakes that made it until the time ran out
@@ -28,6 +31,7 @@ export function makeEndContainer(snakes) {
 
     // Winner is living snake(s) with highest score
     if (reason == "time") {
+      console.log("Time");
       Object.values(snakes.serverSnakes).forEach((snake) => {
         if (snake.score == highestScore && snake.crashed == "time") {
           winners.push(snake.username);
@@ -36,26 +40,38 @@ export function makeEndContainer(snakes) {
     }
     // All (but one) crashed before time ran out. Winner is last survivor(s)
     else {
-      // Get highest steps value
+      console.log("Crashed before time ran out");
+      // Did 1 snake not crash before time ran out?
       Object.values(snakes.serverSnakes).forEach((snake) => {
-        if (snake.steps > highestScore) {
-          highestScore = snake.steps;
+        if (highestScore < snake.score) {
+          highestScore = snake.score;
+        }
+        // If 1 snake left alive
+        if (!snake.crashed) {
+          highestScore = snake.score;
+          winners.push(snake.username);
+          reason = "last";
         }
       });
-      // Figure out winner(s)
-      Object.values(snakes.serverSnakes).forEach((snake) => {
-        
-          if (snake.steps == highestScore) {
-             winners.push(snake.username);
-            if (!reason) {           
-            reason = "last"
-          } else {
-            reason = "tie"
+
+      // If multiple snakes crashed on last game tick, get ones with highest steps values
+      if (!reason) {
+        Object.values(snakes.serverSnakes).forEach((snake) => {
+          if (snake.steps > highestSteps) {
+            highestSteps = snake.steps;
           }
-        }
-      });
+        });
+        // Figure out winners
+        Object.values(snakes.serverSnakes).forEach((snake) => {
+          if (snake.steps == highestSteps) {
+            winners.push(snake.username);
+            reason = "tie";
+          }
+        });
+      }
     }
   }
+  console.log("Reason: " + reason);
   // Create the container element
   const endContainer = document.createElement("div");
   endContainer.classList.add("end-container");
@@ -89,7 +105,11 @@ export function makeEndContainer(snakes) {
   endContainer.appendChild(playerScore);
 
   const winner = document.createElement("div");
-  winner.textContent = `Winner(s): ${winners}`;
+  if (reason != "tie") {
+  winner.textContent = `Winner: ${winners}`;
+  } else {
+    winner.textContent = `Tie between: ${winners}`;
+  }
   endContainer.appendChild(winner);
 
   // Did I win?

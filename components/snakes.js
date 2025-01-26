@@ -11,7 +11,7 @@ export class Snake {
     this.direction = determineDirection(this.segments); // Use segments to determine direction
     this.score = 0;
     this.crashed;
-    this.steps;
+    this.steps = 0;
   }
   // Method to get coordinates of snake head
   get position() {

@@ -35,7 +35,7 @@ export function placeFood(count) {
     const isSuperEgg = Math.random() < 0.3;
 
     if (isSuperEgg) {
-      console.log("Spawning super-egg!");
+      //console.log("Spawning super-egg!");
     }
 
     // Create a new food item
