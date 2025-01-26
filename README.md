@@ -21,7 +21,7 @@ Follow the steps below to install and run the Bomberman-DOM game:
    `git clone <repository-url>`
 
 2. Navigate into the project folder:
-   `cd WEB-GAME`
+   `cd web-game`
 
 3. Install the required dependencies:
    `npm install`
@@ -30,8 +30,7 @@ Follow the steps below to install and run the Bomberman-DOM game:
    `node server.js`
 
 5. Open your preferred browser and visit:
-   [localhost:5000](http://localhost:5000)
-
+   <a href="http://localhost:5000" target="_blank">localhost:5000</a>
 ## Usage
 
 Use a web browser to access the URL and join the lobby with a unique username.
