@@ -34,7 +34,7 @@ Follow the steps below to install and run the Bomberman-DOM game:
 
 ## Usage
 
-The game begins upon visiting the URL and joining the lobby with a username.
+Use a web browser to access the URL and join the lobby with a unique username.
 Navigate your snake using the keyboard arrow keys.
 Press the 'esc' button to pause, then quit if desired.
 Time remaining, score, and game updates are displayed at left. 
