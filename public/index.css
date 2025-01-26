@@ -27,7 +27,7 @@ body {
   grid-template-columns: 1fr 1fr;
   /* Equal widths for info and players */
   width: 90%;
-  height: 90%;
+  height: 100%;
   gap: 10px;
   /* Optional gap between grid items */
   z-index: 15;
@@ -44,7 +44,6 @@ body {
   height: 100%;
   color: black;
   font-size: xx-large;
-  border: 3px rgb(187, 0, 255) solid;
 }
 
 .join-container {
@@ -58,7 +57,7 @@ body {
   flex-direction: column;
   align-items: center;
   overflow-y: auto;
-  border: 3px rgb(255, 145, 0) solid;
+
   position: relative;
   z-index: 16;
 }
@@ -69,16 +68,16 @@ body {
 }
 
 .form h2 {
-  margin-top: 200px;
-  text-align: center;
+  margin-top: 55px;
+  text-align: left;
   font-size: 28px;
 }
 
 .form-input {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: left;
+  align-items: left;
 }
 
 .form-input label {
@@ -127,16 +126,14 @@ body {
 }
 
 .game-info-container {
-  grid-area: info;
-  border: 3px #2196f3 solid;
-  display: grid;
-  grid-template-areas:
-    "title title"
-    "controls extras";
-  grid-template-rows: 100px 1fr 10px;
-  grid-template-columns: 49% 49%;
-  grid-gap: 5px;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  padding: 20px;
+
+  border-radius: 10px;
 }
 
 .main-container {
@@ -443,4 +440,54 @@ body {
   align-items: center;
   border-radius: 10px;
   z-index: 999;
+}
+
+.game-info-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 10px;
+}
+
+.synopsis-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 15px;
+}
+
+.game-info-title + h4 {
+  font-size: 1.2rem;
+  color: #666666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  width: 500px;
+}
+
+.game-instructions {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-bottom: 20px;
+  width: 500px;
+}
+
+.game-instructions li {
+  font-size: 1rem;
+  color: #333333;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.game-instructions li img {
+  display: block;
+  margin: 10px auto 0;
+  width: 100px;
+  height: auto;
+}
+
+.synopsis-text {
+  font-size: 20px;
+  font-weight: bold;
 }
