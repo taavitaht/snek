@@ -1,12 +1,15 @@
 # Snek
 
-Snek is a multi or single player game to collect the most eggs before time runs out. But watch out, touching a wall, another player, or your own tail is lethal!
+Snek is a multi or single player game to collect the most eggs before time runs out. But watch out: touching a wall, another player, or your own tail is lethal!
 
 ## Features:
 
 Real-time multiplayer functionality
+
 Interactive 
-Bonuses
+
+Special Eggs
+
 Confetti 
 
 
@@ -43,8 +46,9 @@ First, download and install ngrok:
 
 Then sign up for a free account at https://ngrok.com/ and copy your authtoken from the Dashboard.
 
-Run the following command to authenticate your account:
+Finally, run the following command to authenticate your account:
    `ngrok config add-authtoken YOUR_AUTHTOKEN`
+
 
 To play online against others:
 1. Start ngrok for port 5000
@@ -53,7 +57,7 @@ To play online against others:
 2. Copy the provided ngrok URL into the ngrok field of misc/gameSettings.js
 
    `// Ngrok link. Leave blank to only use localhost`
-   
+
    `ngrok: "[your ngrok link]",`
 3. Start the server as normal
-4. Send the ngrok URL 
+4. Send the ngrok URL to others and let the games begin!
