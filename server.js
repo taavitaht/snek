@@ -11,9 +11,13 @@ import { globalSettings } from "./misc/gameSettings.js";
 const app = express();
 const server = http.createServer(app);
 const port = globalSettings.port;
+const link = globalSettings.ngrok;
+if (!link) {
+  link = `http://localhost:${port}`;
+}
 const io = new Server(server, {
   cors: {
-    origin: "https://7399-80-235-50-7.ngrok-free.app/",
+    origin: link,
     methods: ["GET", "POST"],
   },
 });
@@ -30,7 +34,6 @@ let playerKeypresses = {};
 let gameInterval;
 let gameTime = globalSettings.gameTime; //should be set in globalSettings
 
-//let tickInterval = 500; // Time between game ticks in milliseconds
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
@@ -40,7 +43,7 @@ const pauseTimers = new Map();
 
 // Cors
 const corsOptions = {
-  origin: "https://7399-80-235-50-7.ngrok-free.app/",
+  origin: link,
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
@@ -514,7 +517,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

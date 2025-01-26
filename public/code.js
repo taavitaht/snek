@@ -14,6 +14,10 @@ import {
 } from "../components/gameEndContainer.js";
 
 export let socket;
+const link = globalSettings.ngrok;
+if (!link) {
+  link = `http://localhost:${port}`;
+}
 let myUsername;
 let myPlayerNumber;
 let map;
@@ -25,7 +29,7 @@ let oldFood = [];
 // Connect to server
 export function startSockets() {
   const app = document.querySelector(".app");
-  socket = io(`https://7399-80-235-50-7.ngrok-free.app`, {
+  socket = io(link, {
     reconnection: false, // Disable auto-reconnection
   });
   // Join button in the waiting room
