@@ -1,16 +1,14 @@
-# Bomberman-DOM
+# Snek
 
-Bomberman-DOM is an engaging multiplayer game developed using a custom-built framework. This game is further enhanced with live chat functionality using Socket.IO, adding an interactive, social component to the gaming experience. The players can chat in real-time while navigating through the game, making it more enjoyable and collaborative.
+Snek is a multi or single player game to collect the most eggs before time runs out. But watch out, touching a wall, another player, or your own tail is lethal!
 
 ## Features:
 
-Real-time multiplayer functionality.
-Live chat for in-game communication.
-Developed using a custom-built game framework.
-Interactive Bomberman game.
-Prerequisites
-Node.js (version 20.2.0 or higher)
-NPM (version 7.0.0 or higher)
+Real-time multiplayer functionality
+Interactive 
+Bonuses
+Confetti 
+
 
 ## Installation and Running
 
@@ -20,7 +18,7 @@ Follow the steps below to install and run the Bomberman-DOM game:
    `git clone <repository-url>`
 
 2. Navigate into the project folder:
-   `cd bomberman-dom`
+   `cd WEB-GAME`
 
 3. Install the required dependencies:
    `npm install`
@@ -33,14 +31,29 @@ Follow the steps below to install and run the Bomberman-DOM game:
 
 ## Usage
 
-The game begins upon visiting the URL and joining the chatroom with a username.
-Navigate your Bomberman using the keyboard controls.
-Engage in real-time chat for collaborative strategies or casual conversation.
-The multiplayer functionality allows you to play and interact with others in real-time.
-Press the 'exit' button to leave the chatroom at any time.
-Contribution
-Contributions are always welcome! Please read the contribution guidelines first.
+The game begins upon visiting the URL and joining the lobby with a username.
+Navigate your snake using the keyboard arrow keys.
+Press the 'esc' button to pause, then quit if desired.
+Time remaining, score, and game updates are displayed at left. 
 
-## License
+## Ngrok
 
-This project is MIT licensed.
+First, download and install ngrok:
+   `npm install ngrok`
+
+Then sign up for a free account at https://ngrok.com/ and copy your authtoken from the Dashboard.
+
+Run the following command to authenticate your account:
+   `ngrok config add-authtoken YOUR_AUTHTOKEN`
+
+To play online against others:
+1. Start ngrok for port 5000
+
+   `ngrok http 5000`
+2. Copy the provided ngrok URL into the ngrok field of misc/gameSettings.js
+
+   `// Ngrok link. Leave blank to only use localhost`
+   
+   `ngrok: "[your ngrok link]",`
+3. Start the server as normal
+4. Send the ngrok URL 
