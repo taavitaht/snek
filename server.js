@@ -13,7 +13,7 @@ const server = http.createServer(app);
 const port = globalSettings.port;
 const link = globalSettings.ngrok;
 if (!link) {
-  link = `http://localhost:${port}`;
+  const link = `http://localhost:${port}`;
 }
 const io = new Server(server, {
   cors: {

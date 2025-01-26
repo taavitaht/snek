@@ -14,9 +14,11 @@ import {
 } from "../components/gameEndContainer.js";
 
 export let socket;
-const link = globalSettings.ngrok;
-if (!link) {
-  link = `http://localhost:${port}`;
+let link;
+if (!globalSettings.ngrok) {
+   link = `http://localhost:${globalSettings.port}`;
+} else {
+  link = globalSettings.ngrok;
 }
 let myUsername;
 let myPlayerNumber;
