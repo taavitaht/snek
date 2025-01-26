@@ -4,7 +4,7 @@ export function makeEndContainer(snakes) {
   // Figure out game end reason and scores
   let highestScore = 0;
   let winners = [];
-  let reason = "time";
+  let reason = "";
   const snakeCount = Object.keys(snakes.serverSnakes).length;
 
   // Singleplayer (reason is time/wall/snake)
@@ -15,26 +15,47 @@ export function makeEndContainer(snakes) {
   }
   // Multiplayer (reason is time/1 snake left)
   else {
-    let count = 0;
-    // Get highest score
+    // If time runs out
     Object.values(snakes.serverSnakes).forEach((snake) => {
-      if (!snake.crashed) {
-        count++;
+      // Loop snakes that made it until the time ran out
+      if (snake.crashed == "time") {
+        reason = "time";
         if (snake.score > highestScore) {
           highestScore = snake.score;
         }
       }
     });
-    if (count === 1) { reason = "last"; }
-    if (count === 0) { reason = "tie"; }
-    // Figure out winner(s)
-    Object.values(snakes.serverSnakes).forEach((snake) => {
-      if (snake.score == highestScore && !snake.crashed) {
-        winners.push(snake.username);
-      }
-    });
-  }
 
+    // Winner is living snake(s) with highest score
+    if (reason == "time") {
+      Object.values(snakes.serverSnakes).forEach((snake) => {
+        if (snake.score == highestScore && snake.crashed == "time") {
+          winners.push(snake.username);
+        }
+      });
+    }
+    // All (but one) crashed before time ran out. Winner is last survivor(s)
+    else {
+      // Get highest steps value
+      Object.values(snakes.serverSnakes).forEach((snake) => {
+        if (snake.steps > highestScore) {
+          highestScore = snake.steps;
+        }
+      });
+      // Figure out winner(s)
+      Object.values(snakes.serverSnakes).forEach((snake) => {
+        
+          if (snake.steps == highestScore) {
+             winners.push(snake.username);
+            if (!reason) {           
+            reason = "last"
+          } else {
+            reason = "tie"
+          }
+        }
+      });
+    }
+  }
   // Create the container element
   const endContainer = document.createElement("div");
   endContainer.classList.add("end-container");
@@ -59,7 +80,7 @@ export function makeEndContainer(snakes) {
   } else if (reason == "last") {
     endReason.textContent = "One Snake Remained";
   } else if (reason == "tie") {
-    endReason.textContent = "DRAW!"
+    endReason.textContent = "DRAW!";
   }
   endContainer.appendChild(endReason);
 

@@ -41,13 +41,14 @@ const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
 
-// Cors
+// Cors TODO: Remove?
 const corsOptions = {
   origin: link,
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
+app.use(cors());
 
 // Serve static files
 app.use(express.static(path.resolve()));
@@ -285,7 +286,7 @@ function resetGameState() {
   playerKeypresses = {};
   serverSnakes = {};
   foodArray.length = 0;
-  gameStarted = false;
+  //gameStarted = false;
   activePauses.clear();
   pauseTimers.clear();
 }
@@ -491,6 +492,7 @@ function gameEndCheck() {
   let snakesLeft = playerCountCheck();
   // Multiplayer
   if (Object.entries(serverSnakes).length > 1 && (snakesLeft == 1 || snakesLeft == 0)) {
+    gameStarted = false;
     io.emit("end-game", { serverSnakes });
     console.log("Game over, only 1 or 0 snake left");
     stopGameTicker();
@@ -498,6 +500,7 @@ function gameEndCheck() {
   }
   // Singleplayer
   if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
+    gameStarted = false;
     io.emit("end-game", { serverSnakes });
     console.log("Game over, you died");
     stopGameTicker();
@@ -505,7 +508,7 @@ function gameEndCheck() {
   }
   // Time runs out
   if (gameStarted && gameTime <= 0) {
-    // Alive snakes.crashed = "time"
+    gameStarted = false;
     playerCountCheck("time");
     io.emit("end-game", { serverSnakes });
     console.log("Game over, time ran out");

@@ -11,6 +11,7 @@ export class Snake {
     this.direction = determineDirection(this.segments); // Use segments to determine direction
     this.score = 0;
     this.crashed;
+    this.steps;
   }
   // Method to get coordinates of snake head
   get position() {
@@ -27,6 +28,7 @@ export class Snake {
     if (this.crashed) {
       return;
     }
+    this.steps += 1;
     const newHead = { ...this.position }; // Copy the current head position
     let foundFood = false;
 
