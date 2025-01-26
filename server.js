@@ -487,9 +487,9 @@ function refreshPlayers() {
 function gameEndCheck() {
   let snakesLeft = playerCountCheck();
   // Multiplayer
-  if (Object.entries(serverSnakes).length > 1 && snakesLeft == 1) {
+  if (Object.entries(serverSnakes).length > 1 && (snakesLeft == 1 || snakesLeft == 0)) {
     io.emit("end-game", { serverSnakes });
-    console.log("Game over, only 1 snake left");
+    console.log("Game over, only 1 or 0 snake left");
     stopGameTicker();
     resetGameState();
   }
