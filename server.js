@@ -13,7 +13,7 @@ const server = http.createServer(app);
 const port = globalSettings.port;
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://7399-80-235-50-7.ngrok-free.app/",
     methods: ["GET", "POST"],
   },
 });
@@ -40,7 +40,7 @@ const pauseTimers = new Map();
 
 // Cors
 const corsOptions = {
-  origin: "*",
+  origin: "https://7399-80-235-50-7.ngrok-free.app/",
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
@@ -118,18 +118,20 @@ io.on("connection", (socket) => {
 
   // Start game button was pressed
   socket.on("start-game-button", () => {
-    gameStarted = true;
-    resetGameState();
-    startGameCountdown();
-    // Create new snakes
-    io.sockets.sockets.forEach((connected) => {
-      // Make sure connection is properly initialized
-      if (connected.playerNumber && connected.username) {
-        const snake = new Snake(connected.playerNumber, connected.username);
-        serverSnakes[connected.playerNumber] = snake;
-        placeFood(globalSettings.food.count); //X food items per snake
-      }
-    });
+    if (!gameStarted) {
+      gameStarted = true;
+      resetGameState();
+      startGameCountdown();
+      // Create new snakes
+      io.sockets.sockets.forEach((connected) => {
+        // Make sure connection is properly initialized
+        if (connected.playerNumber && connected.username) {
+          const snake = new Snake(connected.playerNumber, connected.username);
+          serverSnakes[connected.playerNumber] = snake;
+          placeFood(globalSettings.food.count); //X food items per snake
+        }
+      });
+    }
   });
 
   // Handle game status updates
@@ -512,7 +514,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {});
+io.on("connection", (socket) => { });
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

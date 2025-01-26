@@ -18,17 +18,17 @@ export function makeEndContainer(snakes) {
     let count = 0;
     // Get highest score
     Object.values(snakes.serverSnakes).forEach((snake) => {
-      if (snake.score > highestScore) {
-        highestScore = snake.score;
-        if (!snake.crashed) {
-          count++;
+      if (!snake.crashed) {
+        count++;
+        if (snake.score > highestScore) {
+          highestScore = snake.score;
         }
       }
     });
     if (count === 1) { reason = "mp"; }
     // Figure out winner(s)
     Object.values(snakes.serverSnakes).forEach((snake) => {
-      if (snake.score == highestScore) {
+      if (snake.score == highestScore && !snake.crashed) {
         winners.push(snake.username);
       }
     });
@@ -56,7 +56,7 @@ export function makeEndContainer(snakes) {
   } else if (reason == "itself") {
     endReason.textContent = "You crashed into yourself";
   } else if (reason == "mp") {
-    endReason.textContent = "No more competitors left";
+    endReason.textContent = "One Snake Remained";
   }
   endContainer.appendChild(endReason);
 

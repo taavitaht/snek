@@ -25,7 +25,7 @@ let oldFood = [];
 // Connect to server
 export function startSockets() {
   const app = document.querySelector(".app");
-  socket = io(`http://localhost:${globalSettings.port}`, {
+  socket = io(`https://7399-80-235-50-7.ngrok-free.app`, {
     reconnection: false, // Disable auto-reconnection
   });
   // Join button in the waiting room
