@@ -382,7 +382,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         pauseUsed: playerPauseInfo.pauseUsed,
       });
 
-      let resumeCountdown = 10;
+      let resumeCountdown = 5;
       const countdownInterval = setInterval(() => {
         io.emit("resume-countdown", {
           username,
@@ -520,7 +520,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {});
+io.on("connection", (socket) => { });
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });
