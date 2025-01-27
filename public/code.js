@@ -328,6 +328,11 @@ export function startSockets() {
       const container = document.querySelector(".pause-container");
       const reasonElement = container.querySelector(".pause-reason");
       const timerElement = container.querySelector(".pause-timer");
+      const resumeButton = container.querySelector(".resume-button");
+
+      if (resumeButton) {
+        resumeButton.classList.add("hidden");
+      }
 
       if (reasonElement) {
         reasonElement.classList.remove("hidden");
@@ -478,5 +483,4 @@ function resetGame() {
   updates.forEach((element) => {
     element.remove();
   });
-
 }
