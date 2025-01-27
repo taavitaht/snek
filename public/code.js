@@ -253,6 +253,7 @@ export function startSockets() {
 
     const resumeButton = document.querySelector(".resume-button");
     resumeButton.addEventListener("click", () => {
+      resumeButton.textContent = "";
       socket.emit("game-resumed");
     });
 

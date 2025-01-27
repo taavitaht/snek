@@ -304,6 +304,9 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         resumeCountdownInterval = null;
       }
 
+      io.emit("resume-countdown", {
+        message: "",
+      });
       let playerPauseInfo = activePauses.get(username) || {
         paused: false,
         pauseUsed: false,
