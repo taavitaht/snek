@@ -11,9 +11,9 @@ import { globalSettings } from "./misc/gameSettings.js";
 const app = express();
 const server = http.createServer(app);
 const port = globalSettings.port;
-const link = globalSettings.ngrok;
+let link = globalSettings.ngrok;
 if (!link) {
-  const link = `http://localhost:${port}`;
+  link = `http://localhost:${port}`;
 }
 const io = new Server(server, {
   cors: {
@@ -527,5 +527,6 @@ io.sockets.sockets.forEach((socket) => {
 
 // Start server
 server.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
+  //console.log(`App listening at http://localhost:${port}`);
+  console.log(`Server running at ${link}`);
 });

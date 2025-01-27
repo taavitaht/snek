@@ -10,14 +10,12 @@ export function makeEndContainer(snakes) {
 
   // Singleplayer (reason is time/wall/snake)
   if (snakeCount == 1) {
-    console.log("Single player");
     reason = snakes.serverSnakes[1].crashed;
     highestScore = snakes.serverSnakes[1].score;
     winners = [snakes.serverSnakes[1].username];
   }
   // Multiplayer (reason is time/1(0) snake left)
   else {
-    console.log("Multiplayer");
     // If time runs out
     Object.values(snakes.serverSnakes).forEach((snake) => {
       // Loop snakes that made it until the time ran out
@@ -31,7 +29,6 @@ export function makeEndContainer(snakes) {
 
     // Winner is living snake(s) with highest score
     if (reason == "time") {
-      console.log("Time");
       Object.values(snakes.serverSnakes).forEach((snake) => {
         if (snake.score == highestScore && snake.crashed == "time") {
           winners.push(snake.username);
@@ -40,7 +37,6 @@ export function makeEndContainer(snakes) {
     }
     // All (but one) crashed before time ran out. Winner is last survivor(s)
     else {
-      console.log("Crashed before time ran out");
       // Did 1 snake not crash before time ran out?
       Object.values(snakes.serverSnakes).forEach((snake) => {
         if (highestScore < snake.score) {
@@ -71,7 +67,6 @@ export function makeEndContainer(snakes) {
       }
     }
   }
-  console.log("Reason: " + reason);
   // Create the container element
   const endContainer = document.createElement("div");
   endContainer.classList.add("end-container");

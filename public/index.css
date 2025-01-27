@@ -25,11 +25,9 @@ body {
     "info players";
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr 1fr;
-  /* Equal widths for info and players */
   width: 90%;
   height: 100%;
   gap: 10px;
-  /* Optional gap between grid items */
   z-index: 15;
 }
 
@@ -263,6 +261,8 @@ body {
 
 #start-game-button {
   grid-area: start-button;
+  border-radius: 10px;
+  font-size: xx-large;
 }
 
 .players-waiting-container {
@@ -277,7 +277,7 @@ body {
     "player-2-card"
     "player-3-card"
     "player-4-card";
-  grid-template-rows: 30px 1fr 1fr 1fr 1fr 5px;
+  grid-template-rows: 0.2fr 1fr 1fr 1fr 1fr 5px;
   grid-gap: 10px;
   justify-content: center;
   grid-template-columns: 95%;
@@ -287,10 +287,30 @@ body {
 
 .player-card {
   z-index: 16;
-  border: 1px solid green;
+  border: 3px solid green;
   justify-content: center;
+  align-items: center;
+  display: flex;
   overflow: hidden;
+  text-align: center;
+  font-size: xx-large;
+  border-radius: 10px;
+  padding: 10%;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
 }
+.player-1-card{
+  border: 3px solid rgba(0, 128, 0);
+}
+.player-2-card{
+  border: 3px solid rgba(0, 0, 255);
+}
+.player-3-card{
+  border: 3px solid rgba(255, 0, 0);
+}
+.player-4-card{
+  border: 3px solid rgba(255, 255, 0);
+}
+
 
 .pause-container {
   z-index: 20;
@@ -447,6 +467,7 @@ body {
   font-weight: bold;
   color: #333333;
   margin-bottom: 10px;
+  font-size: x-large;
 }
 
 .synopsis-info {
@@ -456,6 +477,7 @@ body {
   gap: 10px;
   text-align: center;
   padding: 15px;
+  font-size: x-large;
 }
 
 .game-info-title + h4 {

@@ -121,7 +121,7 @@ gameTitle.textContent = "Welcome to Snek!";
 const gameTitle2 = document.createElement("h4");
 gameTitle.classList.add("game-info-title");
 gameTitle2.textContent =
-  "You are very hungry snek on a mission to eat as much as possible. Food is life, other players and walls are not.";
+  "You are a very hungry snek on a mission to eat as much as possible. Food is life, other players and walls are not.";
 
 // Create the game synopsis text
 const synopsisText = document.createElement("p");
@@ -135,7 +135,7 @@ const instruction1 = document.createElement("li");
 instruction1.textContent = "Move Snek with arrow keys. ";
 
 const instruction2 = document.createElement("li");
-instruction2.textContent = "Eat the food to grow bigger.";
+instruction2.textContent = "Eat food to grow bigger.";
 
 const instruction3 = document.createElement("li");
 instruction3.textContent = "The more you eat, the higher your score";
@@ -146,9 +146,12 @@ instruction4.textContent = "Don't eat yourself! Cannibalism ends the game!";
 const instruction5 = document.createElement("li");
 instruction5.textContent = "Don't hit the walls! They are bad for your health!";
 
-const instruction6 = document.createElement("li");
-instruction6.textContent =
-  "Wins the snake who has the highest score and the end of the game!";
+const instruction6a = document.createElement("li");
+instruction6a.textContent =
+  "Winner is snake with the highest score after match time runs out!";
+const instruction6b = document.createElement("li");
+instruction6b.textContent =
+  "If game ends before time runs out, the last survivor wins!";
 const instruction7 = document.createElement("li");
 instruction7.textContent =
   "This egg gives you double points!! Try to get it as much as possible!";
@@ -163,7 +166,8 @@ gameInstructions.append(
   instruction3,
   instruction4,
   instruction5,
-  instruction6,
+  instruction6a,
+  instruction6b,
   instruction7
 );
 // Add game title and text to the synopsis container
