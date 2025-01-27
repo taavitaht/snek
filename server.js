@@ -40,6 +40,7 @@ let gameStarted = false;
 const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
+let resumeCountdownInterval = null;
 
 // Cors
 app.use(cors());
@@ -211,7 +212,7 @@ function startGameTicker() {
           if (tickInterval < globalSettings.minGameInterval) {
             tickInterval = globalSettings.minGameInterval;
           }
-          tickInterval = Math.round(tickInterval)
+          tickInterval = Math.round(tickInterval);
           changeTickInterval(tickInterval);
           console.log("tickInterval:", tickInterval);
         }
@@ -242,6 +243,7 @@ function changeTickInterval(newInterval) {
 
 // Stop the game ticker
 function stopGameTicker() {
+  console.log("Stopping game ticker");
   clearInterval(gameInterval);
 }
 
@@ -297,6 +299,11 @@ function resetGameState() {
 function handleGameStatus(socket, event, username, status, remainingTime) {
   switch (status) {
     case "paused": {
+      if (resumeCountdownInterval) {
+        clearInterval(resumeCountdownInterval);
+        resumeCountdownInterval = null;
+      }
+
       let playerPauseInfo = activePauses.get(username) || {
         paused: false,
         pauseUsed: false,
@@ -309,9 +316,6 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         return;
       }
 
-      stopGameTicker();
-      pauseGameTimer();
-
       if (playerPauseInfo.paused) {
         socket.emit("pause-rejected", {
           reason: "You can only pause once per game.",
@@ -319,13 +323,22 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         return;
       }
 
+      stopGameTicker();
+      pauseGameTimer();
+
       activePauses.set(username, { paused: true, pauseUsed: true });
+
+      console.log("Emitting paused:", {
+        status: "paused",
+        pausedBy: username,
+      });
 
       io.emit("game-status-update", {
         status,
         username,
         remainingTime,
         message: `${username} paused the game`,
+        pausedBy: username,
       });
 
       io.emit("live-game-update", {
@@ -366,15 +379,6 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
     case "resumed": {
       const playerPauseInfo = activePauses.get(username);
 
-      if (playerPauseInfo) {
-        if (!playerPauseInfo.paused) {
-          socket.emit("pause-rejected", {
-            reason: "You have used your pause already.",
-          });
-          return;
-        }
-      }
-
       const interval = pauseTimers.get(username);
       if (interval) {
         clearInterval(interval);
@@ -388,8 +392,14 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         });
       }
 
+      if (resumeCountdownInterval) {
+        clearInterval(resumeCountdownInterval);
+        resumeCountdownInterval = null;
+      }
+
       let resumeCountdown = 5;
-      const countdownInterval = setInterval(() => {
+
+      resumeCountdownInterval = setInterval(() => {
         io.emit("resume-countdown", {
           username,
           remainingTime: resumeCountdown,
@@ -403,7 +413,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         resumeCountdown--;
 
         if (resumeCountdown < 0) {
-          clearInterval(countdownInterval);
+          clearInterval(resumeCountdownInterval);
+          resumeCountdownInterval = null;
 
           startGameTicker();
           resumeGameTimer();

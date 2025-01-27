@@ -249,18 +249,36 @@ export function startSockets() {
       }, 5000);
     });
 
+    pauseMenu(socket);
+
+    const resumeButton = document.querySelector(".resume-button");
+    resumeButton.addEventListener("click", () => {
+      socket.emit("game-resumed");
+    });
+
     socket.on("game-status-update", function (data) {
       const container = document.querySelector(".pause-container");
       const timerElement = container.querySelector(".pause-timer");
+
       if (!container) return;
       switch (data.status) {
         case "paused":
+          isPaused = true;
+          console.log("Received game-status-update:", data);
+          console.log("myUsername is:", myUsername);
+
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message}`;
           if (timerElement) {
             timerElement.style.display = "block";
           }
-          isPaused = true;
+
+          if (data.pausedBy === myUsername) {
+            resumeButton.classList.remove("hidden");
+          } else {
+            resumeButton.classList.add("hidden");
+          }
+
           break;
 
         case "resumed":
@@ -279,7 +297,6 @@ export function startSockets() {
       }
     });
 
-    pauseMenu(socket);
     // for sound effects
     socket.on("play-sound", (data) => {
       if (data.sound === "start-game-sound") {
@@ -473,6 +490,7 @@ function resetGame() {
   // Show waiting room
   removeEndContainer();
   resetPauseUI();
+  resetEscapePressed();
   const waitingRoom = app.querySelector(".waiting-room-container");
   waitingRoom.style.display = "grid";
   // Erase all snakes
