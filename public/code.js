@@ -27,6 +27,7 @@ export let snakes = {};
 export let mySnake;
 let numOfPlayers;
 let oldFood = [];
+let isPaused = false;
 
 // Connect to server
 export function startSockets() {
@@ -259,6 +260,7 @@ export function startSockets() {
           if (timerElement) {
             timerElement.style.display = "block";
           }
+          isPaused = true;
           break;
 
         case "resumed":
@@ -266,6 +268,7 @@ export function startSockets() {
           if (timerElement) {
             timerElement.style.display = "none";
           }
+          isPaused = false;
           break;
 
         case "quit":
@@ -422,7 +425,10 @@ function pauseMenu(socket) {
 
 function checkForEscape() {
   if (escapePressed) {
-    socket.emit("game-paused");
+    if (!isPaused) {
+      socket.emit("game-paused");
+      isPaused = true;
+    }
     resetEscapePressed();
   }
   requestAnimationFrame(checkForEscape);
