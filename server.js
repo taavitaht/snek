@@ -105,6 +105,9 @@ io.on("connection", (socket) => {
       }
     }
 
+    // Check if game end condition is now met
+    gameEndCheck();
+
     // If that was the only connected socket reset game
     if (io.of("/").sockets.size === 0 && gameStarted) {
       gameStarted = false;
@@ -335,7 +338,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       let pauseCountdown = 30;
       const interval = setInterval(() => {
         io.emit("countdown-update", { username, pauseCountdown });
-        if (pauseCountdown === 3) {
+        if (pauseCountdown === 3 && gameStarted) {
           io.emit("play-sound", { sound: "countdown-sound" });
         }
 
@@ -364,11 +367,13 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
     case "resumed": {
       const playerPauseInfo = activePauses.get(username);
 
-      if (!playerPauseInfo.paused) {
-        socket.emit("pause-rejected", {
-          reason: "You have used your pause already.",
-        });
-        return;
+      if (playerPauseInfo) {
+        if (!playerPauseInfo.paused) {
+          socket.emit("pause-rejected", {
+            reason: "You have used your pause already.",
+          });
+          return;
+        }
       }
 
       const interval = pauseTimers.get(username);
@@ -377,10 +382,12 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         pauseTimers.delete(username);
       }
 
-      activePauses.set(username, {
-        paused: false,
-        pauseUsed: playerPauseInfo.pauseUsed,
-      });
+      if (playerPauseInfo) {
+        activePauses.set(username, {
+          paused: false,
+          pauseUsed: playerPauseInfo.pauseUsed,
+        });
+      }
 
       let resumeCountdown = 5;
       const countdownInterval = setInterval(() => {
@@ -390,7 +397,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           message: `Game will resume in ${resumeCountdown} seconds`,
         });
 
-        if (resumeCountdown === 4) {
+        if (resumeCountdown === 4 && gameStarted) {
           io.emit("play-sound", { sound: "countdown-sound" });
         }
 
@@ -416,7 +423,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
     case "quit": {
       const interval = pauseTimers.get(username);
       if (interval) {
-        clearInterval(interval);
+        //clearInterval(interval);
         pauseTimers.delete(username);
       }
       activePauses.set(username, { paused: false });
@@ -491,7 +498,10 @@ function refreshPlayers() {
 function gameEndCheck() {
   let snakesLeft = playerCountCheck();
   // Multiplayer
-  if (Object.entries(serverSnakes).length > 1 && (snakesLeft == 1 || snakesLeft == 0)) {
+  if (
+    Object.entries(serverSnakes).length > 1 &&
+    (snakesLeft == 1 || snakesLeft == 0)
+  ) {
     gameStarted = false;
     io.emit("end-game", { serverSnakes });
     console.log("Game over, no more competitors left");
@@ -520,7 +530,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });
