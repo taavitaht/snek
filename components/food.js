@@ -32,7 +32,7 @@ export function placeFood(count) {
       ({ x: xCoord, y: yCoord } = randomCoordinates());
     }
 
-    const isSuperEgg = Math.random() < 0.3;
+    const isSuperEgg = Math.random() < 0.1;
 
     if (isSuperEgg) {
       //console.log("Spawning super-egg!");

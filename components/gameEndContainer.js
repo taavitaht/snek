@@ -108,7 +108,7 @@ export function makeEndContainer(snakes) {
   endContainer.appendChild(winner);
 
   // Did I win?
-  if (highestScore == mySnake.score) {
+  if (winners.includes(mySnake.username)) {
     confettiScript();
   }
 }

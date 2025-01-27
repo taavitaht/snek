@@ -253,7 +253,7 @@ export function startSockets() {
 
     const resumeButton = document.querySelector(".resume-button");
     resumeButton.addEventListener("click", () => {
-      resumeButton.textContent = "";
+      //resumeButton.textContent = "";
       socket.emit("game-resumed");
     });
 
@@ -473,6 +473,7 @@ function resetPauseUI() {
   const resumeButton = container.querySelector(".resume-button");
   if (resumeButton) {
     resumeButton.classList.remove("hidden");
+    resumeButton.textContent = "Resume";
   }
 
   const timerElement = container.querySelector(".pause-timer");
