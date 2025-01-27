@@ -475,18 +475,20 @@ function resetGame() {
   resetPauseUI();
   const waitingRoom = app.querySelector(".waiting-room-container");
   waitingRoom.style.display = "grid";
-  // Erase all snakes
-  let SnakeHeads = app.querySelectorAll(".snake-head");
-  SnakeHeads.forEach((element) => {
-    element.remove();
-  });
-  let SnakeBodys = app.querySelectorAll(".snake-body");
-  SnakeBodys.forEach((element) => {
-    element.remove();
-  });
-  // Clear game updates
-  let updates = app.querySelectorAll(".update-message");
-  updates.forEach((element) => {
-    element.remove();
-  });
+  setTimeout(() => {
+    // Erase all snakes
+    let SnakeHeads = app.querySelectorAll(".snake-head");
+    SnakeHeads.forEach((element) => {
+      element.remove();
+    });
+    let SnakeBodys = app.querySelectorAll(".snake-body");
+    SnakeBodys.forEach((element) => {
+      element.remove();
+    });
+    // Clear game updates
+    let updates = app.querySelectorAll(".update-message");
+    updates.forEach((element) => {
+      element.remove();
+    });
+  }, 100);
 }
