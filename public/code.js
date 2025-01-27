@@ -424,7 +424,7 @@ function checkForEscape() {
 }
 
 function resetPauseUI() {
-  const container = document.querySelector(".congratulations-container");
+  const container = document.querySelector(".pause-container");
   if (!container) return;
 
   container.classList.add("hidden");
@@ -473,4 +473,10 @@ function resetGame() {
   SnakeBodys.forEach((element) => {
     element.remove();
   });
+  // Clear game updates
+  let updates = app.querySelectorAll(".update-message");
+  updates.forEach((element) => {
+    element.remove();
+  });
+
 }

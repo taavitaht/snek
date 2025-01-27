@@ -4,7 +4,7 @@ export const globalSettings = {
   port: 5000,
 
   // Ngrok link. Leave blank to only use localhost
-  ngrok: "https://75b4-178-248-138-129.ngrok-free.app",
+  ngrok: "",
 
   ////////////////////// Game settings //////////////////////
   // Change to "false" and then ctrl+refresh browser for review question "The lead player can start the game once there are between 2 and 4 players."
