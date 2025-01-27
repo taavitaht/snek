@@ -29,11 +29,11 @@ const players = {
   3: null, // Player 3
   4: null, // Player 4
 };
+let playerCount;
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
-let gameTime = globalSettings.gameTime; //should be set in globalSettings
-
+let gameTime = globalSettings.gameTime;
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
@@ -41,13 +41,7 @@ const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
 const activePauses = new Map();
 const pauseTimers = new Map();
 
-// Cors TODO: Remove?
-const corsOptions = {
-  origin: link,
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-//app.use(cors(corsOptions));
+// Cors
 app.use(cors());
 
 // Serve static files
@@ -57,8 +51,10 @@ app.use(express.static(path.resolve()));
 io.on("connection", (socket) => {
   // Add new player
   socket.on("newuser", (username) => {
+    playerCount = countPlayers();
+    //console.log(`New player trying to connect, ${playerCount} connected players`);
     // No more than 4 connections allowed (io.of("/").sockets.size is number of connected sockets)
-    if (io.of("/").sockets.size <= 4) {
+    if (playerCount < 4) {
       // Add to players object
       let number = assignPlayerNumber();
       players[number] = {
@@ -67,7 +63,7 @@ io.on("connection", (socket) => {
       // Add to socket
       socket.username = username;
       socket.playerNumber = number;
-
+      console.log(`Player joined: \x1b[32m ${socket.username} \x1b[0m`);
       // Broadcast new player to all connected sockets
       io.emit("player-new", number, username, players);
     } else {
@@ -90,6 +86,7 @@ io.on("connection", (socket) => {
   // User disconnected
   socket.on("disconnect", (reason) => {
     if (socket.username) {
+      console.log(`Player disconnected: \x1b[31m ${socket.username} \x1b[0m`);
       io.emit("user-disconnect", socket.playerNumber, socket.username);
       io.emit("live-game-update", {
         event: "player-disconnect",
@@ -109,7 +106,8 @@ io.on("connection", (socket) => {
     gameEndCheck();
 
     // If that was the only connected socket reset game
-    if (io.of("/").sockets.size === 0 && gameStarted) {
+    playerCount = countPlayers();
+    if (playerCount === 0 && gameStarted) {
       gameStarted = false;
       resetGameState();
     }
@@ -213,6 +211,7 @@ function startGameTicker() {
           if (tickInterval < globalSettings.minGameInterval) {
             tickInterval = globalSettings.minGameInterval;
           }
+          tickInterval = Math.round(tickInterval)
           changeTickInterval(tickInterval);
           console.log("tickInterval:", tickInterval);
         }
@@ -474,6 +473,17 @@ function assignPlayerNumber() {
     }
   }
   return null; // Return null if no free player number
+}
+
+// Function to count added players
+function countPlayers() {
+  let count = 0;
+  for (const key in players) {
+    if (players[key] !== null) {
+      count++;
+    }
+  }
+  return count;
 }
 
 // Refresh local players object based on socket connections

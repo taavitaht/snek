@@ -101,15 +101,27 @@ export function makeEndContainer(snakes) {
 
   const winner = document.createElement("div");
   if (reason != "tie") {
-  winner.textContent = `Winner: ${winners}`;
+    winner.textContent = `Winner: ${winners}`;
   } else {
     winner.textContent = `Tie between: ${winners}`;
   }
   endContainer.appendChild(winner);
 
   // Did I win?
-  // https://confetti.js.org/
   if (highestScore == mySnake.score) {
+    confettiScript();
+  }
+}
+
+// Load the confetti script only when needed
+// https://confetti.js.org/
+function confettiScript() {
+  const script = document.createElement("script");
+  script.src =
+    "https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.0.3/tsparticles.confetti.bundle.min.js";
+
+  document.body.appendChild(script);
+  script.onload = () => {
     confetti({
       particleCount: 500,
       spread: 90,
@@ -134,7 +146,14 @@ export function makeEndContainer(snakes) {
       origin: { x: 0.75, y: 0.7 },
       angle: 70,
     });
-  }
+  };
+  setTimeout(() => {
+    script.parentNode.removeChild(script);
+    const confettiDiv = document.getElementById("confetti");
+    if (confettiDiv) {
+      confettiDiv.remove();
+    }
+  }, 4000);
 }
 
 // Remove end container from DOM
