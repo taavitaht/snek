@@ -63,6 +63,10 @@ resumeButton.textContent = "Resume";
 const quitButton = document.createElement("button");
 quitButton.classList.add("quit-button");
 quitButton.textContent = "Quit";
+// Restart Button
+const restartButton = document.createElement("button");
+restartButton.classList.add("restart-button");
+restartButton.textContent = "Restart";
 // Append elements to the pause menu container
 
 pauseContainer.appendChild(pauseContainerMain);
@@ -73,6 +77,7 @@ pauseMenuContainer.appendChild(pauseReason);
 pauseMenuContainer.appendChild(buttonMenuContainer);
 buttonMenuContainer.appendChild(resumeButton);
 buttonMenuContainer.appendChild(quitButton);
+buttonMenuContainer.appendChild(restartButton);
 
 // Main container
 export const mainContainer = document.createElement("div");

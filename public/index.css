@@ -217,24 +217,31 @@ body {
 .snake-1.snake-head {
   background-color: rgba(0, 128, 0);
 }
+
 .snake-1.snake-body {
   background-color: rgba(0, 128, 0, 0.6);
 }
+
 .snake-2.snake-head {
   background-color: rgba(0, 0, 255);
 }
+
 .snake-2.snake-body {
   background-color: rgba(0, 0, 255, 0.6);
 }
+
 .snake-3.snake-head {
   background-color: rgba(255, 0, 0);
 }
+
 .snake-3.snake-body {
   background-color: rgba(255, 0, 0, 0.6);
 }
+
 .snake-4.snake-head {
   background-color: rgba(255, 255, 0);
 }
+
 .snake-4.snake-body {
   background-color: rgba(255, 255, 0, 0.6);
 }
@@ -246,14 +253,14 @@ body {
   z-index: 10;
 }
 
-.join-container > .screen {
+.join-container>.screen {
   display: none;
   position: absolute;
   z-index: 17;
   background-color: whitesmoke;
 }
 
-.join-container > .screen.active {
+.join-container>.screen.active {
   display: block;
   width: 100%;
   height: 100%;
@@ -298,15 +305,19 @@ body {
   padding: 10%;
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 .player-1-card {
   border: 3px solid rgba(0, 128, 0);
 }
+
 .player-2-card {
   border: 3px solid rgba(0, 0, 255);
 }
+
 .player-3-card {
   border: 3px solid rgba(255, 0, 0);
 }
+
 .player-4-card {
   border: 3px solid rgba(255, 255, 0);
 }
@@ -351,7 +362,8 @@ body {
 }
 
 .resume-button,
-.quit-button {
+.quit-button,
+.restart-button {
   background-color: #c2fbd7;
   border-radius: 100px;
   box-shadow: rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
@@ -478,7 +490,7 @@ body {
   font-size: x-large;
 }
 
-.game-info-title + h4 {
+.game-info-title+h4 {
   font-size: 1.2rem;
   color: #666666;
   margin-bottom: 15px;

@@ -430,6 +430,7 @@ export function appendLiveUpdateMessage(updateMessage) {
 function pauseMenu(socket) {
   const resumeButton = document.querySelector(".resume-button");
   const quitButton = document.querySelector(".quit-button");
+  const restartButton = document.querySelector(".restart-button");
 
   if (resumeButton) {
     resumeButton.addEventListener("click", () => {
@@ -441,6 +442,12 @@ function pauseMenu(socket) {
   if (quitButton) {
     quitButton.addEventListener("click", () => {
       socket.emit("game-quit");
+    });
+  }
+
+  if (restartButton) {
+    restartButton.addEventListener("click", () => {
+      socket.emit("game-restart");
     });
   }
 }

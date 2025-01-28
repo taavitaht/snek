@@ -302,15 +302,13 @@ function resetGameState() {
 
   // Clear pause intervals
   for (const username of activePauses.keys()) {
-    console.log("user pause to clear: ", username);
     const interval = pauseTimers.get(username);
     if (interval) {
       clearInterval(interval);
       pauseTimers.delete(username);
     }
   }
-  console.log("active pauses: ", activePauses);
-  console.log("pause timers: ", pauseTimers);
+
   //gameStarted = false;
   activePauses.clear();
   pauseTimers.clear();
