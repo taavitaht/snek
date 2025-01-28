@@ -28,6 +28,7 @@ export class Snake {
     if (this.crashed) {
       return;
     }
+
     this.steps += 1;
     const newHead = { ...this.position }; // Copy the current head position
     let foundFood = false;

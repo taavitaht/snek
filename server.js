@@ -198,6 +198,9 @@ function startGameTicker() {
       // Update moving direction of snake if there is a keypress
       const direction = playerKeypresses[snake.playerNumber];
       if (direction) {
+        if (direction !== snake.direction) {
+          console.log(`New key (\x1b[34m${snake.username}\x1b[0m):\x1b[35m ${direction}\x1b[0m`);
+        }
         snake.setDirection(direction);
       }
       // Update the position of each snake and check for food
@@ -243,7 +246,7 @@ function changeTickInterval(newInterval) {
 
 // Stop the game ticker
 function stopGameTicker() {
-  console.log("Stopping game ticker");
+  //console.log("Stopping game ticker");
   clearInterval(gameInterval);
 }
 
@@ -275,7 +278,7 @@ function startGameCountdown() {
       startGameTimer();
       io.emit("start-game", { allPlayers });
       gameStarted = true;
-      console.log("Game started");
+      console.log(`\x1b[32m---Game started---\x1b[0m`);      
     }
   }
   emitGameCountdown();
@@ -529,7 +532,7 @@ function gameEndCheck() {
   ) {
     gameStarted = false;
     io.emit("end-game", { serverSnakes });
-    console.log("Game over, no more competitors left");
+    console.log(`\x1b[31m---Game over---\x1b[0m, no more competitors left`);
     stopGameTicker();
     resetGameState();
   }
@@ -537,7 +540,7 @@ function gameEndCheck() {
   if (Object.entries(serverSnakes).length == 1 && snakesLeft == 0) {
     gameStarted = false;
     io.emit("end-game", { serverSnakes });
-    console.log("Game over, you died");
+    console.log(`\x1b[31m---Game over---\x1b[0m, you died`);
     stopGameTicker();
     resetGameState();
   }
@@ -546,7 +549,7 @@ function gameEndCheck() {
     gameStarted = false;
     playerCountCheck("time");
     io.emit("end-game", { serverSnakes });
-    console.log("Game over, time ran out");
+    console.log(`\x1b[31m---Game over---\x1b[0m, time ran out`);
     stopGameTicker();
     resetGameState();
   }
@@ -555,7 +558,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

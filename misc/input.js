@@ -15,25 +15,26 @@ function arrowKeyHandler(e) {
   if (!mySnake) {
     return;
   }
-  if (e.key == "Right" || e.key == "ArrowRight") {
+  //console.log("Previous direction: " + mySnake.direction);
+  if (e.key === "Right" || e.key === "ArrowRight") {
     // Ignore direction changes in opposite direction (snake can't start moving into itself)
-    if (mySnake.direction == "Left") {
+    if (mySnake.direction === "Left") {
       return;
     }
     // Record new direction
     arrow = "Right";
-  } else if (e.key == "Left" || e.key == "ArrowLeft") {
-    if (mySnake.direction == "Right") {
+  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+    if (mySnake.direction === "Right") {
       return;
     }
     arrow = "Left";
-  } else if (e.key == "Up" || e.key == "ArrowUp") {
-    if (mySnake.direction == "Down") {
+  } else if (e.key === "Up" || e.key === "ArrowUp") {
+    if (mySnake.direction === "Down") {
       return;
     }
     arrow = "Up";
-  } else if (e.key == "Down" || e.key == "ArrowDown") {
-    if (mySnake.direction == "Up") {
+  } else if (e.key === "Down" || e.key === "ArrowDown") {
+    if (mySnake.direction === "Up") {
       return;
     }
     arrow = "Down";

@@ -131,7 +131,7 @@ export function checkForFood(snakeHead) {
   if (foodIndex !== -1) {
     const foundFood = foodArray[foodIndex];
 
-    console.log("Found food!");
+    //console.log("Found food!");
 
     // Check if it is a superFood
     const isSuperEgg = foundFood instanceof superFood;
