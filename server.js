@@ -119,6 +119,9 @@ io.on("connection", (socket) => {
   socket.on("keypress", (arrow) => {
     if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
       playerKeypresses[socket.playerNumber] = arrow;
+      console.log(
+        `Keypress (\x1b[34m${socket.username}\x1b[0m):\x1b[35m ${arrow}\x1b[0m`
+      );
     }
   });
 
