@@ -119,6 +119,7 @@ io.on("connection", (socket) => {
   socket.on("keypress", (arrow) => {
     if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
       playerKeypresses[socket.playerNumber] = arrow;
+      console.log(`Keypress (\x1b[34m${socket.username}\x1b[0m):\x1b[35m ${arrow}\x1b[0m`);
     }
   });
 
@@ -199,7 +200,7 @@ function startGameTicker() {
       const direction = playerKeypresses[snake.playerNumber];
       if (direction) {
         if (direction !== snake.direction) {
-          console.log(`New key (\x1b[34m${snake.username}\x1b[0m):\x1b[35m ${direction}\x1b[0m`);
+          //console.log(`New key (\x1b[34m${snake.username}\x1b[0m):\x1b[35m ${direction}\x1b[0m`);
         }
         snake.setDirection(direction);
       }

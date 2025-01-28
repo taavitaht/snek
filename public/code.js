@@ -27,7 +27,7 @@ export let snakes = {};
 export let mySnake;
 let numOfPlayers;
 let oldFood = [];
-let isPaused = false;
+export let isPaused = false;
 
 // Connect to server
 export function startSockets() {
@@ -265,8 +265,8 @@ export function startSockets() {
       switch (data.status) {
         case "paused":
           isPaused = true;
-          console.log("Received game-status-update:", data);
-          console.log("myUsername is:", myUsername);
+          //console.log("Received game-status-update:", data);
+          //console.log("myUsername is:", myUsername);
 
           container.classList.remove("hidden");
           container.querySelector("h1").textContent = `${data.message}`;
