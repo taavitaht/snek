@@ -378,7 +378,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
-      let pauseCountdown = 30;
+      let pauseCountdown = 333330;
       const interval = setInterval(() => {
         io.emit("countdown-update", { username, pauseCountdown });
         if (pauseCountdown === 3 && gameStarted) {
@@ -518,8 +518,8 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
-      let restartCountdown = 5;
-      resetGameState();
+      let restartCountdown = 4;
+
       const restartInterval = setInterval(() => {
         io.emit("restart-countdown", {
           countdown: restartCountdown,
@@ -532,10 +532,10 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
 
         restartCountdown--;
 
-        if (restartCountdown === 0) {
+        if (restartCountdown < 0) {
           clearInterval(restartInterval);
 
-          // reset game state etc
+          resetGameState();
 
           // List players
           let allPlayers = [];

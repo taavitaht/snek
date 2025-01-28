@@ -37,13 +37,26 @@ pauseContainer.classList.add("pause-container", "hidden");
 // Containers
 
 const pauseContainerMain = document.createElement("div");
-pauseContainerMain.classList.add("pause-container-main");
+pauseContainerMain.classList.add("pause-container-main", "hidden");
 
 const buttonMenuContainer = document.createElement("div");
 buttonMenuContainer.classList.add("button-menu-container");
 
 const pauseMenuContainer = document.createElement("div");
 pauseMenuContainer.classList.add("pause-menu-container");
+
+const restartContainer = document.createElement("div");
+restartContainer.classList.add("restart-container", "hidden");
+
+// Restart title
+
+const restartTitle = document.createElement("h1");
+restartTitle.textContent = "Game is being restarted...";
+
+// Restart Timer
+
+const restartTimer = document.createElement("p");
+restartTimer.classList.add("restart-timer");
 
 // Pause Title
 const pauseTitle = document.createElement("h1");
@@ -70,6 +83,7 @@ restartButton.textContent = "Restart";
 // Append elements to the pause menu container
 
 pauseContainer.appendChild(pauseContainerMain);
+pauseContainer.appendChild(restartContainer);
 pauseContainerMain.appendChild(pauseTitle);
 pauseContainerMain.appendChild(pauseMenuContainer);
 pauseMenuContainer.appendChild(pauseTimer);
@@ -78,6 +92,8 @@ pauseMenuContainer.appendChild(buttonMenuContainer);
 buttonMenuContainer.appendChild(resumeButton);
 buttonMenuContainer.appendChild(quitButton);
 buttonMenuContainer.appendChild(restartButton);
+restartContainer.appendChild(restartTitle);
+restartContainer.appendChild(restartTimer);
 
 // Main container
 export const mainContainer = document.createElement("div");

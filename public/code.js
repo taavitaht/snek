@@ -12,6 +12,7 @@ import {
   makeEndContainer,
   removeEndContainer,
 } from "../components/gameEndContainer.js";
+import { playSound } from "../utils/sounds.js";
 
 export let socket;
 let link;
@@ -34,6 +35,7 @@ export function startSockets() {
   socket = io(link, {
     reconnection: false, // Disable auto-reconnection
   });
+  pauseMenuBtns();
   // Join button in the waiting room
   const joinUserButton = document.getElementById("join-user-button");
   joinUserButton.addEventListener("click", function () {
@@ -188,8 +190,7 @@ export function startSockets() {
             item.y === oldFood[index].y
         );
         if (!arraysEqual) {
-          const audio = new Audio("/sounds/ding.mp3");
-          audio.play();
+          playSound("/sounds/ding.mp3");
         }
         // Deep copy foodArray
         oldFood = JSON.parse(JSON.stringify(foodArray));
@@ -254,41 +255,44 @@ export function startSockets() {
       }, 5000);
     });
 
-    pauseMenu(socket);
-
-    const resumeButton = document.querySelector(".resume-button");
-    resumeButton.addEventListener("click", () => {
-      //resumeButton.textContent = "";
-      socket.emit("game-resumed");
-    });
-
     socket.on("game-status-update", function (data) {
-      const container = document.querySelector(".pause-container");
-      const timerElement = container.querySelector(".pause-timer");
+      const pauseContainer = document.querySelector(".pause-container");
+      const pauseContainerMain = pauseContainer.querySelector(
+        ".pause-container-main"
+      );
+      const restartContainer =
+        pauseContainer.querySelector(".restart-container");
+      const timerElement = pauseContainer.querySelector(".pause-timer");
+      const titleElement = pauseContainer.querySelector("h1");
+      const pauseTimer = restartContainer.querySelector(".restart-timer");
 
-      if (!container) return;
+      if (!pauseContainer) return;
+
+      resetPauseUI();
+
       switch (data.status) {
         case "paused":
           isPaused = true;
-          //console.log("Received game-status-update:", data);
-          //console.log("myUsername is:", myUsername);
+          pauseContainer.classList.remove("hidden");
+          pauseContainerMain.classList.remove("hidden");
+          restartContainer.classList.add("hidden");
 
-          container.classList.remove("hidden");
-          container.querySelector("h1").textContent = `${data.message}`;
-          if (timerElement) {
-            timerElement.style.display = "block";
-          }
+          titleElement.textContent = data.message || "Game Paused";
+          timerElement.style.display = "block";
 
           if (data.pausedBy === myUsername) {
-            resumeButton.classList.remove("hidden");
+            pauseContainer
+              .querySelector(".resume-button")
+              .classList.remove("hidden");
           } else {
-            resumeButton.classList.add("hidden");
+            pauseContainer
+              .querySelector(".resume-button")
+              .classList.add("hidden");
           }
-
           break;
 
         case "resumed":
-          container.classList.add("hidden");
+          pauseContainer.classList.add("hidden");
           if (timerElement) {
             timerElement.style.display = "none";
           }
@@ -296,18 +300,18 @@ export function startSockets() {
           break;
 
         case "quit":
-          container.classList.remove("hidden");
-          container.querySelector("h1").textContent = `${data.message} `;
+          pauseContainer.classList.remove("hidden");
+          pauseContainer.querySelector("h1").textContent = `${data.message} `;
 
           break;
 
         case "restart": {
-          container.classList.add("hidden");
-          if (timerElement) {
-            timerElement.style.display = "none";
-          }
+          isPaused = false;
+          pauseContainer.classList.remove("hidden");
+          pauseContainerMain.classList.add("hidden");
+          restartContainer.classList.remove("hidden");
 
-          const buttons = container.querySelectorAll("button");
+          const buttons = pauseContainer.querySelectorAll("button");
           buttons.forEach((btn) => (btn.disabled = false));
 
           isPaused = false;
@@ -318,24 +322,23 @@ export function startSockets() {
     // for sound effects
     socket.on("play-sound", (data) => {
       if (data.sound === "start-game-sound") {
-        const audio = new Audio("/sounds/start.mp3");
-        audio.play();
+        playSound("/sounds/start.mp3");
       }
     });
 
     socket.on("play-sound", (data) => {
       if (data.sound === "countdown-sound") {
-        const audio = new Audio("/sounds/pause-end.mp3");
-        audio.play();
+        playSound("/sounds/pause-end.mp3");
       }
     });
 
     // start countdown on main screen
     socket.on("countdown-update", function (data) {
-      const { username, pauseCountdown } = data;
+      const { pauseCountdown } = data;
 
       const container = document.querySelector(".pause-container");
       const timerElement = container.querySelector(".pause-timer");
+
       if (timerElement) {
         timerElement.textContent = `${pauseCountdown} seconds remaining in pause`;
       }
@@ -346,6 +349,7 @@ export function startSockets() {
       const reasonElement = container.querySelector(".pause-reason");
       const resumeButton = container.querySelector(".resume-button");
       const pauseTitle = container.querySelector("h1");
+
       if (!reasonElement || !resumeButton || !pauseTitle) return;
 
       isPaused = false;
@@ -384,29 +388,25 @@ export function startSockets() {
     });
 
     socket.on("restart-countdown", function (data) {
-      const container = document.querySelector(".pause-container");
-      const titleElement = container.querySelector("h1");
-      const timerElement = container.querySelector(".pause-timer");
+      const pauseContainer = document.querySelector(".pause-container");
+      const restartContainer =
+        pauseContainer.querySelector(".restart-container");
+      const titleElement = pauseContainer.querySelector("h1");
+      let pauseTimer = restartContainer.querySelector(".restart-timer");
 
-      const resumeButton = container.querySelector(".resume-button");
-      if (resumeButton) {
-        resumeButton.classList.add("hidden");
+      pauseContainer.classList.remove("hidden");
+      restartContainer.classList.remove("hidden");
+
+      if (!pauseTimer) {
+        pauseTimer = document.createElement("p");
+        pauseTimer.classList.add("restart-timer");
+        restartContainer.appendChild(pauseTimer);
       }
 
-      container.classList.remove("hidden");
+      pauseTimer.textContent = `${data.message}`;
 
-      if (titleElement) {
-        titleElement.textContent = data.message;
-      }
-
-      if (timerElement) {
-        timerElement.classList.add("hidden");
-      }
-
-      const buttons = container.querySelectorAll("button");
+      const buttons = pauseContainer.querySelectorAll("button");
       buttons.forEach((btn) => (btn.disabled = true));
-
-      //resetGame();
       restartGame();
     });
 
@@ -468,7 +468,7 @@ export function appendLiveUpdateMessage(updateMessage) {
 }
 
 // checks needed if the game is running or not
-function pauseMenu(socket) {
+function pauseMenuBtns() {
   const resumeButton = document.querySelector(".resume-button");
   const quitButton = document.querySelector(".quit-button");
   const restartButton = document.querySelector(".restart-button");
@@ -565,31 +565,45 @@ function resetGame() {
     updates.forEach((element) => {
       element.remove();
     });
+
+    pauseMenuBtns();
   }, 100);
 }
 // Restart game without leaving game
 function restartGame() {
   const app = document.querySelector(".app");
-
-  resetPauseUI();
+  isPaused = false;
 
   setTimeout(() => {
     // Erase all snakes
-    let SnakeHeads = app.querySelectorAll(".snake-head");
-    console.log("SnakeHeads:", SnakeHeads.length);
-    SnakeHeads.forEach((element) => {
+    let snakeHeads = app.querySelectorAll(".snake-head");
+    console.log("SnakeHeads:", snakeHeads.length);
+    snakeHeads.forEach((element) => {
       element.remove();
     });
-    let SnakeBodys = app.querySelectorAll(".snake-body");
-    console.log("SnakeBodys:", SnakeBodys.length);
 
-    SnakeBodys.forEach((element) => {
+    let snakeBodies = app.querySelectorAll(".snake-body");
+    console.log("SnakeBodies:", snakeBodies.length);
+    snakeBodies.forEach((element) => {
       element.remove();
     });
+
     // Clear game updates
     let updates = app.querySelectorAll(".update-message");
     updates.forEach((element) => {
       element.remove();
     });
+
+    resetPauseUI();
+    pauseMenuBtns();
+    enablePauseMenuButtons();
   }, 800);
+}
+function enablePauseMenuButtons() {
+  const buttons = document.querySelectorAll(
+    ".resume-button, .quit-button, .restart-button"
+  );
+  buttons.forEach((btn) => {
+    btn.disabled = false;
+  });
 }
