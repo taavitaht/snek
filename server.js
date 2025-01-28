@@ -299,6 +299,13 @@ function resetGameState() {
   playerKeypresses = {};
   serverSnakes = {};
   foodArray.length = 0;
+
+  const interval = pauseTimers.get(username);
+  if (interval) {
+    clearInterval(interval);
+    pauseTimers.delete(username);
+  }
+
   //gameStarted = false;
   activePauses.clear();
   pauseTimers.clear();
