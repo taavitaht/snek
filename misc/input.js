@@ -51,7 +51,7 @@ function arrowKeyHandler(e) {
 
   // If socket is connected emit the keydown event
   if (socket && arrow && isArrowKey) {
-    console.log("arrow:", arrow);
+    //console.log("arrow:", arrow);
     socket.emit("keypress", arrow);
   }
 }

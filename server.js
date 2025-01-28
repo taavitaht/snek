@@ -537,6 +537,33 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
 
           // reset game state etc
 
+          // List players
+          let allPlayers = [];
+          io.sockets.sockets.forEach((connected) => {
+            allPlayers.push({
+              username: connected.username,
+              playerNumber: connected.playerNumber,
+            });
+          });
+          // Create new snakes
+          io.sockets.sockets.forEach((connected) => {
+            // Make sure connection is properly initialized
+            if (connected.playerNumber && connected.username) {
+              const snake = new Snake(
+                connected.playerNumber,
+                connected.username
+              );
+              serverSnakes[connected.playerNumber] = snake;
+              placeFood(globalSettings.food.count); //X food items per snake
+            }
+          });
+
+          startGameTicker();
+          startGameTimer();
+          io.emit("start-game", { allPlayers });
+          gameStarted = true;
+          console.log(`\x1b[32m---Game restarted---\x1b[0m`);
+
           // io.emit("game-status-update", {
           //   status: "game-restarted",
           //   message: "The game has been restarted!",

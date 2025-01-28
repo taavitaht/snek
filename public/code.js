@@ -23,7 +23,6 @@ if (!globalSettings.ngrok) {
 let myUsername;
 let myPlayerNumber;
 let map;
-export let snakes = {};
 export let mySnake;
 let numOfPlayers;
 let oldFood = [];
@@ -406,6 +405,9 @@ export function startSockets() {
 
       const buttons = container.querySelectorAll("button");
       buttons.forEach((btn) => (btn.disabled = true));
+
+      //resetGame();
+      restartGame();
     });
 
     socket.on("score-update", function (scoreboard) {
@@ -564,4 +566,30 @@ function resetGame() {
       element.remove();
     });
   }, 100);
+}
+// Restart game without leaving game
+function restartGame() {
+  const app = document.querySelector(".app");
+
+  resetPauseUI();
+
+  setTimeout(() => {
+    // Erase all snakes
+    let SnakeHeads = app.querySelectorAll(".snake-head");
+    console.log("SnakeHeads:", SnakeHeads.length);
+    SnakeHeads.forEach((element) => {
+      element.remove();
+    });
+    let SnakeBodys = app.querySelectorAll(".snake-body");
+    console.log("SnakeBodys:", SnakeBodys.length);
+
+    SnakeBodys.forEach((element) => {
+      element.remove();
+    });
+    // Clear game updates
+    let updates = app.querySelectorAll(".update-message");
+    updates.forEach((element) => {
+      element.remove();
+    });
+  }, 800);
 }
