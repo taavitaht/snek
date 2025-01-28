@@ -219,6 +219,9 @@ export function startSockets() {
         case "player-disconnect":
           updateMessage = `${timeStamp}: ${message.username} disconnected`;
           break;
+        case "player-resumed":
+          updateMessage = `${timeStamp}: ${message.username} resumed the game`;
+          break;
         default:
           updateMessage = `${timeStamp}: Unknown event occurred.`;
           break;

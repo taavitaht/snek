@@ -300,12 +300,17 @@ function resetGameState() {
   serverSnakes = {};
   foodArray.length = 0;
 
-  const interval = pauseTimers.get(username);
-  if (interval) {
-    clearInterval(interval);
-    pauseTimers.delete(username);
+  // Clear pause intervals
+  for (const username of activePauses.keys()) {
+    console.log("user pause to clear: ", username);
+    const interval = pauseTimers.get(username);
+    if (interval) {
+      clearInterval(interval);
+      pauseTimers.delete(username);
+    }
   }
-
+  console.log("active pauses: ", activePauses);
+  console.log("pause timers: ", pauseTimers);
   //gameStarted = false;
   activePauses.clear();
   pauseTimers.clear();
@@ -439,6 +444,11 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           clearInterval(resumeCountdownInterval);
           resumeCountdownInterval = null;
 
+          io.emit("live-game-update", {
+            event: "player-resumed",
+            username,
+            remainingTime: gameTime,
+          });
           startGameTicker();
           resumeGameTimer();
 
@@ -457,7 +467,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       const interval = pauseTimers.get(username);
       if (interval) {
         //clearInterval(interval);
-        pauseTimers.delete(username);
+        //pauseTimers.delete(username);
       }
       activePauses.set(username, { paused: false });
 
@@ -574,7 +584,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {});
+io.on("connection", (socket) => { });
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });
