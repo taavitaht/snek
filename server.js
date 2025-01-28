@@ -199,7 +199,9 @@ function startGameTicker() {
       const direction = playerKeypresses[snake.playerNumber];
       if (direction) {
         if (direction !== snake.direction) {
-          console.log(`New key (\x1b[34m${snake.username}\x1b[0m):\x1b[35m ${direction}\x1b[0m`);
+          console.log(
+            `New key (\x1b[34m${snake.username}\x1b[0m):\x1b[35m ${direction}\x1b[0m`
+          );
         }
         snake.setDirection(direction);
       }
@@ -278,7 +280,7 @@ function startGameCountdown() {
       startGameTimer();
       io.emit("start-game", { allPlayers });
       gameStarted = true;
-      console.log(`\x1b[32m---Game started---\x1b[0m`);      
+      console.log(`\x1b[32m---Game started---\x1b[0m`);
     }
   }
   emitGameCountdown();
@@ -317,6 +319,9 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       };
 
       if (playerPauseInfo.pauseUsed) {
+        console.log(
+          `Pause rejected: ${username} has already used their pause.`
+        );
         socket.emit("pause-rejected", {
           reason: "You've already used your pause in this game.",
         });
@@ -324,6 +329,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       }
 
       if (playerPauseInfo.paused) {
+        console.log(`Pause rejected: ${username} is already paused.`);
         socket.emit("pause-rejected", {
           reason: "You can only pause once per game.",
         });
@@ -354,7 +360,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
-      let pauseCountdown = 30;
+      let pauseCountdown = 3;
       const interval = setInterval(() => {
         io.emit("countdown-update", { username, pauseCountdown });
         if (pauseCountdown === 3 && gameStarted) {

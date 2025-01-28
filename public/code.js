@@ -28,6 +28,7 @@ export let mySnake;
 let numOfPlayers;
 let oldFood = [];
 let isPaused = false;
+let isPauseRejectVisible = false;
 
 // Connect to server
 export function startSockets() {
@@ -331,6 +332,9 @@ export function startSockets() {
       const pauseTitle = container.querySelector("h1");
       if (!reasonElement || !resumeButton || !pauseTitle) return;
 
+      if (isPauseRejectVisible) return;
+
+      isPaused = false;
       reasonElement.textContent = data.reason;
 
       pauseTitle.classList.add("hidden");
@@ -339,9 +343,12 @@ export function startSockets() {
       container.classList.remove("hidden");
       reasonElement.classList.remove("hidden");
 
+      isPauseRejectVisible = true;
+
       setTimeout(() => {
         container.classList.add("hidden");
         reasonElement.classList.add("hidden");
+        isPauseRejectVisible = false;
       }, 3000);
     });
 
@@ -447,6 +454,7 @@ function checkForEscape() {
     const waitingRoom = document.querySelector(".waiting-room-container");
     if (!isPaused && waitingRoom.style.display == "none") {
       socket.emit("game-paused");
+      isPaused = true;
     }
     resetEscapePressed();
   }
@@ -494,6 +502,7 @@ function resetGame() {
   removeEndContainer();
   resetPauseUI();
   resetEscapePressed();
+  isPaused = false;
   const waitingRoom = app.querySelector(".waiting-room-container");
   waitingRoom.style.display = "grid";
   setTimeout(() => {
