@@ -445,7 +445,6 @@ function checkForEscape() {
   if (escapePressed) {
     if (!isPaused) {
       socket.emit("game-paused");
-      isPaused = true;
     }
     resetEscapePressed();
   }
