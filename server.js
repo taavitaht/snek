@@ -37,7 +37,12 @@ let gameTime = globalSettings.gameTime;
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
-const gameStatusUpdates = ["game-paused", "game-resumed", "game-quit"];
+const gameStatusUpdates = [
+  "game-paused",
+  "game-resumed",
+  "game-quit",
+  "game-restart",
+];
 const activePauses = new Map();
 const pauseTimers = new Map();
 let resumeCountdownInterval = null;
@@ -485,6 +490,62 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
       break;
     }
 
+    case "restart": {
+      console.log(`Game restart requested by ${username}`);
+
+      for (const [user, interval] of pauseTimers) {
+        clearInterval(interval);
+      }
+      pauseTimers.clear();
+
+      if (resumeCountdownInterval) {
+        clearInterval(resumeCountdownInterval);
+        resumeCountdownInterval = null;
+      }
+
+      stopGameTicker();
+      pauseGameTimer();
+
+      io.emit("game-status-update", {
+        status,
+        username,
+        message: `${username} has requested a game restart.`,
+      });
+
+      io.emit("live-game-update", {
+        event: "player-restart",
+        username,
+        remainingTime,
+      });
+
+      let restartCountdown = 5;
+      resetGameState();
+      const restartInterval = setInterval(() => {
+        io.emit("restart-countdown", {
+          countdown: restartCountdown,
+          message: `Game will restart in ${restartCountdown} seconds`,
+        });
+
+        if (restartCountdown === 4 && gameStarted) {
+          io.emit("play-sound", { sound: "countdown-sound" });
+        }
+
+        restartCountdown--;
+
+        if (restartCountdown === 0) {
+          clearInterval(restartInterval);
+
+          // reset game state etc
+
+          // io.emit("game-status-update", {
+          //   status: "game-restarted",
+          //   message: "The game has been restarted!",
+          //   countdown: restartCountdown,
+          // });
+        }
+      }, 1000);
+    }
+
     default:
       // Do nothing
       break;
@@ -582,7 +643,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

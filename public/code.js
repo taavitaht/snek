@@ -222,6 +222,9 @@ export function startSockets() {
         case "player-resumed":
           updateMessage = `${timeStamp}: ${message.username} resumed the game`;
           break;
+        case "player-restart":
+          updateMessage = `${timeStamp}: ${message.username} requested a restart`;
+          break;
         default:
           updateMessage = `${timeStamp}: Unknown event occurred.`;
           break;
@@ -298,6 +301,18 @@ export function startSockets() {
           container.querySelector("h1").textContent = `${data.message} `;
 
           break;
+
+        case "restart": {
+          container.classList.add("hidden");
+          if (timerElement) {
+            timerElement.style.display = "none";
+          }
+
+          const buttons = container.querySelectorAll("button");
+          buttons.forEach((btn) => (btn.disabled = false));
+
+          isPaused = false;
+        }
       }
     });
 
@@ -367,6 +382,30 @@ export function startSockets() {
       if (timerElement) {
         timerElement.textContent = "";
       }
+    });
+
+    socket.on("restart-countdown", function (data) {
+      const container = document.querySelector(".pause-container");
+      const titleElement = container.querySelector("h1");
+      const timerElement = container.querySelector(".pause-timer");
+
+      const resumeButton = container.querySelector(".resume-button");
+      if (resumeButton) {
+        resumeButton.classList.add("hidden");
+      }
+
+      container.classList.remove("hidden");
+
+      if (titleElement) {
+        titleElement.textContent = data.message;
+      }
+
+      if (timerElement) {
+        timerElement.classList.add("hidden");
+      }
+
+      const buttons = container.querySelectorAll("button");
+      buttons.forEach((btn) => (btn.disabled = true));
     });
 
     socket.on("score-update", function (scoreboard) {
