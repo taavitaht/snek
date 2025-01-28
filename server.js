@@ -286,6 +286,7 @@ function resetGameState() {
   //console.log("Reset game state");
   stopGameTicker();
   pauseGameTimer();
+  io.emit("game-timer-update", { remainingTime: globalSettings.gameTime });
   tickInterval = globalSettings.initialGameInterval;
   playerKeypresses = {};
   serverSnakes = {};
@@ -554,7 +555,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {});
+io.on("connection", (socket) => { });
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

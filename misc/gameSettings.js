@@ -4,7 +4,7 @@ export const globalSettings = {
   port: 5000,
 
   // Ngrok link. Leave blank to only use localhost
-  ngrok: "https://saved-enough-civet.ngrok-free.app/",
+  ngrok: "https://58d5-80-235-50-7.ngrok-free.app",
   //ngrok: "",
 
   ////////////////////// Game settings //////////////////////

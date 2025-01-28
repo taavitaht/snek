@@ -443,7 +443,9 @@ function pauseMenu(socket) {
 
 function checkForEscape() {
   if (escapePressed) {
-    if (!isPaused) {
+    // Check that we're not in the lobby
+    const waitingRoom = document.querySelector(".waiting-room-container");
+    if (!isPaused && waitingRoom.style.display == "none") {
       socket.emit("game-paused");
     }
     resetEscapePressed();
