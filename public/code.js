@@ -28,7 +28,6 @@ export let mySnake;
 let numOfPlayers;
 let oldFood = [];
 export let isPaused = false;
-let isPauseRejectVisible = false;
 
 // Connect to server
 export function startSockets() {
@@ -332,8 +331,6 @@ export function startSockets() {
       const pauseTitle = container.querySelector("h1");
       if (!reasonElement || !resumeButton || !pauseTitle) return;
 
-      if (isPauseRejectVisible) return;
-
       isPaused = false;
       reasonElement.textContent = data.reason;
 
@@ -343,12 +340,9 @@ export function startSockets() {
       container.classList.remove("hidden");
       reasonElement.classList.remove("hidden");
 
-      isPauseRejectVisible = true;
-
       setTimeout(() => {
         container.classList.add("hidden");
         reasonElement.classList.add("hidden");
-        isPauseRejectVisible = false;
       }, 3000);
     });
 
