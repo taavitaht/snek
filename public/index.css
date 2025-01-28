@@ -298,19 +298,18 @@ body {
   padding: 10%;
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
 }
-.player-1-card{
+.player-1-card {
   border: 3px solid rgba(0, 128, 0);
 }
-.player-2-card{
+.player-2-card {
   border: 3px solid rgba(0, 0, 255);
 }
-.player-3-card{
+.player-3-card {
   border: 3px solid rgba(255, 0, 0);
 }
-.player-4-card{
+.player-4-card {
   border: 3px solid rgba(255, 255, 0);
 }
-
 
 .pause-container {
   z-index: 20;
@@ -320,7 +319,6 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateX(250px);
 }
 
 .pause-container-main {
