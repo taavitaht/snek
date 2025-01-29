@@ -542,8 +542,12 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
           restartCountdown--;
 
           if (restartCountdown < 0) {
-            clearInterval(restartInterval);
+            io.emit("restart-countdown", {
+              countdown: null,
+              message: "",
+            });
 
+            clearInterval(restartInterval);
             resetGameState();
 
             // List players
