@@ -379,8 +379,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
-      /*
-      let pauseCountdown = 333330;
+      let pauseCountdown = 30;
       const interval = setInterval(() => {
         io.emit("countdown-update", { username, pauseCountdown });
         if (pauseCountdown === 3 && gameStarted) {
@@ -403,10 +402,9 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         }
         pauseCountdown--;
       }, 1000);
-      
 
       pauseTimers.set(username, interval);
-*/
+
       break;
     }
 

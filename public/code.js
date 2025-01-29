@@ -28,6 +28,7 @@ export let mySnake;
 let numOfPlayers;
 let oldFood = [];
 export let isPaused = false;
+let gameEnd = false;
 
 // Connect to server
 export function startSockets() {
@@ -248,10 +249,12 @@ export function startSockets() {
 
     socket.on("end-game", function (snakes) {
       // Genereate game over div
+      gameEnd = true;
       makeEndContainer(snakes);
       // After timeout reset game
       setTimeout(() => {
         resetGame();
+        gameEnd = false;
       }, 5000);
     });
 
@@ -502,7 +505,7 @@ function checkForEscape() {
   if (escapePressed) {
     // Check that we're not in the lobby
     const waitingRoom = document.querySelector(".waiting-room-container");
-    if (!isPaused && waitingRoom.style.display == "none") {
+    if (!gameEnd && !isPaused && waitingRoom.style.display == "none") {
       socket.emit("game-paused");
       isPaused = true;
     }
