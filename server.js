@@ -411,10 +411,13 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
     case "resumed": {
       const playerPauseInfo = activePauses.get(username);
 
-      const interval = pauseTimers.get(username);
-      if (interval) {
-        clearInterval(interval);
-        pauseTimers.delete(username);
+      // Clear all pause intervals
+      for (const username of activePauses.keys()) {
+        const interval = pauseTimers.get(username);
+        if (interval) {
+          clearInterval(interval);
+          pauseTimers.delete(username);
+        }
       }
 
       if (playerPauseInfo) {
@@ -486,7 +489,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
-      serverSnakes[socket.playerNumber].crashed = "quit";
+      if (serverSnakes[socket.playerNumber]) { serverSnakes[socket.playerNumber].crashed = "quit"; }
       socket.disconnect();
       break;
     }
@@ -680,7 +683,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => {});
+io.on("connection", (socket) => { });
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });
