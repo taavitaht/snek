@@ -125,9 +125,9 @@ io.on("connection", (socket) => {
   socket.on("keypress", (arrow) => {
     if (socket.playerNumber >= 1 && socket.playerNumber <= 4) {
       playerKeypresses[socket.playerNumber] = arrow;
-      console.log(
-        `Keypress (\x1b[34m${socket.username}\x1b[0m):\x1b[35m ${arrow}\x1b[0m`
-      );
+      //console.log(
+      //  `Keypress (\x1b[34m${socket.username}\x1b[0m):\x1b[35m ${arrow}\x1b[0m`
+      //);
     }
   });
 
@@ -489,7 +489,9 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
-      if (serverSnakes[socket.playerNumber]) { serverSnakes[socket.playerNumber].crashed = "quit"; }
+      if (serverSnakes[socket.playerNumber]) {
+        serverSnakes[socket.playerNumber].crashed = "quit";
+      }
       socket.disconnect();
       break;
     }
@@ -679,7 +681,7 @@ function gameEndCheck() {
 // Start server
 
 // Clear connected sockets before starting the server
-io.on("connection", (socket) => { });
+io.on("connection", (socket) => {});
 io.sockets.sockets.forEach((socket) => {
   socket.disconnect(true);
 });

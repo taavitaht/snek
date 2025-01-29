@@ -12,7 +12,7 @@ export const globalSettings = {
   singlePlayerEnabled: true,
 
   // Time limit of each game in seconds
-  gameTime: 60,
+  gameTime: 120,
 
   // Animation settings
   fps: 60,
@@ -24,7 +24,7 @@ export const globalSettings = {
   // Game ticker settings
   initialGameInterval: 500,
   minGameInterval: 160,
-  gameIntervalStep: 40,
+  gameIntervalStep: 20,
 
   // Visual settings
   gameSquareSize: 50,
