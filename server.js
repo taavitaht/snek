@@ -489,7 +489,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         username,
         remainingTime,
       });
-      serverSnakes[socket.playerNumber].crashed = "quit";
+      if (serverSnakes[socket.playerNumber]) { serverSnakes[socket.playerNumber].crashed = "quit"; }
       socket.disconnect();
       break;
     }
