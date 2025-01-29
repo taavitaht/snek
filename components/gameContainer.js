@@ -51,6 +51,7 @@ restartContainer.classList.add("restart-container", "hidden");
 // Restart title
 
 const restartTitle = document.createElement("h1");
+restartTitle.classList.add("restart-title");
 restartTitle.textContent = "Game is being restarted...";
 
 // Restart Timer

@@ -262,6 +262,7 @@ export function startSockets() {
       );
       const restartContainer =
         pauseContainer.querySelector(".restart-container");
+      const restartTitle = restartContainer.querySelector(".restart-title");
       const timerElement = pauseContainer.querySelector(".pause-timer");
       const titleElement = pauseContainer.querySelector("h1");
       const pauseTimer = restartContainer.querySelector(".restart-timer");
@@ -306,6 +307,10 @@ export function startSockets() {
           break;
 
         case "restart": {
+          //console.log("Data: " + JSON.stringify(data));
+
+          restartTitle.textContent = data.message;
+
           isPaused = false;
           pauseContainer.classList.remove("hidden");
           pauseContainerMain.classList.add("hidden");
@@ -577,13 +582,13 @@ function restartGame() {
   setTimeout(() => {
     // Erase all snakes
     let snakeHeads = app.querySelectorAll(".snake-head");
-    console.log("SnakeHeads:", snakeHeads.length);
+    //console.log(":", snakeHeads.length);
     snakeHeads.forEach((element) => {
       element.remove();
     });
 
     let snakeBodies = app.querySelectorAll(".snake-body");
-    console.log("SnakeBodies:", snakeBodies.length);
+    //console.log("SnakeBodies:", snakeBodies.length);
     snakeBodies.forEach((element) => {
       element.remove();
     });

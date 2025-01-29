@@ -37,6 +37,7 @@ let gameTime = globalSettings.gameTime;
 let tickInterval = globalSettings.initialGameInterval;
 let waitingTimer, startCountdownTimer, gameTimer;
 let gameStarted = false;
+let gameRestarting = false;
 const gameStatusUpdates = [
   "game-paused",
   "game-resumed",
@@ -378,6 +379,7 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         remainingTime,
       });
 
+      /*
       let pauseCountdown = 333330;
       const interval = setInterval(() => {
         io.emit("countdown-update", { username, pauseCountdown });
@@ -401,9 +403,10 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
         }
         pauseCountdown--;
       }, 1000);
+      
 
       pauseTimers.set(username, interval);
-
+*/
       break;
     }
 
@@ -491,86 +494,91 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
     }
 
     case "restart": {
-      console.log(`Game restart requested by ${username}`);
+      if (!gameRestarting) {
+        gameRestarting = true;
 
-      for (const [user, interval] of pauseTimers) {
-        clearInterval(interval);
-      }
-      pauseTimers.clear();
+        console.log(`Game restart requested by ${username}`);
 
-      if (resumeCountdownInterval) {
-        clearInterval(resumeCountdownInterval);
-        resumeCountdownInterval = null;
-      }
+        for (const [user, interval] of pauseTimers) {
+          clearInterval(interval);
+        }
+        pauseTimers.clear();
 
-      stopGameTicker();
-      pauseGameTimer();
+        if (resumeCountdownInterval) {
+          clearInterval(resumeCountdownInterval);
+          resumeCountdownInterval = null;
+        }
 
-      io.emit("game-status-update", {
-        status,
-        username,
-        message: `${username} has requested a game restart.`,
-      });
+        stopGameTicker();
+        pauseGameTimer();
 
-      io.emit("live-game-update", {
-        event: "player-restart",
-        username,
-        remainingTime,
-      });
-
-      let restartCountdown = 4;
-
-      const restartInterval = setInterval(() => {
-        io.emit("restart-countdown", {
-          countdown: restartCountdown,
-          message: `Game will restart in ${restartCountdown} seconds`,
+        io.emit("game-status-update", {
+          status,
+          username,
+          message: `${username} has requested a game restart.`,
         });
 
-        if (restartCountdown === 4 && gameStarted) {
-          io.emit("play-sound", { sound: "countdown-sound" });
-        }
+        io.emit("live-game-update", {
+          event: "player-restart",
+          username,
+          remainingTime,
+        });
 
-        restartCountdown--;
+        let restartCountdown = 4;
 
-        if (restartCountdown < 0) {
-          clearInterval(restartInterval);
+        const restartInterval = setInterval(() => {
+          io.emit("restart-countdown", {
+            countdown: restartCountdown,
+            message: `Game will restart in ${restartCountdown} seconds`,
+          });
 
-          resetGameState();
+          if (restartCountdown === 4 && gameStarted) {
+            io.emit("play-sound", { sound: "countdown-sound" });
+          }
 
-          // List players
-          let allPlayers = [];
-          io.sockets.sockets.forEach((connected) => {
-            allPlayers.push({
-              username: connected.username,
-              playerNumber: connected.playerNumber,
+          restartCountdown--;
+
+          if (restartCountdown < 0) {
+            clearInterval(restartInterval);
+
+            resetGameState();
+
+            // List players
+            let allPlayers = [];
+            io.sockets.sockets.forEach((connected) => {
+              allPlayers.push({
+                username: connected.username,
+                playerNumber: connected.playerNumber,
+              });
             });
-          });
-          // Create new snakes
-          io.sockets.sockets.forEach((connected) => {
-            // Make sure connection is properly initialized
-            if (connected.playerNumber && connected.username) {
-              const snake = new Snake(
-                connected.playerNumber,
-                connected.username
-              );
-              serverSnakes[connected.playerNumber] = snake;
-              placeFood(globalSettings.food.count); //X food items per snake
-            }
-          });
+            // Create new snakes
+            io.sockets.sockets.forEach((connected) => {
+              // Make sure connection is properly initialized
+              if (connected.playerNumber && connected.username) {
+                const snake = new Snake(
+                  connected.playerNumber,
+                  connected.username
+                );
+                serverSnakes[connected.playerNumber] = snake;
+                placeFood(globalSettings.food.count); //X food items per snake
+              }
+            });
 
-          startGameTicker();
-          startGameTimer();
-          io.emit("start-game", { allPlayers });
-          gameStarted = true;
-          console.log(`\x1b[32m---Game restarted---\x1b[0m`);
+            startGameTicker();
+            startGameTimer();
+            io.emit("start-game", { allPlayers });
+            gameStarted = true;
+            console.log(`\x1b[32m---Game restarted---\x1b[0m`);
 
-          // io.emit("game-status-update", {
-          //   status: "game-restarted",
-          //   message: "The game has been restarted!",
-          //   countdown: restartCountdown,
-          // });
-        }
-      }, 1000);
+            // io.emit("game-status-update", {
+            //   status: "game-restarted",
+            //   message: "The game has been restarted!",
+            //   countdown: restartCountdown,
+            // });
+            gameRestarting = false;
+          }
+        }, 1000);
+      }
     }
 
     default:
