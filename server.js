@@ -6,6 +6,8 @@ import { Server } from "socket.io";
 import { Snake } from "./components/snakes.js";
 import { placeFood, foodArray } from "./components/food.js";
 import { globalSettings } from "./misc/gameSettings.js";
+import { moveAllBots } from "./components/bots.js";
+
 
 // Create an express app and HTTP server
 const app = express();
@@ -29,7 +31,14 @@ const players = {
   3: null, // Player 3
   4: null, // Player 4
 };
+export const bots = {
+  1: null,
+  2: null,
+  3: null,
+  4: null,
+};
 let playerCount;
+let humanCount;
 let serverSnakes = {}; // Object holding all snakes
 let playerKeypresses = {};
 let gameInterval;
@@ -47,6 +56,7 @@ const gameStatusUpdates = [
 const activePauses = new Map();
 const pauseTimers = new Map();
 let resumeCountdownInterval = null;
+let disableJoin = false;
 
 // Cors
 app.use(cors());
@@ -78,6 +88,40 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Add bot
+  socket.on("add-bot-button", (botLevel) => {
+    humanCount = countHumanPlayers();
+    // Only 1 human in lobby allowed to meet review criteria
+    if (humanCount === 1) {
+      playerCount = countPlayers();
+      if (playerCount < 4) {
+        // Sockets cannot join anymore
+        disableJoin = true;
+        // Add to players object
+        let number = assignPlayerNumber();
+        // If slots are full do not continue
+        if (!number) {
+          return;
+        }
+        // Add the bot
+        let username = `BOT-${number}`;
+        players[number] = {
+          username: username,
+        };
+        bots[number] = {
+          username: username,
+          targetingLevel: botLevel.targeting,
+          movementLevel: botLevel.movement,
+        };
+        console.log(
+          `Bot added: \x1b[32m${username}(${botLevel.targeting}-${botLevel.movement}) \x1b[0m`
+        );
+        // Broadcast new player to all connected sockets
+        io.emit("player-new", number, username, players);
+      }
+    }
+  });
+
   // Request to connect. Respond with all connected usernames and game running status
   socket.on("join-request", () => {
     const usernames = [];
@@ -87,7 +131,12 @@ io.on("connection", (socket) => {
         usernames.push(clientSocket.username);
       }
     }
-    socket.emit("join-response", usernames, gameStarted);
+    // When playing with bots emit server full for new connection requests
+    if (disableJoin) {
+      socket.emit("join-response", usernames, true);
+    } else {
+      socket.emit("join-response", usernames, gameStarted);
+    }
   });
 
   // User disconnected
@@ -113,12 +162,32 @@ io.on("connection", (socket) => {
     gameEndCheck();
 
     // If that was the only connected socket reset game
-    playerCount = countPlayers();
+    playerCount = countHumanPlayers();
+    if (playerCount === 0) {
+      disableJoin = false;
+    }
     if (playerCount === 0 && gameStarted) {
       gameStarted = false;
       resetGameState();
     }
-    refreshPlayers();
+    if (socket.playerNumber) {
+      players[socket.playerNumber] = null;
+    }
+  });
+
+  // Remove bot
+  socket.on("remove-bot-button", () => {
+    for (let i = 1; i <= 4; i++) {
+      if (bots[i] !== null) {
+        io.emit("user-disconnect", i, "BOT");
+        delete bots[i];
+        delete players[i];
+      }
+    }
+
+    disableJoin = false;
+
+    console.log(`\x1b[31mAll bots removed \x1b[0m`);
   });
 
   // Player pressed an arrow key
@@ -146,6 +215,17 @@ io.on("connection", (socket) => {
           placeFood(globalSettings.food.count); //X food items per snake
         }
       });
+      // Create bot snakes
+      for (let i = 1; i <= 4; i++) {
+        if (bots[i]) {
+          const snake = new Snake(i, bots[i].username);
+          snake.isBot = true;
+          snake.targetingLevel = bots[i].targetingLevel;
+          snake.movementLevel = bots[i].movementLevel;
+          serverSnakes[i] = snake;
+          placeFood(globalSettings.food.count);
+        }
+      }
     }
   });
 
@@ -245,6 +325,8 @@ function startGameTicker() {
     io.emit("score-update", scoreboard);
     // Emit the updated state of all snakes to all connected clients
     io.emit("tick", serverSnakes, foodArray);
+    // Calculate next bot moves
+    moveAllBots(serverSnakes, foodArray);
   }, tickInterval);
 }
 
@@ -570,6 +652,17 @@ function handleGameStatus(socket, event, username, status, remainingTime) {
                 placeFood(globalSettings.food.count); //X food items per snake
               }
             });
+            // Create bot snakes
+            for (let i = 1; i <= 4; i++) {
+              if (bots[i]) {
+                const snake = new Snake(i, bots[i].username);
+                snake.isBot = true;
+                snake.targetingLevel = bots[i].targetingLevel;
+                snake.movementLevel = bots[i].movementLevel;
+                serverSnakes[i] = snake;
+                placeFood(globalSettings.food.count);
+              }
+            }
 
             startGameTicker();
             startGameTimer();
@@ -610,7 +703,6 @@ function playerCountCheck(crash) {
 
 // Function to find the first unused player number
 function assignPlayerNumber() {
-  refreshPlayers();
   for (let i = 1; i <= 4; i++) {
     if (!players[i]) {
       //console.log("assignPlayerNumber", i);
@@ -631,22 +723,17 @@ function countPlayers() {
   return count;
 }
 
-// Refresh local players object based on socket connections
-function refreshPlayers() {
-  // Loop all 4 player slots
-  for (let i = 1; i <= 4; i++) {
-    players[i] = null;
-    // Loop socket connections
-    for (let [id, socket] of io.sockets.sockets) {
-      let pNumber = socket.playerNumber;
-      let pName = socket.username;
-      // If socket with same player number is found refill player slot
-      if (pNumber == i) {
-        players[i] = pName;
-        break;
-      }
+// Count human players
+function countHumanPlayers() {
+  let count = 0;
+
+  for (const [key, value] of Object.entries(players)) {
+    if (value !== null && !value.username.startsWith("BOT-")) {
+      count++;
     }
   }
+
+  return count;
 }
 
 // Check if conditions are met to end game

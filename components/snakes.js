@@ -68,6 +68,28 @@ export class Snake {
     return false;
   }
 
+
+  // Method used in bot simulation
+  moveWithoutEating() {
+    // Skip if snake has already crashed
+    if (this.crashed) {
+      return;
+    }
+
+    const newHead = { ...this.position }; // Copy the current head position
+
+    // Calculate the new head position based on direction
+    if (this.direction === "Left") newHead.x -= 1;
+    else if (this.direction === "Right") newHead.x += 1;
+    else if (this.direction === "Up") newHead.y -= 1;
+    else if (this.direction === "Down") newHead.y += 1;
+
+    // Update the snake's position
+    this.segments.unshift(newHead); // Add new head
+    this.segments.pop(); // Remove the tail
+  }
+
+
   // Check for collisions with wall or snake
   collisionCheck(allSnakes) {
     // Skip if snake has already crashed
@@ -174,7 +196,7 @@ export function getInitialSnakePosition(mapTemplate, playerNumber) {
 }
 
 // Calculate Manhattan/Taxicab distance
-function calculateDistance(pointA, pointB) {
+export function calculateDistance(pointA, pointB) {
   return Math.abs(pointA.x - pointB.x) + Math.abs(pointA.y - pointB.y);
 }
 

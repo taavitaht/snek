@@ -4,8 +4,8 @@ export const globalSettings = {
   port: 5000,
 
   // Ngrok link. Leave blank to only use localhost
-  //ngrok: "https://saved-enough-civet.ngrok-free.app/",
-  ngrok: "",
+  ngrok: "https://saved-enough-civet.ngrok-free.app/",
+  //ngrok: "",
 
   ////////////////////// Game settings //////////////////////
   // Change to "false" and then ctrl+refresh browser for review question "The lead player can start the game once there are between 2 and 4 players."
@@ -15,7 +15,7 @@ export const globalSettings = {
   gameTime: 120,
 
   // Animation settings
-  fps: 60,
+  fps: 144,
 
   // Game board settings
   numOfRows: 20,

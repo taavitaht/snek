@@ -26,6 +26,7 @@ let myPlayerNumber;
 let map;
 export let mySnake;
 let numOfPlayers;
+let numOfHumans;
 let oldFood = [];
 export let isPaused = false;
 let gameEnd = false;
@@ -36,7 +37,13 @@ export function startSockets() {
   socket = io(link, {
     reconnection: false, // Disable auto-reconnection
   });
+
   pauseMenuBtns();
+
+  // Bots
+  addBotButton();
+  removeBotButton();
+
   // Join button in the waiting room
   const joinUserButton = document.getElementById("join-user-button");
   joinUserButton.addEventListener("click", function () {
@@ -103,11 +110,30 @@ export function startSockets() {
               const waitingPlayerContainer = document.getElementById(
                 `player-${i}-card`
               );
-              waitingPlayerContainer.textContent = otherPlayer;
+              waitingPlayerContainer.textContent = otherPlayer.username;
             }
           }
         }
+
+        // Start game
+        startButton();
       }
+
+      // Show bot div?
+      numOfHumans = Object.values(allPlayers).filter(
+        (player) =>
+          player && player.username && !player.username.startsWith("BOT-")
+      ).length;
+
+      const botDiv = document.querySelector(".play-against-bots-div");
+      if (numOfHumans === 1) {
+        // Show bot div
+        botDiv.style.display = "flex";
+      } else {
+        // Hide bot div
+        botDiv.style.display = "none";
+      }
+
       numOfPlayers = Object.values(allPlayers).filter((value) => value).length;
       //console.log("numOfPlayers", numOfPlayers);
       //console.log(allPlayers);
@@ -613,5 +639,48 @@ function enablePauseMenuButtons() {
   );
   buttons.forEach((btn) => {
     btn.disabled = false;
+  });
+}
+
+// Handle bot buttons
+export function addBotButton() {
+  const addBotButton = document.getElementById("add-bot-button");
+  addBotButton.addEventListener("click", function () {
+    let botLevel = {
+      targeting: "easy",
+      movement: "easy",
+    };
+
+    // Get the difficulty level
+    const difficulty = document.querySelector(
+      'input[name="difficulty"]:checked'
+    ).value;
+
+    if (difficulty === "easy") {
+      botLevel.targeting = "easy";
+      botLevel.movement = "easy";
+    } else if (difficulty === "medium") {
+      botLevel.targeting = "medium";
+      botLevel.movement = "medium";
+    } else if (difficulty === "hard") {
+      botLevel.targeting = "hard";
+      botLevel.movement = "hard";
+    } else if (difficulty === "custom") {
+      // For custom, get the selected targeting and movement strategies
+      botLevel.targeting = document.querySelector(
+        'input[name="targeting"]:checked'
+      ).value;
+      botLevel.movement = document.querySelector(
+        'input[name="movement"]:checked'
+      ).value;
+    }
+
+    socket.emit("add-bot-button", botLevel);
+  });
+}
+export function removeBotButton() {
+  const removeBotButton = document.getElementById("remove-bot-button");
+  removeBotButton.addEventListener("click", function () {
+    socket.emit("remove-bot-button");
   });
 }

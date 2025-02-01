@@ -182,3 +182,217 @@ waitingRoomContainer.append(
   joinContainer,
   gameInfoContainer
 );
+
+
+
+///////////////////// Create play against bots div /////////////////////
+// Create play against bots button div
+const playAgainstBotsDiv = document.createElement("div");
+playAgainstBotsDiv.classList.add("play-against-bots-div");
+playAgainstBotsDiv.textContent = "Play Against Bots";
+
+// Create the "Add Bot" button
+const playAgainstBotsButton = document.createElement("button");
+playAgainstBotsButton.id = "add-bot-button";
+playAgainstBotsButton.textContent = "Add bot";
+
+// Create the "Remove all Bots" button
+const removeAllBotsButton = document.createElement("button");
+removeAllBotsButton.id = "remove-bot-button";
+removeAllBotsButton.textContent = "Remove all bots";
+
+// Add the buttons to the div
+playAgainstBotsDiv.appendChild(playAgainstBotsButton);
+playAgainstBotsDiv.appendChild(removeAllBotsButton);
+
+// Create radio button for difficulty level
+const difficultyDiv = document.createElement("div");
+difficultyDiv.classList.add("difficulty-selector");
+difficultyDiv.style.position = "relative"; // Ensure z-index works correctly
+
+const difficultyLabel = document.createElement("p");
+difficultyLabel.textContent = "Select Bot Difficulty:";
+difficultyDiv.appendChild(difficultyLabel);
+
+// Easy option
+const easyRadioLabel = document.createElement("label");
+easyRadioLabel.classList.add("radio-label");
+
+const easyRadio = document.createElement("input");
+easyRadio.type = "radio";
+easyRadio.id = "easy";
+easyRadio.name = "difficulty";
+easyRadio.value = "easy";
+easyRadioLabel.appendChild(easyRadio);
+easyRadioLabel.appendChild(document.createTextNode(" Easy"));
+
+difficultyDiv.appendChild(easyRadioLabel);
+
+// Medium option
+const mediumRadioLabel = document.createElement("label");
+mediumRadioLabel.classList.add("radio-label");
+
+const mediumRadio = document.createElement("input");
+mediumRadio.type = "radio";
+mediumRadio.id = "medium";
+mediumRadio.name = "difficulty";
+mediumRadio.value = "medium";
+mediumRadioLabel.appendChild(mediumRadio);
+mediumRadioLabel.appendChild(document.createTextNode(" Medium"));
+
+difficultyDiv.appendChild(mediumRadioLabel);
+
+// Hard option
+const hardRadioLabel = document.createElement("label");
+hardRadioLabel.classList.add("radio-label");
+
+const hardRadio = document.createElement("input");
+hardRadio.type = "radio";
+hardRadio.id = "hard";
+hardRadio.name = "difficulty";
+hardRadio.value = "hard";
+hardRadio.checked = true; // Default
+hardRadioLabel.appendChild(hardRadio);
+hardRadioLabel.appendChild(document.createTextNode(" Hard"));
+
+difficultyDiv.appendChild(hardRadioLabel);
+
+// Custom option
+const customRadioLabel = document.createElement("label");
+customRadioLabel.classList.add("radio-label");
+
+const customRadio = document.createElement("input");
+customRadio.type = "radio";
+customRadio.id = "custom";
+customRadio.name = "difficulty";
+customRadio.value = "custom";
+customRadioLabel.appendChild(customRadio);
+customRadioLabel.appendChild(document.createTextNode(" Custom"));
+
+difficultyDiv.appendChild(customRadioLabel);
+
+playAgainstBotsDiv.appendChild(difficultyDiv);
+
+
+// Create a custom settings div (hidden initially)
+const customSettingsDiv = document.createElement("div");
+customSettingsDiv.id = "custom-settings";
+customSettingsDiv.style.display = "none"; // Initially hidden
+
+// Targeting Difficulty
+const targetingLabel = document.createElement("p");
+targetingLabel.textContent = "Targeting Strategy:";
+customSettingsDiv.appendChild(targetingLabel);
+
+// Easy option
+const targetingEasyRadioLabel = document.createElement("label");
+targetingEasyRadioLabel.classList.add("radio-label");
+
+const targetingEasyRadio = document.createElement("input");
+targetingEasyRadio.type = "radio";
+targetingEasyRadio.id = "targeting-easy";
+targetingEasyRadio.name = "targeting";
+targetingEasyRadio.value = "easy";
+targetingEasyRadio.checked = true; // Default to Easy
+targetingEasyRadioLabel.appendChild(targetingEasyRadio);
+targetingEasyRadioLabel.appendChild(document.createTextNode(" Easy"));
+
+customSettingsDiv.appendChild(targetingEasyRadioLabel);
+
+// Medium option
+const targetingMediumRadioLabel = document.createElement("label");
+targetingMediumRadioLabel.classList.add("radio-label");
+
+const targetingMediumRadio = document.createElement("input");
+targetingMediumRadio.type = "radio";
+targetingMediumRadio.id = "targeting-medium";
+targetingMediumRadio.name = "targeting";
+targetingMediumRadio.value = "medium";
+targetingMediumRadioLabel.appendChild(targetingMediumRadio);
+targetingMediumRadioLabel.appendChild(document.createTextNode(" Medium"));
+
+customSettingsDiv.appendChild(targetingMediumRadioLabel);
+
+// Hard option
+const targetingHardRadioLabel = document.createElement("label");
+targetingHardRadioLabel.classList.add("radio-label");
+
+const targetingHardRadio = document.createElement("input");
+targetingHardRadio.type = "radio";
+targetingHardRadio.id = "targeting-hard";
+targetingHardRadio.name = "targeting";
+targetingHardRadio.value = "hard";
+targetingHardRadioLabel.appendChild(targetingHardRadio);
+targetingHardRadioLabel.appendChild(document.createTextNode(" Hard"));
+
+customSettingsDiv.appendChild(targetingHardRadioLabel);
+
+// Movement Difficulty
+const movementLabel = document.createElement("p");
+movementLabel.textContent = "Movement Strategy:";
+customSettingsDiv.appendChild(movementLabel);
+
+// Easy option
+const movementEasyRadioLabel = document.createElement("label");
+movementEasyRadioLabel.classList.add("radio-label");
+
+const movementEasyRadio = document.createElement("input");
+movementEasyRadio.type = "radio";
+movementEasyRadio.id = "movement-easy";
+movementEasyRadio.name = "movement";
+movementEasyRadio.value = "easy";
+movementEasyRadio.checked = true; // Default
+movementEasyRadioLabel.appendChild(movementEasyRadio);
+movementEasyRadioLabel.appendChild(document.createTextNode(" Easy"));
+
+customSettingsDiv.appendChild(movementEasyRadioLabel);
+
+// Medium option
+const movementMediumRadioLabel = document.createElement("label");
+movementMediumRadioLabel.classList.add("radio-label");
+
+const movementMediumRadio = document.createElement("input");
+movementMediumRadio.type = "radio";
+movementMediumRadio.id = "movement-medium";
+movementMediumRadio.name = "movement";
+movementMediumRadio.value = "medium";
+movementMediumRadioLabel.appendChild(movementMediumRadio);
+movementMediumRadioLabel.appendChild(document.createTextNode(" Medium"));
+
+customSettingsDiv.appendChild(movementMediumRadioLabel);
+
+// Hard option
+const movementHardRadioLabel = document.createElement("label");
+movementHardRadioLabel.classList.add("radio-label");
+
+const movementHardRadio = document.createElement("input");
+movementHardRadio.type = "radio";
+movementHardRadio.id = "movement-hard";
+movementHardRadio.name = "movement";
+movementHardRadio.value = "hard";
+movementHardRadioLabel.appendChild(movementHardRadio);
+movementHardRadioLabel.appendChild(document.createTextNode(" Hard"));
+
+customSettingsDiv.appendChild(movementHardRadioLabel);
+
+// Append the custom settings div to the main container
+playAgainstBotsDiv.appendChild(customSettingsDiv);
+
+
+// Add event listener for difficulty selection
+customRadio.addEventListener("change", function () {
+  if (customRadio.checked) {
+    customSettingsDiv.style.display = "block"; // Show custom settings
+  }
+});
+
+// Add event listener for easy, medium, or hard difficulty to hide custom settings
+[easyRadio, mediumRadio, hardRadio].forEach((radio) => {
+  radio.addEventListener("change", function () {
+    customSettingsDiv.style.display = "none"; // Hide custom settings
+  });
+});
+
+// Add the playAgainstBotsDiv to the container
+gameInfoContainer.appendChild(playAgainstBotsDiv);
+

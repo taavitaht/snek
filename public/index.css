@@ -105,7 +105,9 @@ body {
   margin-top: 8px;
 }
 
-#join-user-button {
+#join-user-button,
+#add-bot-button,
+#remove-bot-button {
   display: block;
   width: 30%;
   padding: 12px;
@@ -119,7 +121,9 @@ body {
   transition: background 0.3s ease;
 }
 
-#join-user-button:hover {
+#join-user-button:hover,
+#add-bot-button:hover,
+#remove-bot-button:hover {
   background: #2575fc;
 }
 
@@ -130,8 +134,13 @@ body {
   justify-content: flex-start;
   gap: 15px;
   padding: 20px;
-
   border-radius: 10px;
+}
+
+.radio-label {
+  cursor: pointer;
+  padding-left: 5px;
+  display: inline-block;
 }
 
 .main-container {
@@ -488,6 +497,17 @@ body {
   text-align: center;
   padding: 15px;
   font-size: x-large;
+}
+
+.play-against-bots-div {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 15px;
+  font-size: x-large;
+  width: 100%;
 }
 
 .game-info-title+h4 {
